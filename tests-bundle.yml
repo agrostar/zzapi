@@ -1,0 +1,31 @@
+common:
+  baseUrl: $myserver
+  code: 200
+requests:
+  - name: failedLogin
+    method: POST
+    url: /userservice/login/
+    body: |
+      {
+        "userId": 123456,
+        "password": "incorrect",
+        "verified": false
+      }
+    code: 401
+
+  - name: loginWithAuth
+    method: POST
+    url: /userservice/login/
+    body: |
+      {
+        "userId": 123456,
+        "password": "$password",
+        "verified": false
+      }
+    tests:
+      - { path: status, eq: OK }
+      - { path: responseData.permissions, t: array, gt: 4 }
+      - { path: responseData.permissions.0, t: array, eq: admin }
+      - { path: responseData.authToken, t: string, ex: yes }
+    vars:
+      - { path: responseData.authToken, var: $authToken }

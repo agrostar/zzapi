@@ -1,0 +1,42 @@
+---
+common:
+  baseUrl: "$myserver"
+  headers:
+    - { k: Authentication, v: $authToken }
+requests:
+  - name: login
+    method: POST
+    url: "/userservice/login/"
+    headers:
+      - { k: X-Authorization-Token, v: $authToken }
+    body: |
+      {
+        "userId": 123456,
+        "password": "secret",
+        "verified": false
+      }
+
+  - name: cropattributes
+    url: "/agronomyservice/v1/schedules/cropattributes"
+    method: GET
+    params:
+      - { k: crop, v: tomato }
+      - { k: state, v: Karnataka, doc: Required. }
+      - { k: .district, v: Bangalore } # A . will temporarily disable the param
+    response: <cropattributes_resp.json
+    d: |-
+      # Purpose:
+      To get a list of attributes that the user can set to personalize/customize
+      the crop schedule.
+
+      # Description:
+      There are a set of possible 9 attributes totally for a schedule. The applicable
+      attributes are different for each crop. For the crop, if all schedules have * as the 
+      only possible value, then that attribute will be excluded in the returned list.
+
+      Currently, the plan is to support only choice types
+
+      # Notes:
+      * defaultChoice may not be present in the response. If that's the case, the user will
+        be forced to answer the question.
+      * The auth token will be checked for a valid user, but the response is not personalized.
