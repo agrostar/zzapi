@@ -3,11 +3,20 @@
 zzapi is an API documentation and testing tool set, a grossly simplified version of Postman. The basic idea for this is as follows:
 
 * **Simplicity above all**: this makes the tool set do one job and allows more functionality to be incrementally built on top.
-* **No GUI to enter data**: We believe that developers don't need one. Copy paste within an editor is far more efficient. We will instead use yaml files to write requests. yaml is easy to create manually and also parse for building stuff based on them. JSON, OTOH, is hard to create manually, does not support comments etc.
+* **No GUI to enter data**: We believe that developers don't need one. Copy paste within an editor is far more efficient. We will instead use YAML files to write requests. YAML is easy to create manually and also parse for building stuff based on them. JSON, OTOH, is hard to create manually, does not support comments etc.
 * **Only JSON**: We don't support XML multipart-formdata etc. in the responses. Request body can be anything, though, like curl. Who uses XML these days anyway?
 * **Local storage**: Storage will be on the local file system (ie, not the cloud). Whatever you have typed belongs to you. You can share them with your team using git, S3, a shared file system, whatever. 
 * **Basics only**: We don't have an export/import feature. We don't have an activity history. You can build your own. You can also build your own GUI to create the requests and bundles.
-* **Open source**: if you have an idea that is useful to you and can be to others as well, build it, test it and send us a PR.
+* **Create and test together**: Although a separate tool is useful to run the tests, running from within the editor is very useful. We will build a VS Code plugin, and maybe plugins for other IDEs later.
+* **Open source**: If you have an idea that is useful to you and can be to others as well, build it, test it and send us a PR.
+
+# Alternatives
+
+Here are some alternatives and good things about them. Yet, none of these fit into the above set of goals completely.
+
+* **Postman**: Postman is a great tool, but the storage is on the cloud, making it hard for the tests and documentation be alongside the code. And it is not open source. We borrow the concept of keeping the same tool for tests and documentation from Postman.
+* **OpenAPI**: OpenAPI is meant for documentation alone, it does not cover tests. The YAML spec is also very elaborate and too structured (eg, needing schemas and other kinds of indirection). It is hard to hand-create OpenAPI YAMLs. These are typically done using tools. We borrow the concept of YAML files for saving the API details from OpenAPI.
+* **ThunderClient**: ThunderClient is a great tool but the UI is elaborate and hard to maintain, and it is not open source. We borrow the concept of a VS Code extension from ThunderClient.
 
 # zzapi Constituents
 
@@ -23,8 +32,8 @@ All files will be stored locally (ie, not on the cloud, unlike Postman). A direc
 
 The directory will hold the following kinds of files.
 
-* **Request bundles**: these are yaml files containing many requests. This is a "Collection" in Postman terminlogy. The directory can have any number of request bundles. Files ending with `-bundle.yml` will be recognized as request bundles.
-* **Variable sets**: these are also yaml files, containing variable definitions. This is an "Environment" in Postman terminlogy. Files ending with `-vars.yml` will be recognized as variable set files. Those ending with `-d-vars.yml` will be recognized as *default* variable sets (described below).
+* **Request bundles**: these are YAML files containing many requests. This is a "Collection" in Postman terminlogy. The directory can have any number of request bundles. Files ending with `-bundle.yml` will be recognized as request bundles.
+* **Variable sets**: these are also YAML files, containing variable definitions. This is an "Environment" in Postman terminlogy. Files ending with `-vars.yml` will be recognized as variable set files. Those ending with `-d-vars.yml` will be recognized as *default* variable sets (described below).
 * **Request and response files**: All other files (typically `.json`) are request and response body samples. These will be referenced from within the bundles, so we don't really need a naming convention.
 
 ## Bundle
@@ -121,7 +130,7 @@ The variable set _secrets_ may contain different passwords for each environment,
 
 Variables that are set during run-time using the setvars option of a request are _not_ written back into any of the variable sets. They may overwrite existing variables of the same name loaded from the variable sets during the run session, but not saved permanently.
 
-All the hand-edited yaml files are meant to be that way: they will not be touched by runners or document generators.
+All the hand-edited YAML files are meant to be that way: they will not be touched by runners or document generators.
 
 ## Type
 
