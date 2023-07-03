@@ -6,6 +6,8 @@ exports.deactivate = exports.activate = void 0;
 const vscode_1 = require("vscode");
 const CodelensProviderForIndividualRequests_1 = require("./CodelensProviderForIndividualRequests");
 const CodelensProviderForAllReq_1 = require("./CodelensProviderForAllReq");
+const vscode = require("vscode");
+const YAML = require("yaml");
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
 let disposables = [];
@@ -20,8 +22,20 @@ function activate(context) {
     vscode_1.commands.registerCommand("extension.disableAPIrunner", () => {
         vscode_1.workspace.getConfiguration("extension").update("enableAPIrunner", false, true);
     });
-    vscode_1.commands.registerCommand("extension.runRequest", (args) => {
-        vscode_1.window.showInformationMessage("Request run");
+    vscode_1.commands.registerCommand("extension.runRequest", (name) => {
+        const activeEditor = vscode.window.activeTextEditor;
+        if (activeEditor) {
+            const text = activeEditor.document.getText();
+            const parsedData = YAML.parse(text);
+            const reqName = YAML.parse(name).name;
+            let allReq = parsedData.requests;
+            for (let i = 0; i < allReq.length; i++) {
+                if (YAML.stringify(allReq[i].name) === YAML.stringify(reqName)) {
+                    vscode_1.window.showInformationMessage(YAML.stringify(allReq[i]));
+                    break;
+                }
+            }
+        }
     });
     vscode_1.commands.registerCommand("extension.runAllRequests", (args) => {
         vscode_1.window.showInformationMessage("All requests have been run");

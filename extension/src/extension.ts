@@ -3,6 +3,10 @@
 import { ExtensionContext, languages, commands, Disposable, workspace, window } from 'vscode';
 import { CodelensProviderForIndReq } from './CodelensProviderForIndividualRequests';
 import { CodelensProviderForAllReq } from './CodelensProviderForAllReq';
+
+import * as vscode from 'vscode';
+import * as YAML from 'yaml';
+
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
 let disposables: Disposable[] = [];
@@ -22,8 +26,21 @@ export function activate(context: ExtensionContext) {
 		workspace.getConfiguration("extension").update("enableAPIrunner", false, true);
 	});
 
-	commands.registerCommand("extension.runRequest", (args: any) => {
-		window.showInformationMessage("Request run");
+	commands.registerCommand("extension.runRequest", (name) => {
+		const activeEditor = vscode.window.activeTextEditor;
+		if(activeEditor){
+			const text = activeEditor.document.getText();
+			const parsedData = YAML.parse(text);		
+			
+			const reqName = YAML.parse(name).name;
+			let allReq = parsedData.requests;
+			for(let i = 0; i < allReq.length; i++){
+				if(YAML.stringify(allReq[i].name) === YAML.stringify(reqName)){
+					window.showInformationMessage(YAML.stringify(allReq[i]));
+					break;
+				}
+			}
+		}
 	});
 
 	commands.registerCommand("extension.runAllRequests", (args: any) => {

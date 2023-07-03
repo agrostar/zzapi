@@ -40,13 +40,23 @@ export class CodelensProviderForIndReq implements vscode.CodeLensProvider {
 
 	public resolveCodeLens(codeLens: vscode.CodeLens, token: vscode.CancellationToken) {
 		if (vscode.workspace.getConfiguration("extension").get("enableAPIrunner", true)) {
-			codeLens.command = {
-				title: "Run Request",
-				tooltip: "Click to run the request",
-				command: "extension.runRequest",
-				arguments: ["Argument 1", false]
-			};
-			return codeLens;
+			const activeEditor = vscode.window.activeTextEditor;
+			if(activeEditor){
+				let lineNum = codeLens.range.start.line;
+				let lineData = activeEditor.document.lineAt(lineNum);
+
+				const startPos = codeLens.range.start.character;
+				const endPos = lineData.range.end.character;
+				const nameData = lineData.text.substring(startPos, endPos);
+
+				codeLens.command = {
+					title: "Run Request",
+					tooltip: "Click to run the request",
+					command: "extension.runRequest",
+					arguments: [nameData]
+				};
+				return codeLens;	
+			}
 		}
 		return null;
 	}
