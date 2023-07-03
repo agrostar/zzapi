@@ -38,7 +38,15 @@ function activate(context) {
         }
     });
     vscode_1.commands.registerCommand("extension.runAllRequests", (args) => {
-        vscode_1.window.showInformationMessage("All requests have been run");
+        const activeEditor = vscode.window.activeTextEditor;
+        if (activeEditor) {
+            const text = activeEditor.document.getText();
+            const parsedData = YAML.parse(text);
+            let allReq = parsedData.requests;
+            for (let i = 0; i < allReq.length; i++) {
+                vscode_1.window.showInformationMessage(YAML.stringify(allReq[i]));
+            }
+        }
     });
 }
 exports.activate = activate;

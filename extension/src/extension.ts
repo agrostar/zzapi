@@ -44,7 +44,16 @@ export function activate(context: ExtensionContext) {
 	});
 
 	commands.registerCommand("extension.runAllRequests", (args: any) => {
-		window.showInformationMessage("All requests have been run");
+		const activeEditor = vscode.window.activeTextEditor;
+		if(activeEditor){
+			const text = activeEditor.document.getText();
+			const parsedData = YAML.parse(text);		
+			
+			let allReq = parsedData.requests;
+			for(let i = 0; i < allReq.length; i++){
+				window.showInformationMessage(YAML.stringify(allReq[i]));
+			}
+		}
 	});
 }
 
