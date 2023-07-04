@@ -4,7 +4,6 @@ import { ExtensionContext, languages, commands, Disposable, workspace, window } 
 import { CodelensProviderForIndReq } from './CodelensProviderForIndividualRequests';
 import { CodelensProviderForAllReq } from './CodelensProviderForAllReq';
 
-import * as vscode from 'vscode';
 import * as YAML from 'yaml';
 
 // this method is called when your extension is activated
@@ -27,7 +26,7 @@ export function activate(context: ExtensionContext) {
 	});
 
 	commands.registerCommand("extension.runRequest", (name) => {
-		const activeEditor = vscode.window.activeTextEditor;
+		const activeEditor = window.activeTextEditor;
 		if(activeEditor){
 			const text = activeEditor.document.getText();
 			const parsedData = YAML.parse(text);		
@@ -35,7 +34,7 @@ export function activate(context: ExtensionContext) {
 			const reqName = YAML.parse(name).name;
 			let allReq = parsedData.requests;
 			for(let i = 0; i < allReq.length; i++){
-				if(YAML.stringify(allReq[i].name) === YAML.stringify(reqName)){
+				if(YAML.stringify(allReq[i].name) === YAML.stringify(reqName)) {
 					window.showInformationMessage(YAML.stringify(allReq[i]));
 					break;
 				}
@@ -44,13 +43,13 @@ export function activate(context: ExtensionContext) {
 	});
 
 	commands.registerCommand("extension.runAllRequests", (args: any) => {
-		const activeEditor = vscode.window.activeTextEditor;
+		const activeEditor = window.activeTextEditor;
 		if(activeEditor){
 			const text = activeEditor.document.getText();
 			const parsedData = YAML.parse(text);		
 			
 			let allReq = parsedData.requests;
-			for(let i = 0; i < allReq.length; i++){
+			for(let i = 0; i < allReq.length; i++) {
 				window.showInformationMessage(YAML.stringify(allReq[i]));
 			}
 		}
