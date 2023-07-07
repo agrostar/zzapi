@@ -37,7 +37,7 @@ export function activate(context: ExtensionContext) {
 			let allReq = parsedData.requests;
 			for(let i = 0; i < allReq.length; i++){
 				if(YAML.stringify(allReq[i].name) === YAML.stringify(reqName)) {
-					getResponse(1);
+					getResponse(parsedData, i);
 					break;
 				}
 			}
@@ -52,7 +52,7 @@ export function activate(context: ExtensionContext) {
 			
 			let allReq = parsedData.requests;
 			for(let i = 0; i < allReq.length; i++) {
-				getResponse(1);
+				getResponse(parsedData, i);
 			}
 		}
 	});

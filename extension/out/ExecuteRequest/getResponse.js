@@ -6,14 +6,17 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.getResponse = void 0;
 const got_1 = __importDefault(require("got"));
 const vscode_1 = require("vscode");
-function getResponse(parsedRequest) {
+const openEditor_1 = require("../openEditor/openEditor");
+function getResponse(allRequestData, requestIndex) {
     const getData = async () => {
         try {
-            const res = await got_1.default.get('https://jsonplaceholder.typicode.com/posts/1').json();
-            vscode_1.window.showInformationMessage(JSON.stringify(res));
+            let res;
+            res = await got_1.default.get('https://jsonplaceholder.typicode.com/posts/1').json();
+            (0, openEditor_1.openEditor)(res);
         }
         catch (err) {
             vscode_1.window.showInformationMessage(JSON.stringify(err));
+            return err;
         }
     };
     getData();
