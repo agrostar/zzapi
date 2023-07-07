@@ -1,15 +1,18 @@
 {
     "compilerOptions": {
         "module": "commonjs",
-        "target": "es2020",
-		"lib": ["es2020"],
+        "target": "es2019",
+        "lib": ["ES2019"],
+        "esModuleInterop": true,
+        "moduleResolution": "Node",
         "outDir": "out",
         "sourceMap": true,
         "rootDir": "src",
         /* Strict Type-Checking Option */
         "strict": true,   /* enable all strict type-checking options */
         /* Additional Checks */
-        "noUnusedLocals": true /* Report errors on unused locals. */
+        "noUnusedLocals": true, /* Report errors on unused locals. */
+        "strictPropertyInitialization": false
     },
     "exclude": [
         "node_modules"
