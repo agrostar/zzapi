@@ -22,30 +22,15 @@ var __importStar = (this && this.__importStar) || function (mod) {
     __setModuleDefault(result, mod);
     return result;
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.deactivate = exports.activate = void 0;
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
 const vscode_1 = require("vscode");
+const YAML = __importStar(require("yaml"));
 const CodelensProviderForIndividualRequests_1 = require("./CodelensProviderForIndividualRequests");
 const CodelensProviderForAllReq_1 = require("./CodelensProviderForAllReq");
-const got_1 = __importDefault(require("got"));
-const YAML = __importStar(require("yaml"));
-function getResponse(parsedRequest) {
-    const getData = async () => {
-        try {
-            const res = await got_1.default.get('https://jsonplaceholder.typicode.com/posts/1').json();
-            vscode_1.window.showInformationMessage(JSON.stringify(res));
-        }
-        catch (err) {
-            vscode_1.window.showInformationMessage(JSON.stringify(err));
-        }
-    };
-    getData();
-}
+const getResponse_1 = require("./ExecuteRequest/getResponse");
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
 let disposables = [];
@@ -69,7 +54,7 @@ function activate(context) {
             let allReq = parsedData.requests;
             for (let i = 0; i < allReq.length; i++) {
                 if (YAML.stringify(allReq[i].name) === YAML.stringify(reqName)) {
-                    getResponse(1);
+                    (0, getResponse_1.getResponse)(1);
                     break;
                 }
             }
@@ -82,7 +67,7 @@ function activate(context) {
             const parsedData = YAML.parse(text);
             let allReq = parsedData.requests;
             for (let i = 0; i < allReq.length; i++) {
-                getResponse(1);
+                (0, getResponse_1.getResponse)(1);
             }
         }
     });

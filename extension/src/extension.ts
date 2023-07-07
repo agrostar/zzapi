@@ -1,24 +1,12 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
 import { ExtensionContext, languages, commands, Disposable, workspace, window } from 'vscode';
+import * as YAML from 'yaml';
+
 import { CodelensProviderForIndReq } from './CodelensProviderForIndividualRequests';
 import { CodelensProviderForAllReq } from './CodelensProviderForAllReq';
 
-import got from 'got';
-import * as YAML from 'yaml';
-
-function getResponse(parsedRequest: any) {
-	const getData = async () => {
-		try {
-			const res = await got.get('https://jsonplaceholder.typicode.com/posts/1').json();
-			window.showInformationMessage(JSON.stringify(res));
-		} catch (err) {
-			window.showInformationMessage(JSON.stringify(err));
-		}
-	};
-
-	getData();
-}
+import { getResponse } from './ExecuteRequest/getResponse';
 
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
