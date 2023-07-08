@@ -54,7 +54,7 @@ function activate(context) {
             let allReq = parsedData.requests;
             for (let i = 0; i < allReq.length; i++) {
                 if (YAML.stringify(allReq[i].name) === YAML.stringify(reqName)) {
-                    (0, getResponse_1.getResponse)(parsedData, i);
+                    (0, getResponse_1.getResponse)(parsedData, i + 1);
                     break;
                 }
             }
@@ -67,7 +67,7 @@ function activate(context) {
             const parsedData = YAML.parse(text);
             let allReq = parsedData.requests;
             for (let i = 0; i < allReq.length; i++) {
-                (0, getResponse_1.getResponse)(parsedData, i);
+                (0, getResponse_1.getResponse)(parsedData, i + 1);
             }
         }
     });
