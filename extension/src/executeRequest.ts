@@ -21,11 +21,12 @@ async function requestWithProgress(requestData: any){
             progress.report({message: `${++seconds} sec`});
         }, 1000);
 
-        const httpRequest = got.get(`https://jsonplceholder.typicode.com/posts/1`).json();
+        const httpRequest = got.get(`https://jsonplceholder.typicode.com/posts/1`);
         let response: any;
         let cancelled = false;
         token.onCancellationRequested(() => {
             response = {"cancelRequested": "TRUE"};
+            httpRequest.cancel();
             cancelled = true;
         });
         
@@ -34,7 +35,6 @@ async function requestWithProgress(requestData: any){
         const executionTime = new Date().getTime() - startTime;
 
         clearInterval(interval);
-
         if(!cancelled){
             response = {
                 "executionTime": executionTime,
@@ -51,12 +51,12 @@ async function requestWithProgress(requestData: any){
 async function executeHttpRequest(httpRequest: any){
     try {
         const res = await httpRequest;
-        return res;
+        return res.json();
     } catch(e: any){
         const res = e.response;
 
         if(res){
-            return res;
+            return res.json();
         }
 
         const err2 = e;
