@@ -1,9 +1,9 @@
 import * as vscode from "vscode";
-import * as YAML from "yaml";
+// import * as YAML from "yaml";
 
 export function openEditor(jsonData: object) {
-    const dataToDisplay = YAML.stringify(jsonData);
-    // const dataToDisplay = JSON.stringify(jsonData);
+    // const dataToDisplay = YAML.stringify(jsonData);
+    const dataToDisplay = JSON.stringify(jsonData);
     const language = "yaml";
 
     const activeEditor = vscode.window.activeTextEditor;
