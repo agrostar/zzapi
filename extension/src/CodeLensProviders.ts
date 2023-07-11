@@ -38,7 +38,13 @@ export class CodelensProviderForAllReq implements vscode.CodeLensProvider {
                 const position = new vscode.Position(line.lineNumber, indexOf);
                 const range = document.getWordRangeAtPosition(position);
                 if (range) {
-                    this.codeLenses.push(new vscode.CodeLens(range));
+                    let newCodeLens = new vscode.CodeLens(range);
+                    newCodeLens.command = {
+                        title: "Run All Requests",
+                        tooltip: "Click to run all requests",
+                        command: "extension.runAllRequests",
+                    };
+                    this.codeLenses.push(newCodeLens);
                 }
             }
 
@@ -51,18 +57,6 @@ export class CodelensProviderForAllReq implements vscode.CodeLensProvider {
         codeLens: vscode.CodeLens,
         token: vscode.CancellationToken
     ) {
-        if (
-            vscode.workspace
-                .getConfiguration("extension")
-                .get("enableAPIrunner", true)
-        ) {
-            codeLens.command = {
-                title: "Run All Requests",
-                tooltip: "Click to run all requests",
-                command: "extension.runAllRequests",
-            };
-            return codeLens;
-        }
         return null;
     }
 }
@@ -104,7 +98,19 @@ export class CodelensProviderForIndReq implements vscode.CodeLensProvider {
                 const position = new vscode.Position(line.lineNumber, indexOf);
                 const range = document.getWordRangeAtPosition(position);
                 if (range) {
-                    this.codeLenses.push(new vscode.CodeLens(range));
+                    let newCodeLens = new vscode.CodeLens(range);
+                    
+                    const startPos = range.start.character;
+                    const endPos = line.range.end.character;
+                    const nameData = line.text.substring(startPos, endPos); // 'name: requestName'
+                    const name = YAML.parse(nameData).name;
+                    newCodeLens.command = {
+                        title: "Run Request",
+                        tooltip: "Click to run the request",
+                        command: "extension.runRequest",
+                        arguments: [name],
+                    };
+                    this.codeLenses.push(newCodeLens);
                 }
             }
 
@@ -117,30 +123,6 @@ export class CodelensProviderForIndReq implements vscode.CodeLensProvider {
         codeLens: vscode.CodeLens,
         token: vscode.CancellationToken
     ) {
-        if (
-            vscode.workspace
-                .getConfiguration("extension")
-                .get("enableAPIrunner", true)
-        ) {
-            const activeEditor = vscode.window.activeTextEditor;
-            if (activeEditor) {
-                let lineNum = codeLens.range.start.line;
-                let lineData = activeEditor.document.lineAt(lineNum);
-
-                const startPos = codeLens.range.start.character;
-                const endPos = lineData.range.end.character;
-                const nameData = lineData.text.substring(startPos, endPos); // 'name: requestName'
-                const name = YAML.parse(nameData).name;
-
-                codeLens.command = {
-                    title: "Run Request",
-                    tooltip: "Click to run the request",
-                    command: "extension.runRequest",
-                    arguments: [name],
-                };
-                return codeLens;
-            }
-        }
         return null;
     }
 }

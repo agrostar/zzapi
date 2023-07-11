@@ -21,7 +21,7 @@ async function requestWithProgress(requestData: any){
             progress.report({message: `${++seconds} sec`});
         }, 1000);
 
-        const httpRequest = got.get(`https://jsonplceholder.typicode.com/posts/1`);
+        const httpRequest = got.get(`https://jsonplaceholder.typicode.com/posts/1`);
         let response: any;
         let cancelled = false;
         token.onCancellationRequested(() => {
@@ -39,6 +39,8 @@ async function requestWithProgress(requestData: any){
             response = {
                 "executionTime": executionTime,
                 "httpResponse": httpResponse,
+                "statusCode": httpResponse.statusCode,
+                "headers": httpResponse.headers
             };
         }
 
@@ -61,7 +63,7 @@ async function executeHttpRequest(httpRequest: any){
 
         const err2 = e;
         const message = e.name === "CancelError" ? "Request Cancelled" : err2.message;
-        return {"name": e.name, "message": message };
+        return {"name": e.name, "message": message, "statusCode": e.statusCode };
     }
 }
 
