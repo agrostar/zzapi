@@ -26,6 +26,10 @@ export class CodelensProviderForAllReq implements vscode.CodeLensProvider {
                 .getConfiguration("extension")
                 .get("enableAPIrunner", true)
         ) {
+            if (!document.uri.fsPath.endsWith("bundle.yml")) {
+                return [];
+            }
+
             this.codeLenses = [];
             const regex = new RegExp(this.regex);
             const text = document.getText();
@@ -81,6 +85,10 @@ export class CodelensProviderForIndReq implements vscode.CodeLensProvider {
         document: vscode.TextDocument,
         token: vscode.CancellationToken
     ): vscode.CodeLens[] | Thenable<vscode.CodeLens[]> {
+        if (!document.uri.fsPath.endsWith("bundle.yml")) {
+            return [];
+        }
+
         if (
             vscode.workspace
                 .getConfiguration("extension")
