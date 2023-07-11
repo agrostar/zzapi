@@ -99,7 +99,7 @@ export class CodelensProviderForIndReq implements vscode.CodeLensProvider {
                 const range = document.getWordRangeAtPosition(position);
                 if (range) {
                     let newCodeLens = new vscode.CodeLens(range);
-                    
+
                     const startPos = range.start.character;
                     const endPos = line.range.end.character;
                     const nameData = line.text.substring(startPos, endPos); // 'name: requestName'
