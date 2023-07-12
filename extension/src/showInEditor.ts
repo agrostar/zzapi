@@ -1,8 +1,7 @@
 import { window, workspace, ViewColumn } from "vscode";
 
-export function openEditor(jsonData: object) {
-    const dataToDisplay = getJsonDataOnSeparateLines(jsonData);
-    const language = "yaml";
+export function openEditor(jsonData: object, name: string) {
+    const dataToDisplay = `NAME: ${name}\n\n` + getJsonDataOnSeparateLines(jsonData);
 
     const activeEditor = window.activeTextEditor;
     const nextColumn =
@@ -11,7 +10,7 @@ export function openEditor(jsonData: object) {
             : ViewColumn.Beside;
 
     workspace
-        .openTextDocument({ content: dataToDisplay, language })
+        .openTextDocument({ content: dataToDisplay })
         .then((document) => {
             window.showTextDocument(document, nextColumn, true);
         });

@@ -6,7 +6,7 @@ export async function getResponse(commonData: any, requestData: any) {
     const allData = getMergedData(commonData, requestData);
     let [reqCancelled, responseData] = await requestWithProgress(allData);
     if (!reqCancelled) {
-        openEditor(responseData);
+        openEditor(responseData, requestData.name);
     }
 }
 
