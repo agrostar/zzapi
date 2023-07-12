@@ -23,9 +23,6 @@ export function getJsonDataOnSeparateLines(jsonData: any) {
     for (const key in jsonData) {
         if (jsonData.hasOwnProperty(key)) {
             let value = jsonData[key];
-            if (key === "headers") {
-                value = `\n\t${value}`;
-            }
             formattedString += `${key}: ${value}\n`;
         }
     }

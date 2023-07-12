@@ -76,7 +76,8 @@ function getHeadersAsString(headersObj: any) {
         }
     }
 
-    return formattedString.trim();
+    formattedString = formattedString.trim();
+    return `\n\t${formattedString}`;
 }
 
 async function executeHttpRequest(
