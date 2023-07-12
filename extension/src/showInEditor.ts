@@ -3,7 +3,7 @@ import * as vscode from "vscode";
 
 export function openEditor(jsonData: object) {
     // const dataToDisplay = YAML.stringify(jsonData);
-    const dataToDisplay = JSON.stringify(jsonData);
+    const dataToDisplay = getJsonDataOnSeparateLines(jsonData);
     const language = "yaml";
 
     const activeEditor = vscode.window.activeTextEditor;
@@ -17,4 +17,20 @@ export function openEditor(jsonData: object) {
         .then((document) => {
             vscode.window.showTextDocument(document, nextColumn, true);
         });
+}
+
+export function getJsonDataOnSeparateLines(jsonData: any) {
+    let formattedString = "";
+
+    for (const key in jsonData) {
+        if (jsonData.hasOwnProperty(key)) {
+            let value = jsonData[key];
+            if (key === "headers") {
+                value = `\n\t${value}`;
+            }
+            formattedString += `${key}: ${value}\n`;
+        }
+    }
+
+    return formattedString.trim();
 }

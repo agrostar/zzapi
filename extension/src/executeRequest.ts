@@ -6,13 +6,18 @@ import * as vscode from "vscode";
 
 export async function getResponse(commonData: any, requestData: any) {
     const allData = getMergedData(commonData, requestData);
-    openEditor(await requestWithProgress(allData));
+    let [reqCancelled, responseData] = await requestWithProgress(allData);
+    if (!reqCancelled) {
+        openEditor(responseData);
+    }
 }
 
-async function requestWithProgress(requestData: any) {
+async function requestWithProgress(
+    requestData: any
+): Promise<[boolean, object]> {
     let seconds = 0;
 
-    const response: any = await window.withProgress(
+    const [cancelled, response]: any = await window.withProgress(
         {
             location: vscode.ProgressLocation.Window,
             cancellable: true,
@@ -25,52 +30,71 @@ async function requestWithProgress(requestData: any) {
             }, 1000);
 
             const httpRequest = got.get(
-                `https://jsonplceholder.typicode.com/posts/1`
+                `https://jsonplaceholder.typicode.com/posts/1`
             );
             let response: any;
             let cancelled = false;
             token.onCancellationRequested(() => {
-                response = { cancelRequested: "TRUE" };
+                window.showInformationMessage("Request was cancelled");
                 httpRequest.cancel();
                 cancelled = true;
             });
 
             const startTime = new Date().getTime();
-            const httpResponse = await executeHttpRequest(httpRequest);
+            const [isError, httpResponse] = await executeHttpRequest(
+                httpRequest
+            );
             const executionTime = new Date().getTime() - startTime;
 
             clearInterval(interval);
-            if (!cancelled) {
+            if (!cancelled && !isError) {
                 response = {
                     executionTime: executionTime,
-                    httpResponse: httpResponse,
-                    statusCode: httpResponse.statusCode,
-                    headers: httpResponse.headers,
+                    status: httpResponse.statusCode,
+                    statusText: httpResponse.statusMessage!,
+                    content: httpResponse.body as string,
+                    headers: getHeadersAsString(httpResponse.headers),
+                    rawHeaders: httpResponse.rawHeaders,
+                    httpVersion: httpResponse.httpVersion,
                 };
+
+                return [false, response];
             }
 
-            return response;
+            return [cancelled, httpResponse];
         }
     );
 
-    return response;
+    return [cancelled, response];
 }
 
-async function executeHttpRequest(httpRequest: any) {
+function getHeadersAsString(headersObj: any){
+    let formattedString = "\n";
+
+    for (const key in headersObj) {
+        if (headersObj.hasOwnProperty(key)) {
+            const value = headersObj[key];
+            formattedString += `\t${key}: ${value}\n`;
+        }
+    }
+
+    return formattedString.trim();
+    
+}
+
+async function executeHttpRequest(
+    httpRequest: any
+): Promise<[isError: boolean, responseData: any]> {
     try {
-        const res = await httpRequest;
-        return res.json();
+        return [false, await httpRequest];
     } catch (e: any) {
         const res = e.response;
-
         if (res) {
-            return res.json();
+            return [true, res];
         }
 
-        const err2 = e;
-        const message =
-            e.name === "CancelError" ? "Request Cancelled" : err2.message;
-        return { name: e.name, message: message };
+        const message = e.name === "CancelError" ? "Cancelled" : e.message;
+        return [true, { name: e.name, message: message }];
     }
 }
 
