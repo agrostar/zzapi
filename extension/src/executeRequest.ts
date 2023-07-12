@@ -1,8 +1,6 @@
 import got from "got";
-import { window } from "vscode";
+import { window, ProgressLocation } from "vscode";
 import { openEditor } from "./showInEditor";
-
-import * as vscode from "vscode";
 
 export async function getResponse(commonData: any, requestData: any) {
     const allData = getMergedData(commonData, requestData);
@@ -19,7 +17,7 @@ async function requestWithProgress(
 
     const [cancelled, response]: any = await window.withProgress(
         {
-            location: vscode.ProgressLocation.Window,
+            location: ProgressLocation.Window,
             cancellable: true,
             title: "Running Request, click to cancel",
         },
@@ -51,11 +49,11 @@ async function requestWithProgress(
                 response = {
                     executionTime: executionTime,
                     status: httpResponse.statusCode,
-                    statusText: httpResponse.statusMessage!,
+                    // statusText: httpResponse.statusMessage!,
                     content: httpResponse.body as string,
                     headers: getHeadersAsString(httpResponse.headers),
-                    rawHeaders: httpResponse.rawHeaders,
-                    httpVersion: httpResponse.httpVersion,
+                    // rawHeaders: httpResponse.rawHeaders,
+                    // httpVersion: httpResponse.httpVersion,
                 };
 
                 return [false, response];
@@ -68,7 +66,7 @@ async function requestWithProgress(
     return [cancelled, response];
 }
 
-function getHeadersAsString(headersObj: any){
+function getHeadersAsString(headersObj: any) {
     let formattedString = "\n";
 
     for (const key in headersObj) {
@@ -79,7 +77,6 @@ function getHeadersAsString(headersObj: any){
     }
 
     return formattedString.trim();
-    
 }
 
 async function executeHttpRequest(

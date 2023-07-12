@@ -1,21 +1,19 @@
-import * as vscode from "vscode";
-// import * as YAML from "yaml";
+import { window, workspace, ViewColumn } from "vscode";
 
 export function openEditor(jsonData: object) {
-    // const dataToDisplay = YAML.stringify(jsonData);
     const dataToDisplay = getJsonDataOnSeparateLines(jsonData);
     const language = "yaml";
 
-    const activeEditor = vscode.window.activeTextEditor;
+    const activeEditor = window.activeTextEditor;
     const nextColumn =
         activeEditor && activeEditor.viewColumn !== undefined
             ? activeEditor.viewColumn + 1
-            : vscode.ViewColumn.Beside;
+            : ViewColumn.Beside;
 
-    vscode.workspace
+    workspace
         .openTextDocument({ content: dataToDisplay, language })
         .then((document) => {
-            vscode.window.showTextDocument(document, nextColumn, true);
+            window.showTextDocument(document, nextColumn, true);
         });
 }
 
