@@ -1,75 +1,46 @@
-import { window, ViewColumn, commands, workspace } from "vscode";
+import { window, commands, workspace } from "vscode";
 
 let keysInContent = ["executionTime", "status", "content"];
 
-export async function openEditorForIndividualReq(jsonData: object, name: string) {
+export async function openEditorForIndividualReq(
+    jsonData: object,
+    name: string
+) {
     let [contentData, headersData] = getDataOfIndReqAsString(jsonData, name);
-
-    const activeEditor = window.activeTextEditor;
-
-    let targetColumn: number;
-    targetColumn =
-        activeEditor && activeEditor.viewColumn !== undefined
-            ? activeEditor.viewColumn + 1
-            : ViewColumn.Beside;
-
-    // insert a new group to the right, insert the content
-    commands.executeCommand("workbench.action.newGroupRight");
-    await openDocument(contentData);
-
-    // insert a new group below, insert the content
-    commands.executeCommand("workbench.action.newGroupBelow");
-    await openDocument(headersData);
-
-    if (activeEditor) {
-        window.showTextDocument(activeEditor.document);
-    }
+    await showContent(contentData, headersData);
 }
 
-export async function openEditorForAllRequests(responses: Array<{response: object, name: string}>){
+export async function openEditorForAllRequests(
+    responses: Array<{ response: object; name: string }>
+) {
     const n = responses.length;
     let formattedContent = "";
     let formattedHeaders = "";
 
-    for(let i = 0; i < n; i++){
+    for (let i = 0; i < n; i++) {
         let responseObj = responses[i];
-        let [contentData, headersData] = getDataOfIndReqAsString(responseObj["response"], responseObj["name"]);
+        let [contentData, headersData] = getDataOfIndReqAsString(
+            responseObj["response"],
+            responseObj["name"]
+        );
         formattedContent += contentData + "\n-------\n";
-        formattedHeaders += headersData + "\n-------\n";   
+        formattedHeaders += headersData + "\n-------\n";
     }
-    
-    const activeEditor = window.activeTextEditor;
 
-    let targetColumn: number;
-    targetColumn =
-        activeEditor && activeEditor.viewColumn !== undefined
-            ? activeEditor.viewColumn + 1
-            : ViewColumn.Beside;
-
-    // insert a new group to the right, insert the content
-    commands.executeCommand("workbench.action.newGroupRight");
-    await openDocument(formattedContent);
-
-    // insert a new group below, insert the content
-    commands.executeCommand("workbench.action.newGroupBelow");
-    await openDocument(formattedHeaders);
-
-    if (activeEditor) {
-        window.showTextDocument(activeEditor.document);
-    }    
+    await showContent(formattedContent, formattedHeaders);
 }
 
 function getDataOfIndReqAsString(
     jsonData: any,
     name: string
 ): [contentData: string, headersData: string] {
-    let contentData = `${name} content\n\n` + getContent(jsonData);
+    let contentData = `${name} content\n\n` + getMainContent(jsonData);
     let headersData = `${name} headers\n\n` + getRemainingContent(jsonData);
 
     return [contentData, headersData];
 }
 
-function getContent(jsonData: any): string {
+function getMainContent(jsonData: any): string {
     let formattedString = "";
 
     for (const key in jsonData) {
@@ -101,4 +72,20 @@ async function openDocument(content: string) {
             preserveFocus: false,
         });
     });
+}
+
+async function showContent(bodyContent: string, headersContent: string) {
+    const activeEditor = window.activeTextEditor;
+
+    // insert a new group to the right, insert the content
+    commands.executeCommand("workbench.action.newGroupRight");
+    await openDocument(bodyContent);
+
+    // insert a new group below, insert the content
+    commands.executeCommand("workbench.action.newGroupBelow");
+    await openDocument(headersContent);
+
+    if (activeEditor) {
+        window.showTextDocument(activeEditor.document);
+    }
 }
