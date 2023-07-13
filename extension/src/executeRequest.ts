@@ -1,13 +1,35 @@
 import got from "got";
 import { window, ProgressLocation } from "vscode";
-import { openEditor } from "./showInEditor";
+import { openEditorForIndividualReq, openEditorForAllRequests } from "./showInEditor";
 
-export async function getResponse(commonData: any, requestData: any) {
+export async function getIndividualResponse(commonData: any, requestData: any) {
     const allData = getMergedData(commonData, requestData);
     let [reqCancelled, responseData] = await requestWithProgress(allData);
     if (!reqCancelled) {
-        await openEditor(responseData, requestData.name);
+        await openEditorForIndividualReq(responseData, requestData.name);
     }
+}
+
+export async function getAllResponses(commonData: any, allRequests: Array<any>){
+    let responses = [];
+    let atleastOneExecuted = false;
+    
+    const n = allRequests.length;
+    for(let i = 0; i < n; i++){
+        let request = allRequests[i];
+        const allData = getMergedData(commonData, request);
+        let [reqCancelled, responseData] = await requestWithProgress(allData);
+        if(!reqCancelled){
+            responses.push({response: responseData, name: request.name});
+            atleastOneExecuted = true;
+        }
+    }
+
+    if(atleastOneExecuted){
+        openEditorForAllRequests(responses);
+    } else {
+        window.showInformationMessage("ALL REQUESTS WERE CANCELLED");
+    }   
 }
 
 async function requestWithProgress(
@@ -19,7 +41,7 @@ async function requestWithProgress(
         {
             location: ProgressLocation.Window,
             cancellable: true,
-            title: "Running Request, click to cancel",
+            title: `Running ${requestData.name}, click to cancel`,
         },
         async (progress, token) => {
             const interval = setInterval(() => {
@@ -34,7 +56,7 @@ async function requestWithProgress(
             let cancelled = false;
 
             token.onCancellationRequested(() => {
-                window.showInformationMessage("Request was cancelled");
+                window.showInformationMessage(`Request ${requestData.name} was cancelled`);
                 httpRequest.cancel();
                 cancelled = true;
             });
