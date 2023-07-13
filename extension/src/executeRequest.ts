@@ -21,7 +21,6 @@ async function requestWithProgress(
             cancellable: true,
             title: "Running Request, click to cancel",
         },
-
         async (progress, token) => {
             const interval = setInterval(() => {
                 progress.report({ message: `${++seconds} sec` });
@@ -30,8 +29,10 @@ async function requestWithProgress(
             const httpRequest = got.get(
                 `https://jsonplaceholder.typicode.com/posts/1`
             );
+
             let response: any;
             let cancelled = false;
+
             token.onCancellationRequested(() => {
                 window.showInformationMessage("Request was cancelled");
                 httpRequest.cancel();
