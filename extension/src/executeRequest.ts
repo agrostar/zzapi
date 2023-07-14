@@ -9,7 +9,7 @@ export async function getIndividualResponse(commonData: any, requestData: any) {
     const allData = getMergedData(commonData, requestData);
     let [reqCancelled, responseData] = await requestWithProgress(allData);
     if (!reqCancelled) {
-        await openEditorForIndividualReq(responseData, requestData.name);
+        await openEditorForIndividualReq(responseData, allData.name);
     }
 }
 
@@ -128,8 +128,5 @@ async function executeHttpRequest(
 }
 
 function getMergedData(commonData: any, requestData: any): any {
-    return {
-        ...commonData,
-        ...requestData,
-    };
+    return Object.assign({}, requestData, commonData);
 }
