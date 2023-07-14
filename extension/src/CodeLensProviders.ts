@@ -21,40 +21,33 @@ export class CodelensProviderForAllReq implements vscode.CodeLensProvider {
         document: vscode.TextDocument,
         token: vscode.CancellationToken
     ): vscode.CodeLens[] | Thenable<vscode.CodeLens[]> {
-        if (
-            vscode.workspace
-                .getConfiguration("extension")
-                .get("enableAPIrunner", true)
-        ) {
-            if (!document.uri.fsPath.endsWith("bundle.yml")) {
-                return [];
-            }
-
-            this.codeLenses = [];
-            const regex = new RegExp(this.regex);
-            const text = document.getText();
-            let matches;
-            while ((matches = regex.exec(text)) !== null) {
-                const line = document.lineAt(
-                    document.positionAt(matches.index).line
-                );
-                const indexOf = line.text.indexOf(matches[0]);
-                const position = new vscode.Position(line.lineNumber, indexOf);
-                const range = document.getWordRangeAtPosition(position);
-                if (range) {
-                    let newCodeLens = new vscode.CodeLens(range);
-                    newCodeLens.command = {
-                        title: "Run All Requests",
-                        tooltip: "Click to run all requests",
-                        command: "extension.runAllRequests",
-                    };
-                    this.codeLenses.push(newCodeLens);
-                }
-            }
-
-            return this.codeLenses;
+        if (!document.uri.fsPath.endsWith("bundle.yml")) {
+            return [];
         }
-        return [];
+
+        this.codeLenses = [];
+        const regex = new RegExp(this.regex);
+        const text = document.getText();
+        let matches;
+        while ((matches = regex.exec(text)) !== null) {
+            const line = document.lineAt(
+                document.positionAt(matches.index).line
+            );
+            const indexOf = line.text.indexOf(matches[0]);
+            const position = new vscode.Position(line.lineNumber, indexOf);
+            const range = document.getWordRangeAtPosition(position);
+            if (range) {
+                let newCodeLens = new vscode.CodeLens(range);
+                newCodeLens.command = {
+                    title: "Run All Requests",
+                    tooltip: "Click to run all requests",
+                    command: "extension.runAllRequests",
+                };
+                this.codeLenses.push(newCodeLens);
+            }
+        }
+
+        return this.codeLenses;
     }
 
     public resolveCodeLens(
@@ -89,42 +82,35 @@ export class CodelensProviderForIndReq implements vscode.CodeLensProvider {
             return [];
         }
 
-        if (
-            vscode.workspace
-                .getConfiguration("extension")
-                .get("enableAPIrunner", true)
-        ) {
-            this.codeLenses = [];
-            const regex = new RegExp(this.regex);
-            const text = document.getText();
-            let matches;
-            while ((matches = regex.exec(text)) !== null) {
-                const line = document.lineAt(
-                    document.positionAt(matches.index).line
-                );
-                const indexOf = line.text.indexOf(matches[0]);
-                const position = new vscode.Position(line.lineNumber, indexOf);
-                const range = document.getWordRangeAtPosition(position);
-                if (range) {
-                    let newCodeLens = new vscode.CodeLens(range);
+        this.codeLenses = [];
+        const regex = new RegExp(this.regex);
+        const text = document.getText();
+        let matches;
+        while ((matches = regex.exec(text)) !== null) {
+            const line = document.lineAt(
+                document.positionAt(matches.index).line
+            );
+            const indexOf = line.text.indexOf(matches[0]);
+            const position = new vscode.Position(line.lineNumber, indexOf);
+            const range = document.getWordRangeAtPosition(position);
+            if (range) {
+                let newCodeLens = new vscode.CodeLens(range);
 
-                    const startPos = range.start.character;
-                    const endPos = line.range.end.character;
-                    const nameData = line.text.substring(startPos, endPos); // 'name: requestName'
-                    const name = YAML.parse(nameData).name;
-                    newCodeLens.command = {
-                        title: "Run Request",
-                        tooltip: "Click to run the request",
-                        command: "extension.runRequest",
-                        arguments: [name],
-                    };
-                    this.codeLenses.push(newCodeLens);
-                }
+                const startPos = range.start.character;
+                const endPos = line.range.end.character;
+                const nameData = line.text.substring(startPos, endPos); // 'name: requestName'
+                const name = YAML.parse(nameData).name;
+                newCodeLens.command = {
+                    title: "Run Request",
+                    tooltip: "Click to run the request",
+                    command: "extension.runRequest",
+                    arguments: [name],
+                };
+                this.codeLenses.push(newCodeLens);
             }
-
-            return this.codeLenses;
         }
-        return [];
+
+        return this.codeLenses;
     }
 
     public resolveCodeLens(

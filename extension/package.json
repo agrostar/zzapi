@@ -14,24 +14,8 @@
   ],
   "main": "./out/extension.js",
   "contributes": {
-    "commands": [
-      {
-        "command": "extension.enableAPIrunner",
-        "title": "Enable hAPI"
-      },
-      {
-        "command": "extension.disableAPIrunner",
-        "title": "Disable hAPI"
-      }
-    ],
-    "configuration": {
-      "properties": {
-        "extension.enableAPIrunner": {
-          "type": "boolean",
-          "default": true
-        }
-      }
-    }
+    "commands": [],
+    "configuration": {}
   },
   "scripts": {
     "vscode:prepublish": "npm run compile",
@@ -56,7 +40,7 @@
     "typescript": "^5.1.3"
   },
   "dependencies": {
-    "got": "^11.8.6",
+    "got": "11.8.6",
     "yaml": "^2.3.1"
   }
 }
