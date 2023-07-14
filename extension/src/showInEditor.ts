@@ -34,36 +34,21 @@ function getDataOfIndReqAsString(
     jsonData: any,
     name: string
 ): [contentData: string, headersData: string] {
-    let contentData = `${name} content\n\n` + getMainContent(jsonData);
-    let headersData = `${name} headers\n\n` + getRemainingContent(jsonData);
+    let contentData = `${name} content\n\n`;
+    let headersData = `${name} headers\n\n`;
+
+    for (const key in jsonData) {
+        if (jsonData.hasOwnProperty(key)) {
+            let value = jsonData[key];
+            if (keysInContent.includes(key)) {
+                contentData += `${key}: ${value}\n`;
+            } else {
+                headersData += `${key}: ${value}\n`;
+            }
+        }
+    }
 
     return [contentData, headersData];
-}
-
-function getMainContent(jsonData: any): string {
-    let formattedString = "";
-
-    for (const key in jsonData) {
-        if (keysInContent.includes(key) && jsonData.hasOwnProperty(key)) {
-            let value = jsonData[key];
-            formattedString += `${key}: ${value}\n`;
-        }
-    }
-
-    return formattedString.trim();
-}
-
-function getRemainingContent(jsonData: any): string {
-    let formattedString = "";
-
-    for (const key in jsonData) {
-        if (!keysInContent.includes(key) && jsonData.hasOwnProperty(key)) {
-            let value = jsonData[key];
-            formattedString += `${key}: ${value}\n`;
-        }
-    }
-
-    return formattedString.trim();
 }
 
 async function openDocument(content: string) {
@@ -85,6 +70,7 @@ async function showContent(bodyContent: string, headersContent: string) {
     commands.executeCommand("workbench.action.newGroupBelow");
     await openDocument(headersContent);
 
+    //reopen the initial editor
     if (activeEditor) {
         window.showTextDocument(activeEditor.document);
     }
