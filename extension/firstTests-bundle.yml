@@ -1,0 +1,15 @@
+common:
+  baseUrl: https://jsonplaceholder.typicode.com
+requests:
+  - name: makePost
+    method: POST
+    url: posts
+    body: |
+      {
+        title: "foo",
+        body: "bar",
+        userId: 1
+      }
+  - name: getPost
+    method: GET
+    url: posts/1

@@ -54,9 +54,7 @@ async function requestWithProgress(
                 progress.report({ message: `${++seconds} sec` });
             }, 1000);
 
-            const httpRequest = got.get(
-                `https://jsonplaceholder.typicode.com/posts/1`
-            );
+            const httpRequest = constructRequest(requestData);
 
             let response: any;
             let cancelled = false;
@@ -97,6 +95,25 @@ async function requestWithProgress(
     return [cancelled, response];
 }
 
+function constructRequest(allData: any) {
+    let baseURL = allData["baseUrl"];
+    let mainUrl = allData["url"];
+
+    let options = {
+        prefixUrl: baseURL,
+        body: allData["body"],
+    };
+
+    let httpRequest: any;
+    if (allData.method === "GET") {
+        httpRequest = got.get(mainUrl, options);
+    } else {
+        httpRequest = got.post(mainUrl, options);
+    }
+
+    return httpRequest;
+}
+
 function getHeadersAsString(headersObj: any) {
     let formattedString = "\n";
 
@@ -128,5 +145,5 @@ async function executeHttpRequest(
 }
 
 function getMergedData(commonData: any, requestData: any): any {
-    return Object.assign({}, requestData, commonData);
+    return Object.assign({}, commonData, requestData);
 }

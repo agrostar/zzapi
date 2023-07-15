@@ -99,7 +99,7 @@ export class CodelensProviderForIndReq implements vscode.CodeLensProvider {
                 const startPos = range.start.character;
                 const endPos = line.range.end.character;
                 const nameData = line.text.substring(startPos, endPos); // 'name: requestName'
-                const name = YAML.parse(nameData).name;
+                const name = YAML.parse(nameData).name;                 // 'requestName'
                 newCodeLens.command = {
                     title: "Run Request",
                     tooltip: "Click to run the request",

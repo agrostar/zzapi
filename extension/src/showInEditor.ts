@@ -60,8 +60,6 @@ async function openDocument(content: string) {
 }
 
 async function showContent(bodyContent: string, headersContent: string) {
-    const activeEditor = window.activeTextEditor;
-
     // insert a new group to the right, insert the content
     commands.executeCommand("workbench.action.newGroupRight");
     await openDocument(bodyContent);
@@ -69,9 +67,4 @@ async function showContent(bodyContent: string, headersContent: string) {
     // insert a new group below, insert the content
     commands.executeCommand("workbench.action.newGroupBelow");
     await openDocument(headersContent);
-
-    //reopen the initial editor
-    if (activeEditor) {
-        window.showTextDocument(activeEditor.document);
-    }
 }
