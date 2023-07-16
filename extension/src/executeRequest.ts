@@ -68,13 +68,11 @@ async function requestWithProgress(
             });
 
             const startTime = new Date().getTime();
-            const [isError, httpResponse] = await executeHttpRequest(
-                httpRequest
-            );
+            const httpResponse = await executeHttpRequest(httpRequest);
             const executionTime = new Date().getTime() - startTime;
 
             clearInterval(interval);
-            if (!cancelled && !isError) {
+            if (!cancelled) {
                 response = {
                     executionTime: executionTime,
                     status: httpResponse.statusCode,
@@ -96,22 +94,60 @@ async function requestWithProgress(
 }
 
 function constructRequest(allData: any) {
-    let baseURL = allData["baseUrl"];
-    let mainUrl = allData["url"];
+    let completeUrl = allData.baseUrl + allData.url;
 
     let options = {
-        prefixUrl: baseURL,
-        body: allData["body"],
+        body: getBody(allData.body),
+        searchParams: getObjectSetAsJSON(allData.params),
+        headers: getObjectSetAsJSON(allData.headers),
+        followRedirect: allData.options.follow,
     };
 
-    let httpRequest: any;
     if (allData.method === "GET") {
-        httpRequest = got.get(mainUrl, options);
+        return got.get(completeUrl, options);
     } else {
-        httpRequest = got.post(mainUrl, options);
+        return got.post(completeUrl, options);
+    }
+}
+
+function getBody(body: any) {
+    if (body === undefined) {
+        return undefined;
+    }
+    if (typeof body === "object") {
+        return JSON.stringify(body);
     }
 
-    return httpRequest;
+    return body;
+}
+
+function getObjectSetAsJSON(
+    objectSet: Array<{ name: any; value: any; encode: boolean }>
+) {
+    if (objectSet === undefined) {
+        return undefined;
+    }
+    if (!Array.isArray(objectSet)) {
+        return objectSet;
+    }
+
+    let finalObject: { [key: string]: any } = {};
+
+    const n = objectSet.length;
+    for (let i = 0; i < n; i++) {
+        const currObj: { name: string; value: any; encode: boolean } =
+            objectSet[i];
+
+        const key = currObj.name;
+        let value = currObj.value;
+        // if(currObj.encode === undefined || currObj.encode === true){
+        //     value = encodeURIComponent(value);
+        // }
+
+        finalObject[key] = value;
+    }
+
+    return finalObject;
 }
 
 function getHeadersAsString(headersObj: any) {
@@ -128,22 +164,63 @@ function getHeadersAsString(headersObj: any) {
     return `\n\t${formattedString}`;
 }
 
-async function executeHttpRequest(
-    httpRequest: any
-): Promise<[isError: boolean, responseData: any]> {
+async function executeHttpRequest(httpRequest: any) {
     try {
-        return [false, await httpRequest];
+        return await httpRequest;
     } catch (e: any) {
         const res = e.response;
         if (res) {
-            return [true, res];
+            return res;
         }
 
         const message = e.name === "CancelError" ? "Cancelled" : e.message;
-        return [true, { name: e.name, message: message }];
+        return { name: e.name, message: message };
     }
 }
 
 function getMergedData(commonData: any, requestData: any): any {
-    return Object.assign({}, commonData, requestData);
+    let mergedData = Object.assign({}, commonData, requestData);
+
+    for (const key in requestData) {
+        if (requestData.hasOwnProperty(key)) {
+            if (
+                commonData.hasOwnProperty(key) &&
+                Array.isArray(requestData[key])
+            ) {
+                let finalKeyData: { [key: string]: any } = {};
+
+                let currProp: any;
+                let n: number;
+
+                if (Array.isArray(commonData[key])) {
+                    currProp = commonData[key];
+                    n = currProp.length;
+
+                    for (let i = 0; i < n; i++) {
+                        const key = currProp[i].name;
+                        let value = currProp[i].value;
+                        // if(currProp[i].encode === undefined || currProp[i].encode === true){
+                        //     value = encodeURIComponent(value);
+                        // }
+                        finalKeyData[key] = value;
+                    }
+                }
+
+                currProp = requestData[key];
+                n = currProp.length;
+                for (let i = 0; i < n; i++) {
+                    const key = currProp[i].name;
+                    let value = currProp[i].value;
+                    // if(currProp[i].encode === undefined || currProp[i].encode === true){
+                    //     value = encodeURIComponent(value);
+                    // }
+                    finalKeyData[key] = value;
+                }
+
+                mergedData[key] = finalKeyData;
+            }
+        }
+    }
+
+    return mergedData;
 }

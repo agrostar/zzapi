@@ -35,7 +35,8 @@ export class CodelensProviderForAllReq implements vscode.CodeLensProvider {
             );
             const indexOf = line.text.indexOf(matches[0]);
             const position = new vscode.Position(line.lineNumber, indexOf);
-            const range = document.getWordRangeAtPosition(position);
+            const range = new vscode.Range(position, position);
+
             if (range) {
                 let newCodeLens = new vscode.CodeLens(range);
                 newCodeLens.command = {
@@ -67,7 +68,7 @@ export class CodelensProviderForIndReq implements vscode.CodeLensProvider {
         this._onDidChangeCodeLenses.event;
 
     constructor() {
-        this.regex = /\bname:/g;
+        this.regex = /-\sname: (.*)\b/g;
 
         vscode.workspace.onDidChangeConfiguration((_) => {
             this._onDidChangeCodeLenses.fire();
@@ -92,14 +93,16 @@ export class CodelensProviderForIndReq implements vscode.CodeLensProvider {
             );
             const indexOf = line.text.indexOf(matches[0]);
             const position = new vscode.Position(line.lineNumber, indexOf);
-            const range = document.getWordRangeAtPosition(position);
+            const range = new vscode.Range(position, position);
+
             if (range) {
                 let newCodeLens = new vscode.CodeLens(range);
 
                 const startPos = range.start.character;
                 const endPos = line.range.end.character;
-                const nameData = line.text.substring(startPos, endPos); // 'name: requestName'
-                const name = YAML.parse(nameData).name;                 // 'requestName'
+
+                const nameData = line.text.substring(startPos + 2, endPos); // 'name: requestName', +2 to account for -\s
+                const name = YAML.parse(nameData).name; // 'requestName'
                 newCodeLens.command = {
                     title: "Run Request",
                     tooltip: "Click to run the request",

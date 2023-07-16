@@ -1,9 +1,4 @@
-import {
-    ExtensionContext,
-    languages,
-    commands,
-    Disposable,
-} from "vscode";
+import { ExtensionContext, languages, commands, Disposable } from "vscode";
 
 import {
     CodelensProviderForAllReq,

@@ -40,6 +40,7 @@ function getDataOfIndReqAsString(
     for (const key in jsonData) {
         if (jsonData.hasOwnProperty(key)) {
             let value = jsonData[key];
+
             if (keysInContent.includes(key)) {
                 contentData += `${key}: ${value}\n`;
             } else {
