@@ -24,7 +24,7 @@ zzapi is made up of (at least):
 
 1. **Specs**: The storage format specification
 2. **Runners**: The tool thats can make one or more API requests. We are not restricted to a single runner, we may have a command line runner and also a VS Code extension that can run the requests.
-3. **Documentation generators**: these will generate in different formats: We envisate a markdown generator to begin with.
+3. **Documentation generators**: these will generate in different formats: We envisage a markdown generator to begin with.
 
 # Storage format
 
@@ -40,7 +40,7 @@ The directory will hold the following kinds of files.
 
 ### Types of bundles
 
-Although the file format does not make a real distinction, there are two types of bundles:
+Although the file format does not make a real distinction, there are two types of bundles in terms of practical usage:
 
 1. **Documentation bundles**: the primary purpose is to document the APIs in this bundle. Typically, documentation bundles will have one entry for each endpoint, with lots of documentation accompanying it.
 2. **Test bundles**: the purpose is to automate testing. The same endpoint typically appears multiple times with different parameters. Tests are run against the response.
@@ -89,6 +89,7 @@ If there are any tests, the response is parsed as JSON. A test checks the value 
 * `path`: the path to the field. Nested fields are accessed using the dot notation (eg, `product.name` for object nesting and `products.0` for array nesting).
 
 Assertions (all optional):
+* TODO: consider mongo filter kind of expressions
 * `t`: the expected type of the field, one of: `string`, `number`, `array`, `object`, `null`
 * `eq`: the expected value (the value of an array is its size, the value of null or undefined will always fail)
 * `gt`: the value should be greater than
@@ -98,7 +99,7 @@ Assertions (all optional):
 * `neq`, `ngt`, `nlt`: not of the above
 * `ieq`, `ico`, `ire`: case insensitive match of the above.
 
-Multiple assertions are allowed in a single test. Even though it doesn't make sense to have combinations such as `eq` and `neq` in the same test, we don't bother to disallow it. In the absence of any assertions, the existance of the field will be checked (`field: null` is considered "exists").
+Multiple assertions are allowed in a single test. Even though it doesn't make sense to have combinations such as `eq` and `neq` in the same test, we don't bother to disallow it. In the absence of any assertions, the existance of the field will be checked.
 
 ### Variable (setvars)
 

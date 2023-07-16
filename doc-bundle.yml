@@ -1,14 +1,15 @@
+# yaml-language-server: $schema=zzapi-bundle.schema.json
 ---
 common:
-  baseUrl: "$myserver"
+  baseUrl: "https://jsonplaceholder.org"
   headers:
-    - { k: Authentication, v: $authToken }
+    - { name: Authentication, value: $authToken }
+  code: 200
+
 requests:
   - name: login
     method: POST
-    url: "/userservice/login/"
-    headers:
-      - { k: X-Authorization-Token, v: $authToken }
+    url: "/userservice/login/"    
     body: |
       {
         "userId": 123456,
@@ -20,9 +21,9 @@ requests:
     url: "/agronomyservice/v1/schedules/cropattributes"
     method: GET
     params:
-      - { k: crop, v: tomato }
-      - { k: state, v: Karnataka, doc: Required. }
-      - { k: .district, v: Bangalore } # A . will temporarily disable the param
+      - { name: crop, value: tomato }
+      - { name: state, value: Madhya%20Pradesh, encode: false, d: Required. }
+      - { name: .district, value: Bangalore }
     response: <cropattributes_resp.json
     d: |-
       # Purpose:

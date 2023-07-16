@@ -1,31 +1,73 @@
-common:
-  baseUrl: $myserver
-  code: 200
-requests:
-  - name: failedLogin
-    method: POST
-    url: /userservice/login/
-    body: |
-      {
-        "userId": 123456,
-        "password": "incorrect",
-        "verified": false
-      }
-    code: 401
+# yaml-language-server: $schema=zzapi-bundle.schema.json
 
-  - name: loginWithAuth
+# This bundle contains a series of test requests against various endpoints,
+# most of them being the postman echo service. We use this to both serve as
+# an example of how to create test bundles as well as testing zzapi runner itself.
+
+common:
+  baseUrl: https://postman-echo.com
+  headers:
+    - { name: Content-type, value: application/json }
+  tests:
+    code: 200
+
+requests:
+  # Test a simple get request
+  - name: get
+    method: GET
+    url: /get
+    params:
+      - { name: foo1, value: bar1 }
+      - { name: foo2, value: bar2 }
+    tests:
+      json:
+        - { path: args.foo1, eq: bar1 }
+        - { path: args.foo2, eq: bar2 }
+
+  # Test a simple JSON post request
+  - name: post
+    url: /post
     method: POST
-    url: /userservice/login/
-    body: |
+    headers: 
+      - { name: x, value: y }
+    body: |-
       {
-        "userId": 123456,
-        "password": "$password",
-        "verified": false
+        "foo1": "bar1",
+        "foo2": 42
       }
     tests:
-      - { path: status, eq: OK }
-      - { path: responseData.permissions, t: array, gt: 4 }
-      - { path: responseData.permissions.0, t: array, eq: admin }
-      - { path: responseData.authToken, t: string, ex: yes }
-    vars:
-      - { path: responseData.authToken, var: $authToken }
+      json:
+        - { path: "data.foo1", eq: "bar1" }
+        - { path: "data.foo2", gt: 41 }
+        - { path: "data.foo2", eq: 42 }
+      headers:
+        - { name: Content-type, eq: application/json }
+
+  # Test a simple not found URL
+  - name: notfound
+    url: /notfound
+    method: GET
+    tests:
+      code: 404
+
+  # Test URL encoding
+  - name: encoding
+    method: GET
+    url: /get
+    params:
+      - { name: foo, value: 30% of 200 is 60 }
+    tests:
+      json:
+        - { path: url, eq: https://postman-echo.com/get?foo=30%25%20of%20200%20is%2060 }
+        - { path: args, eq: 30% of 200 is 60 }
+
+  # Test disable URL encoding
+  - name: no-encoding
+    method: GET
+    url: /get
+    params:
+      - { name: foo, value: 30%25+of+200, encode: false }
+    tests:
+      json:
+        - { path: url, eq: https://postman-echo.com/get?foo=30%25%+of%+200 }
+        - { path: args, eq: 30% of 200 }
