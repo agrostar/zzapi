@@ -8,12 +8,16 @@ common:
   baseUrl: https://postman-echo.com
   headers:
     - { name: Content-type, value: application/json }
+  options:
+    follow: false
+    verifySSL: true
   tests:
     code: 200
+    headers:
+      - { name: Content-type, value: application/json }
 
 requests:
-  # Test a simple get request
-  - name: get
+  - name: simple-get
     method: GET
     url: /get
     params:
@@ -21,15 +25,14 @@ requests:
       - { name: foo2, value: bar2 }
     tests:
       json:
-        - { path: args.foo1, eq: bar1 }
-        - { path: args.foo2, eq: bar2 }
+        args.foo1: bar1
+        args.foo2: bar2
 
-  # Test a simple JSON post request
-  - name: post
+  - name: post-header-merge
     url: /post
     method: POST
     headers: 
-      - { name: x, value: y }
+      - { name: X-Custom-Header, value: Custom Value }
     body: |-
       {
         "foo1": "bar1",
@@ -37,20 +40,35 @@ requests:
       }
     tests:
       json:
-        - { path: "data.foo1", eq: "bar1" }
-        - { path: "data.foo2", gt: 41 }
-        - { path: "data.foo2", eq: 42 }
+        data.foo1: "bar1"
+        data.foo2: { $type: number, $gt: 41, $lt: 43 }
       headers:
-        - { name: Content-type, eq: application/json }
+        X-Custom-Header: Custom Value
 
-  # Test a simple not found URL
-  - name: notfound
+  - name: post-header-override
+    url: /post
+    method: POST
+    headers: 
+      - { name: Content-Type, value: text/plain }
+    body: { foo: bar }
+    tests:
+      json:
+        data: "{ foo bar }"
+
+  - name: status-404
     url: /notfound
     method: GET
     tests:
       code: 404
 
-  # Test URL encoding
+  - name: status-401
+    url: /status/401
+    method: GET
+    tests:
+      code: 401
+      json:
+        status: 401
+
   - name: encoding
     method: GET
     url: /get
@@ -58,10 +76,9 @@ requests:
       - { name: foo, value: 30% of 200 is 60 }
     tests:
       json:
-        - { path: url, eq: https://postman-echo.com/get?foo=30%25%20of%20200%20is%2060 }
-        - { path: args, eq: 30% of 200 is 60 }
+        url: https://postman-echo.com/get?foo=30%25%20of%20200%20is%2060
+        args.foo: 30% of 200 is 60
 
-  # Test disable URL encoding
   - name: no-encoding
     method: GET
     url: /get
@@ -69,5 +86,30 @@ requests:
       - { name: foo, value: 30%25+of+200, encode: false }
     tests:
       json:
-        - { path: url, eq: https://postman-echo.com/get?foo=30%25%+of%+200 }
-        - { path: args, eq: 30% of 200 }
+        url: https://postman-echo.com/get?foo=30%25%+of%+200
+        args: 30% of 200
+
+  # The cookies endpoint does a redirect (no clue why), let's use that.
+  - name: no-redirects
+    method: GET
+    url: /cookies/set
+    tests:
+      code: 302
+      headers:
+        { Location: /cookies }
+
+  - name: redirects
+    options:
+      follow: true
+    method: GET
+    url: /cookies/set
+    tests:
+      json:
+        cookies: { $exists: true } 
+
+  - name: non-json
+    method: GET
+    url: /encoding/utf8
+    tests:
+      body: /Unicode Demo/
+
