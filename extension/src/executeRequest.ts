@@ -98,16 +98,45 @@ function constructRequest(allData: any) {
 
     let options = {
         body: getBody(allData.body),
-        searchParams: getObjectSetAsJSON(allData.params),
         headers: getObjectSetAsJSON(allData.headers),
         followRedirect: allData.options.follow,
+
+        https: {
+            rejectUnauthorized: allData.options.verifySSL,
+        },
     };
+
+    completeUrl += getParamsForUrl(allData.params);
 
     if (allData.method === "GET") {
         return got.get(completeUrl, options);
     } else {
         return got.post(completeUrl, options);
     }
+}
+
+function getParamsForUrl(params: Array<any>) {
+    let paramString = "";
+    let paramArray: Array<string> = [];
+    if(params === undefined || !Array.isArray(params)){
+        return paramString;
+    }
+
+    const n = params.length;
+    for (let i = 0; i < n; i++) {
+        const param = params[i];
+
+        const key = param.name as string;
+        let value = param.value as string;
+        if (param.encode !== undefined && param.encode === false) {
+            paramArray.push(`${key}=${value}`);
+        } else {
+            paramArray.push(`${key}=${encodeURIComponent(value)}`);
+        }
+    }
+
+    paramString = paramArray.join("&");
+    return `?${paramString}`;
 }
 
 function getBody(body: any) {
@@ -139,10 +168,7 @@ function getObjectSetAsJSON(
             objectSet[i];
 
         const key = currObj.name;
-        let value = currObj.value;
-        // if(currObj.encode === undefined || currObj.encode === true){
-        //     value = encodeURIComponent(value);
-        // }
+        const value = currObj.value;
 
         finalObject[key] = value;
     }
@@ -192,16 +218,15 @@ function getMergedData(commonData: any, requestData: any): any {
                 let currProp: any;
                 let n: number;
 
+                //idea: set value for each key for commonData, and then for requestData,
+                //  thus, if there is a common key, then the requestData value will overwrite
                 if (Array.isArray(commonData[key])) {
                     currProp = commonData[key];
                     n = currProp.length;
 
                     for (let i = 0; i < n; i++) {
                         const key = currProp[i].name;
-                        let value = currProp[i].value;
-                        // if(currProp[i].encode === undefined || currProp[i].encode === true){
-                        //     value = encodeURIComponent(value);
-                        // }
+                        const value = currProp[i].value;
                         finalKeyData[key] = value;
                     }
                 }
@@ -210,10 +235,8 @@ function getMergedData(commonData: any, requestData: any): any {
                 n = currProp.length;
                 for (let i = 0; i < n; i++) {
                     const key = currProp[i].name;
-                    let value = currProp[i].value;
-                    // if(currProp[i].encode === undefined || currProp[i].encode === true){
-                    //     value = encodeURIComponent(value);
-                    // }
+                    const value = currProp[i].value;
+
                     finalKeyData[key] = value;
                 }
 
