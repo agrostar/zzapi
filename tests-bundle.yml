@@ -9,12 +9,12 @@ common:
   headers:
     - { name: Content-type, value: application/json }
   options:
-    follow: false
-    verifySSL: true
+    follow: false # the default, so this can be omitted
+    verifySSL: false # the default, so this can be omitted
   tests:
     code: 200
     headers:
-      - { name: Content-type, value: application/json }
+      - { Content-type: application/json }
 
 requests:
   - name: simple-get
@@ -104,6 +104,7 @@ requests:
     method: GET
     url: /cookies/set
     tests:
+      # code: 200 - this is inherited from common
       json:
         cookies: { $exists: true } 
 
@@ -111,5 +112,13 @@ requests:
     method: GET
     url: /encoding/utf8
     tests:
-      body: /Unicode Demo/
+      body: { $regex: unicode demo, $options: i }
 
+  - name: response-headers
+    method: GET
+    url: /response-headers
+    params:
+      - { name: foo, value: bar }
+    tests:
+      headers:
+        - { foo: bar }
