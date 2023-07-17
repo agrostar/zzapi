@@ -10,7 +10,7 @@ export class CodelensProviderForAllReq implements vscode.CodeLensProvider {
         this._onDidChangeCodeLenses.event;
 
     constructor() {
-        this.regex = /\brequests:/g;
+        this.regex = /requests:(?![^{]*})/g;
 
         vscode.workspace.onDidChangeConfiguration((_) => {
             this._onDidChangeCodeLenses.fire();
@@ -40,7 +40,7 @@ export class CodelensProviderForAllReq implements vscode.CodeLensProvider {
             if (range) {
                 let newCodeLens = new vscode.CodeLens(range);
                 newCodeLens.command = {
-                    title: "Run All Requests",
+                    title: "↪ Run All Requests",
                     tooltip: "Click to run all requests",
                     command: "extension.runAllRequests",
                 };
@@ -104,7 +104,7 @@ export class CodelensProviderForIndReq implements vscode.CodeLensProvider {
                 const nameData = line.text.substring(startPos + 2, endPos); // 'name: requestName', +2 to account for -\s
                 const name = YAML.parse(nameData).name; // 'requestName'
                 newCodeLens.command = {
-                    title: "Run Request",
+                    title: "▶ Run Request",
                     tooltip: "Click to run the request",
                     command: "extension.runRequest",
                     arguments: [name],
