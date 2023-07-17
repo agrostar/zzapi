@@ -47,59 +47,101 @@ Although the file format does not make a real distinction, there are two types o
 
 You can find two sample bundles `doc-bundle.yml` and `tests-bundle.yml` in this directory. Please refer to them as you read the explanation below.
 
-### Common keys
+## Top level objects
 
-For convenience, we use these common key shorthands for many objects in the bundle:
-
-* k: key
-* v: value
-* d: documentation
-* t: type
-
-### Top level objects
-
-* `t`: any value, optional (the doc generator can use this to ignore 'test' bundles)
 * `common`: optional, applies to all requests. Each of the sub-elements is also optional.
-  * `baseUrl`: a prefix applied to the url of all requests that start with a /
-  * `headers`: a set of headers `{ k, v, d }`
-  * `status`: the response code expected in all the requests in this bundle
+* `requests`: a list of Request objects
+
+### common
+
+  * `baseUrl`: a prefix applied to the url of a request that starts with a /
+  * `headers`: an array of header elements, which can be overridden in individual requests
+     * By default, the header `user-agent` will be set to `zzapi/<version>` unless overridden
+  * `params`: query parameters added to all requests.
   * `tests`: a set of tests applied to all the requests in this bundle (test spec follows)
-* `requests`: a list of request objects (described below)
+  * `options`: options applicable to all requests, unless overridden
 
-### Request (requests)
+### request
 
-* `name`: to identify the request and print it during any test executions
-* `url`: actual URL of the request
-* `method`: defaults to GET if not specified
-* `headers`: an optional set of headers `{ k, v, d }`
-* `params`: an optional set of parameter objects `{ k, v, d }` Any parameter key starting with a dot will be ignored, like hidden files. This is to quickly enable/disable a parameter. The value will be URL Encoded before making the request)
-* `body`: the raw request body, optional. (Use `<filename` to read from a file)
-* `response`: an optional sample response.
-  * `body`: the raw response body. Use `<filename` to read from a file.
-  * `d`: optional documentation to describe the response.
-* `status`: the expected response code, optional
-* `d`: optional general documentation, in free format. Typically, this will be written in markdown. Use `<filename` to read from a file.
+* `name`: required, to identify the request and print it during all executions
+* `url`: required, URL of the request (baseUrl from common settings will be prefixed if the URL starts with a /)
+* `method`: required, one of GET, POST, PUT, PATCH etc
+* `headers`: an array of `header`s, in addition to the common set, or overridden if the name is the same
+* `params`: an array of `params`s, in addition to the common set. Parameters cannot be overridden.
+* `body`: the raw request body. (Use the value `@filename` to read from a file, like in `curl`)
+* `response`: a sample response, useful for documentation (doesn't affect the request)
+  * `body`: the raw response body. Use `@filename` to read from a file.
+  * `doc`: documentation to describe the response.
+* `options`: options specific to this request, overrides common options
+* `doc`: general documentation, typically in markdown (use `@filename` to read from a file)
 * `tests`: a set of tests  (described below)
-* `setvars`: a set of variables to be saved into  (described below)
+* `capture`: a set of values in the response to be captured as variables for use in further requests
 
-### Test (tests)
+## Common Objects
 
-If there are any tests, the response is parsed as JSON. A test checks the value of fields with arbitrary nesting by specifying a path to the field, its data type and a check against the value.
+### options
 
-* `path`: the path to the field. Nested fields are accessed using the dot notation (eg, `product.name` for object nesting and `products.0` for array nesting).
+These are options that can be switches on/off, both at the common level as well as the request level.
 
-Assertions (all optional):
-* TODO: consider mongo filter kind of expressions
-* `t`: the expected type of the field, one of: `string`, `number`, `array`, `object`, `null`
-* `eq`: the expected value (the value of an array is its size, the value of null or undefined will always fail)
-* `gt`: the value should be greater than
-* `lt`: the value should be less than
-* `co`: the value should contain
-* `re`: the value matches the regex
-* `neq`, `ngt`, `nlt`: not of the above
-* `ieq`, `ico`, `ire`: case insensitive match of the above.
+* `follow`: whether to follow redirects (default is false)
+* `verifySSL`: whether to enfoce SSL certificate validation (default is false)
 
-Multiple assertions are allowed in a single test. Even though it doesn't make sense to have combinations such as `eq` and `neq` in the same test, we don't bother to disallow it. In the absence of any assertions, the existance of the field will be checked.
+### header
+
+HTTP Headers that will be sent along with the request.
+
+* `name`: required, name of the header
+* `value`: requuired, value of the header
+* `doc`: helpful descriptions about what this header does, has no effect on the actual request
+
+### param
+
+* `name`: required, name of the parameter
+* `value`: requuired, value of the parameter
+* `doc`: helpful descriptions about what this parameter does, has no effect on the actual request
+
+### tests
+
+Tests are run against (each of them is a property of `tests`). 
+
+* `status`: an `assertion` against the HTTP status code
+* `body`: an `assertion` against the entire raw body
+* `json`: a list of `assertion`s against elements (`path`s) of the body parsed as JSON
+
+#### asssertion
+
+Assertions are similar to MongoDB filters. The key is the path, and the value is something that checks the contents of the path's value.
+
+* `status: 400`: status must be equal to 400
+* `body: {$regex: /\<html\>/}`: the body must contain the characters `<html>` (using the `$regex` operator,)
+
+Operators supported in the RHS are:
+* { `$eq`: value }
+* { `$ne`: value }
+* { `$regex`: re, `$options`: opts }
+* { `$lt`: value }
+* { `$gt`: value }
+* { `$lte`: value }
+* { `$gte`: value }
+* { `$exists`: true|false }
+* { `$size`: value }: for arrays
+* { `$type`: string|number|object|array|null}: checks the type of the value
+
+#### json
+
+If there are any json tests, the response is parsed as JSON, provided the content type is `application/json`. The key of the test is a path to the (nested) field in the JSON document, using the . notation as in MongoDB filters. The kind of paths supported are:
+
+* `field.nested.value`: will match 10 in `{ field: { nested: { value: 10 } } }`
+* `field.0` will match 10 in  `{ field: [ 10, 20 ]}`
+* `field.0.value` will match 10 in  `{ field: [ { value: 10 }, { value: 20 } ]}`
+
+(Things like $elemMatch as in MongoDB filters may be supported in the future)
+
+Multiple assertions are allowed in a single test. Even though it doesn't make sense to have combinations such as `$eq` and `$neq` in the same test, we don't bother to disallow it.
+
+### capture
+
+(TODO)
 
 ### Variable (setvars)
 
