@@ -1,5 +1,4 @@
 import * as vscode from "vscode";
-import * as YAML from "yaml";
 
 export class CodelensProviderForAllReq implements vscode.CodeLensProvider {
     private codeLenses: vscode.CodeLens[] = [];
@@ -10,7 +9,7 @@ export class CodelensProviderForAllReq implements vscode.CodeLensProvider {
         this._onDidChangeCodeLenses.event;
 
     constructor() {
-        this.regex = /requests:(?![^{]*})/g;
+        this.regex = /requests:/g;
 
         vscode.workspace.onDidChangeConfiguration((_) => {
             this._onDidChangeCodeLenses.fire();
@@ -101,8 +100,8 @@ export class CodelensProviderForIndReq implements vscode.CodeLensProvider {
                 const startPos = range.start.character;
                 const endPos = line.range.end.character;
 
-                const nameData = line.text.substring(startPos + 2, endPos); // 'name: requestName', +2 to account for -\s
-                const name = YAML.parse(nameData).name; // 'requestName'
+                const name = line.text.substring(startPos + 8, endPos); // 'name: requestName', +8 to account for -\sname:\s
+
                 newCodeLens.command = {
                     title: "▶ Run Request",
                     tooltip: "Click to run the request",
