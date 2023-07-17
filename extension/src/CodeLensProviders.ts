@@ -1,5 +1,7 @@
 import * as vscode from "vscode";
 
+const requiredFileEnd = "bundle.yml";
+
 export class CodelensProviderForAllReq implements vscode.CodeLensProvider {
     private codeLenses: vscode.CodeLens[] = [];
     private regex: RegExp;
@@ -20,7 +22,7 @@ export class CodelensProviderForAllReq implements vscode.CodeLensProvider {
         document: vscode.TextDocument,
         token: vscode.CancellationToken
     ): vscode.CodeLens[] | Thenable<vscode.CodeLens[]> {
-        if (!document.uri.fsPath.endsWith("bundle.yml")) {
+        if (!document.uri.fsPath.endsWith(requiredFileEnd)) {
             return [];
         }
 
@@ -78,7 +80,7 @@ export class CodelensProviderForIndReq implements vscode.CodeLensProvider {
         document: vscode.TextDocument,
         token: vscode.CancellationToken
     ): vscode.CodeLens[] | Thenable<vscode.CodeLens[]> {
-        if (!document.uri.fsPath.endsWith("bundle.yml")) {
+        if (!document.uri.fsPath.endsWith(requiredFileEnd)) {
             return [];
         }
 
@@ -100,11 +102,15 @@ export class CodelensProviderForIndReq implements vscode.CodeLensProvider {
                 const startPos = range.start.character;
                 const endPos = line.range.end.character;
 
-                const name = line.text.substring(startPos + 8, endPos); // 'name: requestName', +8 to account for -\sname:\s
+                /*
+                "name: requestName" is [startPos, endPos),
+                    +8 is to account for -\sname:\s, to get requestName
+                */
+                const name = line.text.substring(startPos + 8, endPos);
 
                 newCodeLens.command = {
-                    title: "▶ Run Request",
-                    tooltip: "Click to run the request",
+                    title: `▶ Run '${name}'`,
+                    tooltip: `Click to run '${name}'`,
                     command: "extension.runRequest",
                     arguments: [name],
                 };
