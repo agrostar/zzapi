@@ -162,4 +162,4 @@ requests:
     tests:
       json:
         data.foo1: bar
-        data.foo2: 3.414
+        data.foo2: { $type: number, $eq: 3.414 }
