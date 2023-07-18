@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 
-const requiredFileEnd = "bundle.yml";
+const requiredFileEnd = "zz-bundle.yaml";
 
 export class CodelensProviderForAllReq implements vscode.CodeLensProvider {
     private codeLenses: vscode.CodeLens[] = [];
@@ -69,7 +69,7 @@ export class CodelensProviderForIndReq implements vscode.CodeLensProvider {
         this._onDidChangeCodeLenses.event;
 
     constructor() {
-        this.regex = /-\sname: (.*)\b/g;
+        this.regex = /-\sname:\s(.+)/g;
 
         vscode.workspace.onDidChangeConfiguration((_) => {
             this._onDidChangeCodeLenses.fire();

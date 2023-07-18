@@ -14,7 +14,12 @@
   ],
   "main": "./out/extension.js",
   "contributes": {
-    "commands": [],
+    "commands": [
+      {
+        "command": "extension.clickEnvSelector",
+        "title": "Select Environment"
+      }
+    ],
     "configuration": {}
   },
   "scripts": {

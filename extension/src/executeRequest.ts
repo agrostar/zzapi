@@ -122,10 +122,10 @@ function constructRequest(allData: any, paramsForUrl: string) {
         },
     };
 
-    if (allData.method === "GET") {
-        return got.get(completeUrl, options);
-    } else {
+    if (allData.method === "POST") {
         return got.post(completeUrl, options);
+    } else {
+        return got.get(completeUrl, options);
     }
 }
 
