@@ -123,21 +123,43 @@ requests:
       headers:
         foo: bar
 
-  - name: no-base-url
+  - name: override-base-url
     method: GET
     url: https://postman-echo.com/get
 
-  - name: variables
+  - name: variables-in-params
     method: GET
     url: ${getUrl}
     params:
-      - { name: username1, value: $username }
-      - { name: foo1, value: theValue$(username) }
-      - { name: foo2, value: "\\$(username)" }
+      - { name: replaced1, value: $username }
+      - { name: replaced2, value: some$(myUsername) }
+      - { name: verbatim1, value: some$username }
+      - { name: verbatim2, value: \\$(username) }
+    tests:
+      json:
+        args.replaced1: vasan.subramanian
+        args.replaced2: somevasan.subramanian
+        args.verbatim1: { $ne: somevasan.subramanian, $eq: some$username }
+        args.verbatim2: { $ne: vasan.subramanian, $eq: \\($username) }
+
+  - name: variables-in-headers
+    method: GET
+    url: ${getUrl}
     headers:
       - { name: foo, value: $(fooValue) }
     tests:
       json:
-        args.username: vasan.subramanian
-        args.foo2: "\\${username}"
         headers.foo: bar
+
+  - name: variables-in-body
+    method: POST
+    url: /post
+    body: |-
+      {
+        "foo1": "${fooValue}",
+        "foo2": $pi
+      }
+    tests:
+      json:
+        data.foo1: bar
+        data.foo2: 3.414

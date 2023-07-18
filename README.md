@@ -22,7 +22,7 @@ Here are some alternatives and good things about them. Yet, none of these fit in
 
 zzapi is made up of (at least):
 
-1. **Specs**: The storage format specification, with a JSON Schema for validation
+1. **Specs**: The storage format specification, with a JSON Schema for validation. The YAML parsing and conversion to requests could make this an npm as well.
 2. **Runners**: The tool thats can make one or more API requests. The current support is for:
    a. A command line runner
    b. A VS Code extension that prvovides CodeLenses to run a request in a bundle
@@ -34,20 +34,23 @@ All files will be stored locally (ie, not on the cloud, unlike Postman). A direc
 
 The directory will hold the following kinds of files.
 
-* **Request bundles**: these are YAML files containing many requests. This is a "Collection" in Postman terminlogy. The directory can have any number of request bundles. Files ending with `-bundle.yml` will be recognized as request bundles.
-* **Variable sets**: these are also YAML files, containing variable definitions. This is an "Environment" in Postman terminlogy. Files ending with `-vars.yml` will be recognized as variable set files.
-* **Request and response files**: All other files (typically `.json`) are request and response body samples. These will be referenced from within the bundles, so we don't really need a naming convention.
+* **Bundles**: these are YAML files containing many requests. This is a "Collection" in Postman terminlogy. The directory can have any number of request bundles. Files ending with `.zz-bundle.yml` will be recognized as request bundles.
+* **Variables**: these are also YAML files, containing variable definitions. Files ending with `.zz-vars.yml` will be recognized as variable files.
+* **Environments**: YAML files, containing combinations of variables and a name for each. The file named `zz-envs.yaml` will be recognized as _the_ environment configuration file.
+* **Files**: All other files (typically `.json`) are request and response body samples. These will be referenced from within the bundles, so we don't really need a naming convention.
 
-## Bundle
+The schema for the above (except request and response files) will be discussed in detail below.
 
-### Types of bundles
+# Request Bundles
 
-Although the file format does not make a real distinction, there are two types of bundles in terms of practical usage:
+## Types of Bundles
 
-1. **Documentation bundles**: the primary purpose is to document the APIs in this bundle. Typically, documentation bundles will have one entry for each endpoint, with lots of documentation accompanying it.
-2. **Test bundles**: the purpose is to automate testing. The same endpoint typically appears multiple times with different parameters. Tests are run against the response.
+Although the file format does not make a real distinction, practically there are two types of bundles:
 
-You can find two sample bundles `doc-bundle.yml` and `tests-bundle.yml` in this directory. Please refer to them as you read the explanation below.
+1. **Documentation bundles**: the primary purpose is to document an API set. Documentation bundles will have one entry for each API endpoint, with lots of documentation accompanying it on different ways to use the API endpoint, expected responses, and samples.
+2. **Test bundles**: the purpose is to automate testing. The same endpoint typically appears multiple times with different parameters and failure cases. Tests are run against the response to ensure the API is responding as it is supposed to.
+
+You can find two sample bundles `doc.zz-bundle.yml` and `tests.zz-bundle.yml` in this directory. Please refer to them as you read the explanation below.
 
 ## Top level objects
 
@@ -60,7 +63,7 @@ You can find two sample bundles `doc-bundle.yml` and `tests-bundle.yml` in this 
   * `headers`: an array of header elements, which can be overridden in individual requests
      * By default, the header `user-agent` will be set to `zzapi/<version>` unless overridden
   * `params`: query parameters added to all requests.
-  * `tests`: a set of tests applied to all the requests in this bundle (test spec follows)
+  * `tests`: a set of tests applied to all the requests in this bundle
   * `options`: options applicable to all requests, unless overridden
 
 ### request
@@ -72,11 +75,12 @@ You can find two sample bundles `doc-bundle.yml` and `tests-bundle.yml` in this 
 * `params`: an array of `params`s, in addition to the common set. Parameters cannot be overridden.
 * `body`: the raw request body. (Use the value `@filename` to read from a file, like in `curl`)
 * `response`: a sample response, useful for documentation (doesn't affect the request)
+  * `headers`: the headers expected in the response
   * `body`: the raw response body. Use `@filename` to read from a file.
   * `doc`: documentation to describe the response.
 * `options`: options specific to this request, overrides common options
 * `doc`: general documentation, typically in markdown (use `@filename` to read from a file)
-* `tests`: a set of tests  (described below)
+* `tests`: a set of test objects
 * `capture`: a set of values in the response to be captured as variables for use in further requests
 
 ## Common Objects
@@ -109,73 +113,50 @@ Tests are run against (each of them is a property of `tests`).
 * `status`: an `assertion` against the HTTP status code
 * `body`: an `assertion` against the entire raw body
 * `json`: a list of `assertion`s against elements (`path`s) of the body parsed as JSON
+* `headers`: a list of `assertion`s against the headers
 
-#### asssertion
+### asssertion
 
-Assertions are similar to MongoDB filters. The key is the path, and the value is something that checks the contents of the path's value.
+Assertions are similar to MongoDB filters. The key is the element (a path in case of json), and the value is something that checks the contents of the element. The value can be a plain value, or a specification with the operator and value.
 
 * `status: 400`: status must be equal to 400
 * `body: {$regex: /\<html\>/}`: the body must contain the characters `<html>` (using the `$regex` operator,)
+* `json: - { field.nested.value: 42 }`: the nested value must be equal to 42 (and match the type)
+* `json: - { other: {$gt: 41 } }`: the other value must be greater than 41
 
 Operators supported in the RHS are:
-* { `$eq`: value }
-* { `$ne`: value }
-* { `$regex`: re, `$options`: opts }
-* { `$lt`: value }
-* { `$gt`: value }
-* { `$lte`: value }
-* { `$gte`: value }
-* { `$exists`: true|false }
-* { `$size`: value }: for arrays
-* { `$type`: string|number|object|array|null}: checks the type of the value
+* `$eq`, `$ne`, `$lt`, `$gt`, `$lte`, `$gte`: against the value
+* `$regex`: against the value, with `$options` like ignore-case
+* `$size`: for length of arrays, or the length of the string if it is not an array
+* `$exists`: true|false, to check existance of a field
+* `$type`: string|number|object|array|null: to ensure the type of the field
 
-#### json
+### json
 
 If there are any json tests, the response is parsed as JSON, provided the content type is `application/json`. The key of the test is a path to the (nested) field in the JSON document, using the . notation as in MongoDB filters. The kind of paths supported are:
 
-* `field.nested.value`: will match 10 in `{ field: { nested: { value: 10 } } }`
+* `field.nested.value`: will match 10 if the response body is like `{ field: { nested: { value: 10 } } }` 
 * `field.0` will match 10 in  `{ field: [ 10, 20 ]}`
 * `field.0.value` will match 10 in  `{ field: [ { value: 10 }, { value: 20 } ]}`
 
 (Things like $elemMatch as in MongoDB filters may be supported in the future)
 
-Multiple assertions are allowed in a single test. Even though it doesn't make sense to have combinations such as `$eq` and `$neq` in the same test, we don't bother to disallow it.
-
 ### capture
 
 (TODO)
 
-### Variable (setvars)
-
 * `path`: the path of the field whose value needs to be saved (in the same format as tests)
 * `var`: the name of the variable into which the value is saved.
 
-## Variable Set Files
-
-These contain a simple list of key, value pairs, one for each variable. You can find two files, `prod-vars.yml` and `common-d-vars.yml` in this directory. Please refer to them.
-
 # Variables
 
-## Variable Overriding
+Variables are simple YAML files of a list of name value pairs. For example:
 
-The order of the variable sets is important. Each variable set is processed in the order in which it is specified, and the following actions will be taken:
-
-* The variable will be set to the value.
-* It will overwrite any previously set value from previous variable sets.
-* The value itself can contain another variable (which should have already been set).
-
-A typical directory will have some secrets, some common variables and one variable set for each environment, eg, production and staging. We would want them to be loaded in the following example orders:
-
-* secrets, common, production
-* secrets, common, staging
-
-The variable set _secrets_ may contain different passwords for each environment, eg, `prodpassword` and `stagingpassword`. The production and staging variable sets can then use one of these as the value for the variable `password`. The variable set `common` will have common variables which can be overridden by the environment specific variables.
-
-## Runtime Variables
-
-Variables that are set during run-time using the setvars option of a request are _not_ written back into any of the variable sets. They may overwrite existing variables of the same name loaded from the variable sets during the run session, but not saved permanently.
-
-All the hand-edited YAML files are meant to be that way: they will not be touched by runners or document generators.
+```
+-
+  name: value
+  type: free
+```
 
 ## Type
 
@@ -183,18 +164,41 @@ Variables can only be of the string type. This is because they will be replaced 
 
 ## Use of Variables
 
-Variables can be used as values in the following places in the request
+Variables can be used as values in the following places:
 
 * URL
-* Parameters
-* Headers
+* Parameter valuues
+* Header values
 * Post Body
-* Test values (eg, right side of eq)
+* Test values
 
-We will follow the bash/zsh convention of using variables:
+We will follow the makefile convention of variables, restircted to the round bracked `()`.
 
-* $variable if followed by a non-word character or EOL ([a-z0-9_] is considered a word character, everything else is not)
-* ${variable}
+* `$variable` if followed by a non-word character or EOL
+* `$(variable)`, unless the $ is escaped by a \
+
+# Environments
+
+Environments consist of a sequence of variable sets loaded one after the other. The file `zz-envs.yaml` describes the environments. It is just a list of `{name: somename, varsets: [list of varset files]}`. 
+
+The order of the variable sets is important. Each variable set is processed in the order in which it is specified, and the following actions are taken:
+
+* The variable will be set to the value.
+* It will overwrite any previously set value from previous variable sets.
+* The value itself can contain another variable (which should have already been set).
+
+A typical directory will have some secrets, some common variables and one variable set for each different environment, eg, production and staging and local. We would want them to be loaded in the following example orders:
+
+* secrets, common, production
+* secrets, common, staging
+
+The variable set _secrets_ may contain different passwords for each environment, eg, `prodpassword` and `stagingpassword`. The production and staging variable sets can then use one of these as the value for the variable `password`. The variable set `common` will have common variables which can be overridden by the environment specific variables.
+
+# Runtime Variables
+
+Variables that are set during run-time using the `capture` option of a request are _not_ written back into any of the variable sets. They may overwrite existing variables of the same name loaded from the variable sets during the run session, but they are not saved permanently.
+
+All the hand-edited YAML files are meant to be that way: they will not be touched by runners or document generators.
 
 # Runners
 
@@ -240,18 +244,11 @@ Say we had `1-secrets-d-vars.yml`, `2-common-d-vars.yml`, `prod-vars.yml` and `s
 $ zzapi-run --request login --vars prod
 ```
 
-## GUI based runners
-
-Oh, we did say we won't have a GUI. That's still the case, but we do want to try things out at the time of creation. If the bundles and requests are being created by hand, in an editor, why not plug the editor in with an ability to run the bundle or request then and there?
-
 ### VS Code Extension
 
 VS Code extensions are awesome because they can do magic. A few magics we would like to implement in our VS Code extension are:
 
-* Action items above any bundle ("Run all") or request: ("Run"). This similar to the golang "Run test" and "Debug test" actions that automagically appear above any test functions.
-* A console or output window that shows the response of any request(s).
-* An ability to save a single run's response as a file: we can use it as the response sample in the documentation.
-
-### Others
-
-Given the separation of specification and UIs, a full-fledged runner GUI can also be built. But we don't think that will ever happen.
+* Action items (aka Code Lenses) above any bundle ("Run all") or request: ("Run"). This similar to the golang "Run test" and "Debug test" actions that automagically appear above any test functions
+* A console window that shows the status of the request(s)
+* Multiple output windows that show the response of the requests(s)
+* An ability to save a single run's response as a file: we can use it as the response sample in the documentation
