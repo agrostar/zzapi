@@ -1,5 +1,14 @@
-import { ExtensionContext, languages, commands /*Disposable*/ } from "vscode";
-import * as vscode from "vscode";
+import {
+    ExtensionContext,
+    languages,
+    commands,
+    window,
+    StatusBarAlignment,
+    StatusBarItem,
+    // workspace,
+    Disposable,
+} from "vscode";
+
 import {
     CodelensProviderForAllReq,
     CodelensProviderForIndReq,
@@ -7,21 +16,22 @@ import {
 
 import { registerRunRequest, registerRunAllRequests } from "./registerRequests";
 
-// let disposables: Disposable[] = [];
+import * as fs from "fs";
+import * as YAML from "yaml";
 
+let disposables: Disposable[] = [];
+
+const varFile = "../zz-envs.yaml";
+//plan: export these details wherever required
 let currentEnvironment: string;
-
-const environments = [
-    { label: "x", description: "Environment X" },
-    { label: "y", description: "Environment Y" },
-    { label: "z", description: "Environment Z" },
-];
+let allEnvironments: any = {};
 
 export function activate(context: ExtensionContext) {
-    const statusBar = vscode.window.createStatusBarItem(
-        vscode.StatusBarAlignment.Left
-    );
+    initialiseEnvironments();
+
+    const statusBar = window.createStatusBarItem(StatusBarAlignment.Left);
     initialiseStatusBar(statusBar, context);
+
     createEnvironmentSelector(statusBar, context);
 
     languages.registerCodeLensProvider("*", new CodelensProviderForIndReq());
@@ -36,15 +46,21 @@ export function activate(context: ExtensionContext) {
     });
 }
 
-function initialiseStatusBar(statusBar: vscode.StatusBarItem, context: ExtensionContext){
+function initialiseStatusBar(
+    statusBar: StatusBarItem,
+    context: ExtensionContext
+) {
     statusBar.text = "zzAPI: Set Environment";
     statusBar.command = "extension.clickEnvSelector";
     statusBar.show();
     context.subscriptions.push(statusBar);
 }
 
-function createEnvironmentSelector(statusBar: vscode.StatusBarItem, context: ExtensionContext){
-    const statusClick = vscode.commands.registerCommand(
+function createEnvironmentSelector(
+    statusBar: StatusBarItem,
+    context: ExtensionContext
+) {
+    const statusClick = commands.registerCommand(
         "extension.clickEnvSelector",
         () => {
             showEnvironmentOptions();
@@ -53,9 +69,9 @@ function createEnvironmentSelector(statusBar: vscode.StatusBarItem, context: Ext
     context.subscriptions.push(statusClick);
 
     const showEnvironmentOptions = () => {
-        vscode.window
-            .showQuickPick(environments, {
-                placeHolder: "Select an environment",
+        window
+            .showQuickPick(environmentsToDisplay, {
+                placeHolder: "Select An Environment",
                 matchOnDetail: true,
                 matchOnDescription: true,
             })
@@ -67,14 +83,44 @@ function createEnvironmentSelector(statusBar: vscode.StatusBarItem, context: Ext
     };
 }
 
-function setEnvironment(statusBar: vscode.StatusBarItem, environment: string) {
+function setEnvironment(statusBar: StatusBarItem, environment: string) {
     currentEnvironment = environment;
     statusBar.text = `Current Environment: ${currentEnvironment}`;
 }
 
-// export function deactivate() {
-//     if (disposables) {
-//         disposables.forEach((item) => item.dispose());
-//     }
-//     disposables = [];
-// }
+let environmentsToDisplay: Array<{ label: string; description: string }> = [];
+
+function initialiseEnvironments() {
+    if (fs.existsSync(varFile)) {
+        const data = fs.readFileSync(varFile, "utf-8");
+        const parsedData = YAML.parse(data);
+
+        if (parsedData !== undefined) {
+            const allEnvs = parsedData.varsets;
+
+            if (allEnvs !== undefined && Array.isArray(allEnvs)) {
+                const numEnvs = allEnvs.length;
+
+                for (let i = 0; i < numEnvs; i++) {
+                    const env = allEnvs[i];
+
+                    const name: string = env.name;
+                    const vars: Array<string> = env.vars;
+                    environmentsToDisplay.push({
+                        label: `${name}`,
+                        description: `Set Environment: ${name} -> ${vars}`,
+                    });
+
+                    allEnvironments[name] = vars;
+                }
+            }
+        }
+    }
+}
+
+export function deactivate() {
+    if (disposables) {
+        disposables.forEach((item) => item.dispose());
+    }
+    disposables = [];
+}
