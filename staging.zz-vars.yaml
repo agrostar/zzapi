@@ -1,0 +1,5 @@
+-
+  myserver: https://staging.example.com
+  username: ${myUsername}
+  authToken: ${stagingAuthToken}
+  

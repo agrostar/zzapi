@@ -22,8 +22,10 @@ Here are some alternatives and good things about them. Yet, none of these fit in
 
 zzapi is made up of (at least):
 
-1. **Specs**: The storage format specification
-2. **Runners**: The tool thats can make one or more API requests. We are not restricted to a single runner, we may have a command line runner and also a VS Code extension that can run the requests.
+1. **Specs**: The storage format specification, with a JSON Schema for validation
+2. **Runners**: The tool thats can make one or more API requests. The current support is for:
+   a. A command line runner
+   b. A VS Code extension that prvovides CodeLenses to run a request in a bundle
 3. **Documentation generators**: these will generate in different formats: We envisage a markdown generator to begin with.
 
 # Storage format
@@ -33,7 +35,7 @@ All files will be stored locally (ie, not on the cloud, unlike Postman). A direc
 The directory will hold the following kinds of files.
 
 * **Request bundles**: these are YAML files containing many requests. This is a "Collection" in Postman terminlogy. The directory can have any number of request bundles. Files ending with `-bundle.yml` will be recognized as request bundles.
-* **Variable sets**: these are also YAML files, containing variable definitions. This is an "Environment" in Postman terminlogy. Files ending with `-vars.yml` will be recognized as variable set files. Those ending with `-d-vars.yml` will be recognized as *default* variable sets (described below).
+* **Variable sets**: these are also YAML files, containing variable definitions. This is an "Environment" in Postman terminlogy. Files ending with `-vars.yml` will be recognized as variable set files.
 * **Request and response files**: All other files (typically `.json`) are request and response body samples. These will be referenced from within the bundles, so we don't really need a naming convention.
 
 ## Bundle

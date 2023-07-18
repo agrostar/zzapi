@@ -1,4 +1,4 @@
-# yaml-language-server: $schema=zzapi-bundle.schema.json
+# yaml-language-server: $schema=zz-bundle.schema.json
 
 # This bundle contains a series of test requests against various endpoints,
 # most of them being the postman echo service. We use this to both serve as
@@ -40,7 +40,7 @@ requests:
       }
     tests:
       json:
-        data.foo1: "bar1"
+        data.foo1: bar1
         data.foo2: { $type: number, $gt: 41, $lt: 43 }
       headers:
         X-Custom-Header: Custom Value
@@ -121,4 +121,23 @@ requests:
       - { name: foo, value: bar }
     tests:
       headers:
-        - { foo: bar }
+        foo: bar
+
+  - name: no-base-url
+    method: GET
+    url: https://postman-echo.com/get
+
+  - name: variables
+    method: GET
+    url: ${getUrl}
+    params:
+      - { name: username1, value: $username }
+      - { name: foo1, value: theValue$(username) }
+      - { name: foo2, value: "\\$(username)" }
+    headers:
+      - { name: foo, value: $(fooValue) }
+    tests:
+      json:
+        args.username: vasan.subramanian
+        args.foo2: "\\${username}"
+        headers.foo: bar

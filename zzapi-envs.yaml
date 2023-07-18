@@ -1,5 +1,0 @@
-varsets:
-  - name: test
-    vars: [ secrets.yaml, test.yaml ]
-  - name: local
-    vars: [ secrets.yaml, local.yaml ]
