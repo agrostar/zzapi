@@ -5,7 +5,7 @@ import {
     window,
     StatusBarAlignment,
     StatusBarItem,
-    // workspace,
+    workspace,
     Disposable,
 } from "vscode";
 
@@ -20,16 +20,33 @@ import * as fs from "fs";
 import * as YAML from "yaml";
 
 let disposables: Disposable[] = [];
+let statusBar: StatusBarItem;
 
-const varFile = "../zz-envs.yaml";
+const varFile = "zz-envs.yaml";
+let varFilePath: string;
+
 //plan: export these details wherever required
 let currentEnvironment: string;
 let allEnvironments: any = {};
 
 export function activate(context: ExtensionContext) {
-    initialiseEnvironments();
+    const activeEditor = window.activeTextEditor;
+    if (activeEditor) {
+        const activeEditorPath = activeEditor.document.uri.path;
+        const lastIndex = activeEditorPath.lastIndexOf("/");
+        varFilePath = activeEditorPath.substring(0, lastIndex + 1) + varFile;
+    }
 
-    const statusBar = window.createStatusBarItem(StatusBarAlignment.Left);
+    initialiseEnvironments();
+    const envChangeListener = workspace.onDidChangeTextDocument((event) => {
+        if (event.document.uri.path === varFilePath) {
+            initialiseEnvironments();
+        }
+    });
+    context.subscriptions.push(envChangeListener);
+    disposables.push(envChangeListener);
+
+    statusBar = window.createStatusBarItem(StatusBarAlignment.Left);
     initialiseStatusBar(statusBar, context);
 
     createEnvironmentSelector(statusBar, context);
@@ -54,6 +71,7 @@ function initialiseStatusBar(
     statusBar.command = "extension.clickEnvSelector";
     statusBar.show();
     context.subscriptions.push(statusBar);
+    disposables.push(statusBar);
 }
 
 function createEnvironmentSelector(
@@ -91,8 +109,12 @@ function setEnvironment(statusBar: StatusBarItem, environment: string) {
 let environmentsToDisplay: Array<{ label: string; description: string }> = [];
 
 function initialiseEnvironments() {
-    if (fs.existsSync(varFile)) {
-        const data = fs.readFileSync(varFile, "utf-8");
+    environmentsToDisplay = [];
+    currentEnvironment = "";
+    allEnvironments = [];
+
+    if (fs.existsSync(varFilePath)) {
+        const data = fs.readFileSync(varFilePath, "utf-8");
         const parsedData = YAML.parse(data);
 
         if (parsedData !== undefined) {
@@ -123,4 +145,8 @@ export function deactivate() {
         disposables.forEach((item) => item.dispose());
     }
     disposables = [];
+
+    if (statusBar) {
+        statusBar.hide();
+    }
 }
