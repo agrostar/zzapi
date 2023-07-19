@@ -1,8 +1,13 @@
-# yaml-language-server: $schema=https://raw.githubusercontent.com/agrostar/zzapi/main/zz-bundle.schema.json
+# Alternate view of the bundle, where each request is a key in an object as opposed
+# to an array of requests. If we have an array, the outline is not convenient. It also
+# makes us add extra validation for unique names of requests. The alternative is to build
+# our own outline view where we show the requests and let users either navigate to that in the yaml
+# and execute, or execute from the outline view itself using a context menu.
 
-# This bundle contains a series of test requests against various endpoints,
-# most of them being the postman echo service. We use this to both serve as
-# an example of how to create test bundles as well as testing zzapi runner itself.
+# But this approach fits into our manifesto/philosophy of reusing existing stuff. The only
+# downside is that we can't add CodeLens using regexes. We will need to parseDocument the yaml
+# or move the execution trigger to a context menu (or an action button, not sure if it is possible)
+# in the outline view. Or some other TreeView that we can add on the sidebar (like thunderclient)
 
 common:
   baseUrl: https://postman-echo.com
@@ -17,7 +22,7 @@ common:
       Content-type: application/json
 
 requests:
-  - name: simple-get
+  simple-get:
     method: GET
     url: /get
     params:
@@ -28,7 +33,7 @@ requests:
         args.foo1: bar1
         args.foo2: bar2
 
-  - name: post-header-merge
+  post-header-merge:
     url: /post
     method: POST
     headers: 
@@ -45,7 +50,7 @@ requests:
       headers:
         X-Custom-Header: Custom Value
 
-  - name: post-header-override
+  post-header-override:
     url: /post
     method: POST
     headers: 
@@ -55,13 +60,13 @@ requests:
       json:
         data: "{ foo bar }"
 
-  - name: status-404
+  status-404:
     url: /notfound
     method: GET
     tests:
       status: 404
 
-  - name: status-401
+  status-401:
     url: /status/401
     method: GET
     tests:
@@ -69,7 +74,7 @@ requests:
       json:
         status: 401
 
-  - name: encoding
+  encoding:
     method: GET
     url: /get
     params:
@@ -79,7 +84,7 @@ requests:
         url: https://postman-echo.com/get?foo=30%25%20of%20200%20is%2060
         args.foo: 30% of 200 is 60
 
-  - name: no-encoding
+  no-encoding:
     method: GET
     url: /get
     params:
@@ -90,7 +95,7 @@ requests:
         args: 30% of 200
 
   # The cookies endpoint does a redirect (no clue why), let's use that.
-  - name: no-redirects
+  no-redirects:
     method: GET
     url: /cookies/set
     tests:
@@ -99,7 +104,7 @@ requests:
         Location: /cookies
         Content-Type: { $ne: application/json }
 
-  - name: redirects
+  redirects:
     options:
       follow: true
     method: GET
@@ -109,13 +114,13 @@ requests:
       json:
         cookies: { $exists: true } # Header names are case insensitive
 
-  - name: non-json
+  non-json:
     method: GET
     url: /encoding/utf8
     tests:
       body: { $regex: unicode demo, $options: i }
 
-  - name: response-headers
+  response-headers:
     method: GET
     url: /response-headers
     params:
@@ -124,11 +129,11 @@ requests:
       headers:
         foo: bar
 
-  - name: override-base-url
+  override-base-url:
     method: GET
     url: https://postman-echo.com/get
 
-  - name: variables-in-params
+  variables-in-params:
     method: GET
     url: ${getUrl}
     params:
@@ -145,7 +150,7 @@ requests:
         args.verbatim1: { $ne: vasan.subramaniansome, $eq: $usernameelse }
         args.verbatim2: { $ne: vasan.subramanian, $eq: \\($username) }
 
-  - name: variables-in-headers
+  variables-in-headers:
     method: GET
     url: ${getUrl}
     headers:
@@ -154,7 +159,7 @@ requests:
       json:
         headers.foo: bar
 
-  - name: variables-in-body
+  variables-in-body:
     method: POST
     url: /post
     body: |-
@@ -167,4 +172,3 @@ requests:
         data.foo1: bar
         data.foo2: { $type: number, $eq: 3.414 }
 
-  

@@ -1,13 +1,14 @@
 # zzapi
 
-zzapi is an API documentation and testing tool set, a grossly simplified version of Postman. The basic idea for this is as follows:
+zzapi (prounounced like pizza, the syllables interchanged) is an API documentation and testing tool set, a very simplified version of Postman.
 
-* **Simplicity above all**: this makes the tool set do one job and allows more functionality to be incrementally built on top.
-* **No GUI to enter data**: We believe that developers don't need one. Copy paste within an editor is far more efficient. We will instead use YAML files to write requests. YAML is easy to create manually and also parse for building stuff based on them. JSON, OTOH, is hard to create manually, does not support comments etc.
-* **Only JSON**: We don't support XML multipart-formdata etc. in the responses. Request body can be anything, though, like curl. Who uses XML these days anyway?
-* **Local storage**: Storage will be on the local file system (ie, not the cloud). Whatever you have typed belongs to you. You can share them with your team using git, S3, a shared file system, whatever. 
-* **Basics only**: We don't have an export/import feature. We don't have an activity history. You can build your own. You can also build your own GUI to create the requests and bundles.
-* **Create and test together**: Although a separate tool is useful to run the tests, running from within the editor is very useful. We will build a VS Code plugin, and maybe plugins for other IDEs later.
+Our manifesto:
+
+* **Simplicity above all**: Do one thing (or two) and do it well. Single responsibility. Allow stuff to be built on top.
+* **Stand on the shoulders of giants**: Do not reinvent what has already been solved. We will use existing conveniences, which may not be "perfect" but will work well.
+* **No GUI to enter data**: Developers don't need a GUI. Copy paste within an editor is far more efficient compared to multiple mouse clicks to enter data. We will use YAML files to specify requests.
+* **Only JSON**: We don't support XML multipart-formdata etc. while running tests against responses. Request body can be anything, though, like curl.
+* **API doc/tests part of code**: Storage will be on the local file system (ie, not the cloud). Whatever you have typed belongs to you. We expect you to save the YAMLs within your code repository.
 * **Open source**: If you have an idea that is useful to you and can be to others as well, build it, test it and send us a PR.
 
 # Alternatives
@@ -15,22 +16,22 @@ zzapi is an API documentation and testing tool set, a grossly simplified version
 Here are some alternatives and good things about them. Yet, none of these fit into the above set of goals completely.
 
 * **Postman**: Postman is a great tool, but the storage is on the cloud, making it hard for the tests and documentation be alongside the code. And it is not open source. We borrow the concept of keeping the same tool for tests and documentation from Postman.
-* **OpenAPI**: OpenAPI is meant for documentation alone, it does not cover tests. The YAML spec is also very elaborate and too structured (eg, needing schemas and other kinds of indirection). It is hard to hand-create OpenAPI YAMLs. These are typically done using tools. We borrow the concept of YAML files for saving the API details from OpenAPI.
+* **OpenAPI**: OpenAPI is meant for documentation alone, it does not cover tests. The YAML spec is also very elaborate and too structured. It is hard to hand-create OpenAPI YAMLs. We borrow the concept of YAML files for saving the API details from OpenAPI.
 * **ThunderClient**: ThunderClient is a great tool but the UI is elaborate and hard to maintain, and it is not open source. We borrow the concept of a VS Code extension from ThunderClient.
 
 # zzapi Constituents
 
 zzapi is made up of (at least):
 
-1. **Specs**: The storage format specification, with a JSON Schema for validation. The YAML parsing and conversion to requests could make this an npm as well.
+1. **Specs**: The YAML schema and description. The YAML parsing and conversion to requests can be made into a reference implementation library.
 2. **Runners**: The tool thats can make one or more API requests. The current support is for:
    a. A command line runner
-   b. A VS Code extension that prvovides CodeLenses to run a request in a bundle
+   b. A VS Code extension that prvovides CodeLenses to run a request(s) in a bundle
 3. **Documentation generators**: these will generate in different formats: We envisage a markdown generator to begin with.
 
-# Storage format
+# Storage
 
-All files will be stored locally (ie, not on the cloud, unlike Postman). A directory will hold together files of different kinds. The directory is typically the input to the runner and the doc generator. You can have many directories (typically only one per git repository). A directory is like a "Workspace" in Postman terminology.
+All files will be stored locally (ie, not on the cloud, unlike Postman). A directory will hold together files of different kinds. The directory is typically the input to the runner and the doc generator. You can have many directories (typically only one per git repository). A directory is like a "Folder" in Postman terminology. If you need hierarchy, use sub-directories.
 
 The directory will hold the following kinds of files.
 
@@ -83,7 +84,7 @@ You can find two sample bundles `doc.zz-bundle.yml` and `tests.zz-bundle.yml` in
 * `tests`: a set of test objects
 * `capture`: a set of values in the response to be captured as variables for use in further requests
 
-## Common Objects
+## Object definitions
 
 ### options
 
@@ -174,12 +175,12 @@ Variables can be used as values in the following places:
 
 We will follow the makefile convention of variables, restircted to the round bracked `()`.
 
-* `$variable` if followed by a non-word character or EOL
-* `$(variable)`, unless the $ is escaped by a \
+* `$variable` if followed by a non-word character or EOL, or the $ is preceded by a \
+* `$(variable)`, unless the $ is preceded by a \
 
 # Environments
 
-Environments consist of a sequence of variable sets loaded one after the other. The file `zz-envs.yaml` describes the environments. It is just a list of `{name: somename, varsets: [list of varset files]}`. 
+Environments consist of a sequence of variable sets loaded one after the other. The file `zz-envs.yaml` describes the environments. It is just a list of `{name: someenv, varsets: [list of varset files]}`.
 
 The order of the variable sets is important. Each variable set is processed in the order in which it is specified, and the following actions are taken:
 
@@ -187,7 +188,7 @@ The order of the variable sets is important. Each variable set is processed in t
 * It will overwrite any previously set value from previous variable sets.
 * The value itself can contain another variable (which should have already been set).
 
-A typical directory will have some secrets, some common variables and one variable set for each different environment, eg, production and staging and local. We would want them to be loaded in the following example orders:
+A typical directory will have some personal variables which you don't want to share, some common variables and one variable set for each different environment, eg, production and staging and local. We would want them to be loaded in the following example orders:
 
 * secrets, common, production
 * secrets, common, staging
@@ -244,7 +245,7 @@ Say we had `1-secrets-d-vars.yml`, `2-common-d-vars.yml`, `prod-vars.yml` and `s
 $ zzapi-run --request login --vars prod
 ```
 
-### VS Code Extension
+## VS Code Extension
 
 VS Code extensions are awesome because they can do magic. A few magics we would like to implement in our VS Code extension are:
 
