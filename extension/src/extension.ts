@@ -22,6 +22,7 @@ import * as YAML from "yaml";
 let disposables: Disposable[] = [];
 let statusBar: StatusBarItem;
 
+const requiredFileEnd = ".zz-bundle.yaml";
 const varFile = "zz-envs.yaml";
 let dirPath: string = "~";
 let varFilePath: string;
@@ -43,36 +44,49 @@ export function getEnvDetails() {
 export function activate(context: ExtensionContext) {
     const activeEditor = window.activeTextEditor;
     if (activeEditor) {
-        const activeEditorPath = activeEditor.document.uri.path;
-        const lastIndex = activeEditorPath.lastIndexOf("/");
-        dirPath = activeEditorPath.substring(0, lastIndex + 1);
-        varFilePath = activeEditorPath.substring(0, lastIndex + 1) + varFile;
-    }
+        const document = activeEditor.document;
+        if (document.uri.fsPath.endsWith(requiredFileEnd)) {
+            const activeEditorPath = activeEditor.document.uri.path;
+            const lastIndex = activeEditorPath.lastIndexOf("/");
+            dirPath = activeEditorPath.substring(0, lastIndex + 1);
+            varFilePath =
+                activeEditorPath.substring(0, lastIndex + 1) + varFile;
 
-    statusBar = window.createStatusBarItem(StatusBarAlignment.Left);
-    initialiseStatusBar(statusBar, context);
+            statusBar = window.createStatusBarItem(StatusBarAlignment.Left);
+            initialiseStatusBar(statusBar, context);
 
-    createEnvironmentSelector(statusBar, context);
+            createEnvironmentSelector(statusBar, context);
 
-    initialiseEnvironments(statusBar);
-    const envChangeListener = workspace.onDidChangeTextDocument((event) => {
-        if (event.document.uri.path === varFilePath) {
             initialiseEnvironments(statusBar);
+            const envChangeListener = workspace.onDidChangeTextDocument(
+                (event) => {
+                    if (event.document.uri.path === varFilePath) {
+                        initialiseEnvironments(statusBar);
+                    }
+                }
+            );
+
+            context.subscriptions.push(envChangeListener);
+            disposables.push(envChangeListener);
+
+            languages.registerCodeLensProvider(
+                "*",
+                new CodelensProviderForIndReq()
+            );
+            languages.registerCodeLensProvider(
+                "*",
+                new CodelensProviderForAllReq()
+            );
+
+            commands.registerCommand("extension.runRequest", async (name) => {
+                await registerRunRequest(name);
+            });
+
+            commands.registerCommand("extension.runAllRequests", async () => {
+                await registerRunAllRequests();
+            });
         }
-    });
-    context.subscriptions.push(envChangeListener);
-    disposables.push(envChangeListener);
-
-    languages.registerCodeLensProvider("*", new CodelensProviderForIndReq());
-    languages.registerCodeLensProvider("*", new CodelensProviderForAllReq());
-
-    commands.registerCommand("extension.runRequest", async (name) => {
-        await registerRunRequest(name);
-    });
-
-    commands.registerCommand("extension.runAllRequests", async () => {
-        await registerRunAllRequests();
-    });
+    }
 }
 
 function initialiseStatusBar(
