@@ -11,7 +11,7 @@ let variables: any = {};
 
 function loadVariables() {
     variables = {};
-    
+
     const dirPath = getDirPath();
     const [currentEnvironment, allEnvironments] = getEnvDetails();
 
@@ -28,10 +28,9 @@ function loadVariables() {
                 for (const key in parsedVariables) {
                     if (parsedVariables.hasOwnProperty(key)) {
                         variables[key] = parsedVariables[key];
+                        replaceVariablesInSelf();
                     }
                 }
-
-                replaceVariablesInSelf();
             }
         }
     }
@@ -40,15 +39,17 @@ function loadVariables() {
 const varRegexWithBraces = /(?<!\\)\$\(([_a-zA-Z]\w*)\)/g;
 const varRegexWithoutBraces = /(?<!\\)\$(?:(?![0-9])[_a-zA-Z]\w*(?=\W|$))/g;
 
-export function replaceVariablesInObject(objectData: object): object | undefined {
-    if(objectData === undefined){
+export function replaceVariablesInObject(
+    objectData: object
+): object | undefined {
+    if (objectData === undefined) {
         return undefined;
     }
     loadVariables();
     return JSON.parse(replaceVariables(JSON.stringify(objectData)));
 }
 
-function replaceVariablesInSelf(){
+function replaceVariablesInSelf() {
     variables = JSON.parse(replaceVariables(JSON.stringify(variables)));
 }
 
