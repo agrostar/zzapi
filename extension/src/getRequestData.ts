@@ -9,7 +9,7 @@ export function getBody(body: any) {
 export function getHeadersAsJSON(
     objectSet: Array<{ name: string; value: any }>
 ) {
-    //If both common and request has headers then mergeData itself will make it JSON, 
+    //If both common and request has headers then mergeData itself will make it JSON,
     // so we can immediately return it, else we handle it ourselves
     if (objectSet === undefined || !Array.isArray(objectSet)) {
         return objectSet;

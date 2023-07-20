@@ -24,7 +24,7 @@ let statusBar: StatusBarItem;
 
 const requiredFileEnd = ".zz-bundle.yaml";
 const varFile = "zz-envs.yaml";
-let dirPath: string = "~";
+let dirPath: string;
 let varFilePath: string;
 
 //plan: export these details wherever required

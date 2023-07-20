@@ -12,7 +12,7 @@ import {
     getHeadersAsString,
 } from "./getRequestData";
 
-import {replaceVariablesInObject } from "./variableReplacement";
+import { replaceVariablesInObject } from "./variableReplacement";
 
 export async function getIndividualResponse(commonData: any, requestData: any) {
     let allData = getMergedDataExceptParams(commonData, requestData);
@@ -20,7 +20,7 @@ export async function getIndividualResponse(commonData: any, requestData: any) {
     commonData.params = replaceVariablesInObject(commonData.params);
     requestData.params = replaceVariablesInObject(requestData.params);
     const params = getParamsForUrl(commonData.params, requestData.params);
-    
+
     let [reqCancelled, responseData] = await requestWithProgress(
         allData,
         params
@@ -116,12 +116,12 @@ async function requestWithProgress(
 }
 
 function constructRequest(allData: any, paramsForUrl: string) {
-    let completeUrl = allData.baseUrl + allData.url + paramsForUrl;
+    let completeUrl = getURL(allData, paramsForUrl);
 
     let options = {
         body: getBody(allData.body),
         headers: getHeadersAsJSON(allData.headers),
-        followRedirect: allData.options.follow as boolean,
+        followRedirect: allData.options.follow,
 
         https: {
             rejectUnauthorized: allData.options.verifySSL,
@@ -133,6 +133,22 @@ function constructRequest(allData: any, paramsForUrl: string) {
     } else {
         return got.get(completeUrl, options);
     }
+}
+
+function getURL(allData: any, paramsForUrl: string){
+    let completeUrl = "";
+    if(allData.baseUrl !== undefined){
+        completeUrl += allData.baseUrl;
+    }
+    if(allData.url !== undefined){
+        if(allData.url !== "" && allData.url[0] !== '/'){
+            return allData.url + paramsForUrl;
+        } else {
+            completeUrl += allData.url;
+        }
+    }
+
+    return completeUrl + paramsForUrl;
 }
 
 async function executeHttpRequest(httpRequest: any) {
