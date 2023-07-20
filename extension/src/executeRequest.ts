@@ -12,9 +12,15 @@ import {
     getHeadersAsString,
 } from "./getRequestData";
 
+import {replaceVariablesInObject } from "./variableReplacement";
+
 export async function getIndividualResponse(commonData: any, requestData: any) {
-    const allData = getMergedDataExceptParams(commonData, requestData);
+    let allData = getMergedDataExceptParams(commonData, requestData);
+    allData = replaceVariablesInObject(allData);
+    commonData.params = replaceVariablesInObject(commonData.params);
+    requestData.params = replaceVariablesInObject(requestData.params);
     const params = getParamsForUrl(commonData.params, requestData.params);
+    
     let [reqCancelled, responseData] = await requestWithProgress(
         allData,
         params

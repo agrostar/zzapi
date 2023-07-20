@@ -130,24 +130,24 @@ requests:
 
   - name: variables-in-params
     method: GET
-    url: ${getUrl}
+    url: $(getUrl)
     params:
       - { name: replaced1, value: $username }
       - { name: replaced2, value: some$myUsername }
       - { name: replaced3, value: some$(myUsername)else }
       - { name: verbatim1, value: $usernameelse }
-      - { name: verbatim2, value: \\$(username) }
+      - { name: verbatim2, value: \$(username) }
     tests:
       json:
         args.replaced1: vasan.subramanian
         args.replaced2: somevasan.subramanian
         args.replaced3: somevasan.subramanianelse
         args.verbatim1: { $ne: vasan.subramaniansome, $eq: $usernameelse }
-        args.verbatim2: { $ne: vasan.subramanian, $eq: \\($username) }
+        args.verbatim2: { $ne: vasan.subramanian, $eq: \($username) }
 
   - name: variables-in-headers
     method: GET
-    url: ${getUrl}
+    url: $(getUrl)
     headers:
       - { name: foo, value: $(fooValue) }
     tests:

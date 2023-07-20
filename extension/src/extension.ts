@@ -23,33 +23,45 @@ let disposables: Disposable[] = [];
 let statusBar: StatusBarItem;
 
 const varFile = "zz-envs.yaml";
+let dirPath: string = "~";
 let varFilePath: string;
 
 //plan: export these details wherever required
 let currentEnvironment: string;
 let allEnvironments: any = {};
 
+export { dirPath, currentEnvironment, allEnvironments };
+
+export function getDirPath() {
+    return dirPath;
+}
+
+export function getEnvDetails() {
+    return [currentEnvironment, allEnvironments];
+}
+
 export function activate(context: ExtensionContext) {
     const activeEditor = window.activeTextEditor;
     if (activeEditor) {
         const activeEditorPath = activeEditor.document.uri.path;
         const lastIndex = activeEditorPath.lastIndexOf("/");
+        dirPath = activeEditorPath.substring(0, lastIndex + 1);
         varFilePath = activeEditorPath.substring(0, lastIndex + 1) + varFile;
     }
-
-    initialiseEnvironments();
-    const envChangeListener = workspace.onDidChangeTextDocument((event) => {
-        if (event.document.uri.path === varFilePath) {
-            initialiseEnvironments();
-        }
-    });
-    context.subscriptions.push(envChangeListener);
-    disposables.push(envChangeListener);
 
     statusBar = window.createStatusBarItem(StatusBarAlignment.Left);
     initialiseStatusBar(statusBar, context);
 
     createEnvironmentSelector(statusBar, context);
+
+    initialiseEnvironments(statusBar);
+    const envChangeListener = workspace.onDidChangeTextDocument((event) => {
+        if (event.document.uri.path === varFilePath) {
+            initialiseEnvironments(statusBar);
+        }
+    });
+    context.subscriptions.push(envChangeListener);
+    disposables.push(envChangeListener);
 
     languages.registerCodeLensProvider("*", new CodelensProviderForIndReq());
     languages.registerCodeLensProvider("*", new CodelensProviderForAllReq());
@@ -108,10 +120,11 @@ function setEnvironment(statusBar: StatusBarItem, environment: string) {
 
 let environmentsToDisplay: Array<{ label: string; description: string }> = [];
 
-function initialiseEnvironments() {
+function initialiseEnvironments(statusBar: StatusBarItem) {
     environmentsToDisplay = [];
     currentEnvironment = "";
-    allEnvironments = [];
+    allEnvironments = {};
+    statusBar.text = "zzAPI: Set Environment";
 
     if (fs.existsSync(varFilePath)) {
         const data = fs.readFileSync(varFilePath, "utf-8");
