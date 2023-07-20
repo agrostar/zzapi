@@ -15,8 +15,8 @@ function getRequestPositions(document) {
         if (!YAML.isMap(topLevelItem.value)) return;
 
         const [start, end ] = topLevelItem.key.range;
-        // Do we need the end position? lineCounter is expected tobe inefficient as it does 
-        // a search among the lines. The lesser we call it the better.
+        // Do we need the end position? lineCounter is expected to be inefficient as it does 
+        // a binary search among the lines. The lesser we call it the better.
         ret.all = [lineCounter.linePos(start), lineCounter.linePos(end)];
 
         topLevelItem.value.items.forEach(request => {
@@ -34,6 +34,7 @@ console.log(util.inspect(all, {depth: null}));
 console.log(util.inspect(each, {depth: null}));
 
 /* output: 
+[ { line: 24, col: 1 }, { line: 24, col: 9 } ]
 [
   {
     name: 'simple-get',
