@@ -22,7 +22,10 @@ common:
       Content-type: application/json
 
 requests:
-  simple-get:
+
+  simple-get: { method: GET, url: /simpleget }
+
+  get-with-params:
     method: GET
     url: /get
     params:
