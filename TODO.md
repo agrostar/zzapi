@@ -22,6 +22,8 @@
 
 * Automatically add header User-Agent: zzapi-runner/<version> (where is the extension version stored?)
 
+## This will be v1.0
+
 ## Further ahead
 
 * Support `{ foo: bar }` kind of headers and params in addition to arrays. Use case: when need to override, unique keys, they can use the shorter simpler form of `foo: bar`. In more complex cases of repeating parameter names or needing the doc: attribute, they can use the long form. 
