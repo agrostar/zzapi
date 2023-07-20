@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 
-const requiredFileEnd = "zz-bundle.yaml";
+const requiredFileEnd = ".zz-bundle.yaml";
 
 export class CodelensProviderForAllReq implements vscode.CodeLensProvider {
     private codeLenses: vscode.CodeLens[] = [];
