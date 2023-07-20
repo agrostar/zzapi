@@ -130,18 +130,26 @@ function constructRequest(allData: any, paramsForUrl: string) {
 
     if (allData.method === "POST") {
         return got.post(completeUrl, options);
+    } else if (allData.method === "HEAD") {
+        return got.head(completeUrl, options);
+    } else if (allData.method === "PUT") {
+        return got.put(completeUrl, options);
+    } else if (allData.method === "DELETE") {
+        return got.delete(completeUrl, options);
+    } else if (allData.method === "PATCH") {
+        return got.patch(completeUrl, options);
     } else {
         return got.get(completeUrl, options);
     }
 }
 
-function getURL(allData: any, paramsForUrl: string){
+function getURL(allData: any, paramsForUrl: string) {
     let completeUrl = "";
-    if(allData.baseUrl !== undefined){
+    if (allData.baseUrl !== undefined) {
         completeUrl += allData.baseUrl;
     }
-    if(allData.url !== undefined){
-        if(allData.url !== "" && allData.url[0] !== '/'){
+    if (allData.url !== undefined) {
+        if (allData.url !== "" && allData.url[0] !== "/") {
             return allData.url + paramsForUrl;
         } else {
             completeUrl += allData.url;
