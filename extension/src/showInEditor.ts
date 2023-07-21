@@ -1,4 +1,5 @@
 import { window, commands, workspace } from "vscode";
+import { getEnvDetails } from "./extension";
 
 let keysInContent = ["executionTime", "status", "content"];
 
@@ -34,8 +35,13 @@ function getDataOfIndReqAsString(
     jsonData: any,
     name: string
 ): [contentData: string, headersData: string] {
-    let contentData = `${name} content\n\n`;
-    let headersData = `${name} headers\n\n`;
+    let currentEnvironment = getEnvDetails()[0];
+    if(currentEnvironment === ""){
+        currentEnvironment = "None Selected";
+    }
+
+    let contentData = `${name} content\nEnvironment: ${currentEnvironment}\n\n`;
+    let headersData = `${name} headers\nEnvironment: ${currentEnvironment}\n\n`;
 
     for (const key in jsonData) {
         if (jsonData.hasOwnProperty(key)) {
