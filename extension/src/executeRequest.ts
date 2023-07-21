@@ -1,9 +1,11 @@
 import got from "got";
 import { window, ProgressLocation } from "vscode";
+
 import {
     openEditorForIndividualReq,
     openEditorForAllRequests,
 } from "./showInEditor";
+
 import {
     getParamsForUrl,
     getMergedDataExceptParams,
@@ -12,13 +14,11 @@ import {
     getHeadersAsString,
 } from "./getRequestData";
 
-import { replaceVariablesInObject } from "./variableReplacement";
+import { loadVariables } from "./variableReplacement";
 
 export async function getIndividualResponse(commonData: any, requestData: any) {
-    let allData = getMergedDataExceptParams(commonData, requestData);
-    allData = replaceVariablesInObject(allData);
-    commonData.params = replaceVariablesInObject(commonData.params);
-    requestData.params = replaceVariablesInObject(requestData.params);
+    loadVariables();
+    const allData = getMergedDataExceptParams(commonData, requestData);
     const params = getParamsForUrl(commonData.params, requestData.params);
 
     let [reqCancelled, responseData] = await requestWithProgress(
@@ -37,6 +37,7 @@ export async function getAllResponses(
     let responses = [];
     let atleastOneExecuted = false;
 
+    loadVariables();
     const n = allRequests.length;
     for (let i = 0; i < n; i++) {
         let request = allRequests[i];

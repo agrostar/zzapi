@@ -1,3 +1,5 @@
+import { replaceVariablesInObject, replaceVariablesInArray } from "./variableReplacement";
+
 export function getBody(body: any) {
     if (body === undefined || !(typeof body === "object")) {
         return body;
@@ -93,7 +95,7 @@ export function getMergedDataExceptParams(
         }
     }
 
-    return mergedData;
+    return replaceVariablesInObject(mergedData);
 }
 
 export function getParamsForUrl(
@@ -114,6 +116,7 @@ export function getParamsForUrl(
         return "";
     }
 
+    params = replaceVariablesInArray(params);
     let paramString = "";
     let paramArray: Array<string> = [];
 

@@ -9,7 +9,7 @@ import * as YAML from "yaml";
 
 let variables: any = {};
 
-function loadVariables() {
+export function loadVariables() {
     variables = {};
 
     const dirPath = getDirPath();
@@ -45,7 +45,6 @@ export function replaceVariablesInObject(
     if (objectData === undefined) {
         return undefined;
     }
-    loadVariables();
     return JSON.parse(replaceVariables(JSON.stringify(objectData)));
 }
 
@@ -53,7 +52,16 @@ function replaceVariablesInSelf() {
     variables = JSON.parse(replaceVariables(JSON.stringify(variables)));
 }
 
-function replaceVariables(text: string): string {
+export function replaceVariablesInArray(arr: Array<object>): Array<object>{
+    let newArr: Array<object> = [];
+    arr.forEach((element) => {
+        newArr.push(JSON.parse(replaceVariables(JSON.stringify(element))));
+    });
+
+    return newArr;
+}
+
+export function replaceVariables(text: string): string {
     const outputTextWithBraces = text.replace(
         varRegexWithBraces,
         function (match, variable) {

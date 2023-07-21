@@ -28,7 +28,6 @@ const varFile = "zz-envs.yaml";
 let dirPath: string;
 let varFilePath: string;
 
-//plan: export these details wherever required
 let currentEnvironment: string = "";
 let allEnvironments: any = {};
 

@@ -14,11 +14,11 @@ export async function openEditorForIndividualReq(
 export async function openEditorForAllRequests(
     responses: Array<{ response: object; name: string }>
 ) {
-    const n = responses.length;
+    const numResponses = responses.length;
     let formattedContent = "";
     let formattedHeaders = "";
 
-    for (let i = 0; i < n; i++) {
+    for (let i = 0; i < numResponses; i++) {
         let responseObj = responses[i];
         let [contentData, headersData] = getDataOfIndReqAsString(
             responseObj["response"],
