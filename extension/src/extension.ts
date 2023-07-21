@@ -7,6 +7,7 @@ import {
     StatusBarItem,
     workspace,
     Disposable,
+    ThemeColor,
 } from "vscode";
 
 import {
@@ -95,6 +96,9 @@ function initialiseStatusBar(
 ) {
     statusBar.text = "zzAPI: Set Environment";
     statusBar.command = "extension.clickEnvSelector";
+    statusBar.backgroundColor = new ThemeColor(
+        "statusBarItem.warningBackground"
+    );
     statusBar.show();
     context.subscriptions.push(statusBar);
     disposables.push(statusBar);
@@ -130,6 +134,7 @@ function createEnvironmentSelector(
 function setEnvironment(statusBar: StatusBarItem, environment: string) {
     currentEnvironment = environment;
     statusBar.text = `Current Environment: ${currentEnvironment}`;
+    statusBar.backgroundColor = undefined;
 }
 
 let environmentsToDisplay: Array<{ label: string; description: string }> = [];
@@ -139,6 +144,9 @@ function initialiseEnvironments(statusBar: StatusBarItem) {
     currentEnvironment = "";
     allEnvironments = {};
     statusBar.text = "zzAPI: Set Environment";
+    statusBar.backgroundColor = new ThemeColor(
+        "statusBarItem.warningBackground"
+    );
 
     if (fs.existsSync(varFilePath)) {
         const data = fs.readFileSync(varFilePath, "utf-8");
