@@ -1,18 +1,24 @@
-const fs = require('fs');
-const YAML = require('yaml');
-const util = require('util')
+import * as fs from 'fs';
+import * as YAML from 'yaml';
+import * as util from 'util';
 
-function getRequestPositions(document) {
+function getRequestPositions(document: string) {
     const lineCounter = new YAML.LineCounter();
 
     const parsed = YAML.parseDocument(document, { lineCounter });
 
     const ret = { all: {}, each: [] };
-    if (!YAML.isMap(parsed.contents)) return ret;
+    if (!YAML.isMap(parsed.contents)){
+      return ret;
+    } 
 
     parsed.contents.items.forEach(topLevelItem => {
-        if (topLevelItem.key.value !== 'requests') return;
-        if (!YAML.isMap(topLevelItem.value)) return;
+        if (topLevelItem.key.value !== 'requests'){
+          return;
+        } 
+        if (!YAML.isMap(topLevelItem.value)) {
+          return;
+        }
 
         const [start, end ] = topLevelItem.key.range;
         // Do we need the end position? lineCounter is expected to be inefficient as it does 

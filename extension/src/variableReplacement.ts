@@ -61,7 +61,7 @@ export function replaceVariablesInArray(arr: Array<object>): Array<object>{
     return newArr;
 }
 
-export function replaceVariables(text: string): string {
+function replaceVariables(text: string): string {
     const outputTextWithBraces = text.replace(
         varRegexWithBraces,
         function (match, variable) {

@@ -38,8 +38,8 @@ export async function getAllResponses(
     let atleastOneExecuted = false;
 
     loadVariables();
-    const n = allRequests.length;
-    for (let i = 0; i < n; i++) {
+    const numRequests = allRequests.length;
+    for (let i = 0; i < numRequests; i++) {
         let request = allRequests[i];
         const allData = getMergedDataExceptParams(commonData, request);
         const paramsForUrl = getParamsForUrl(commonData.params, request.params);
@@ -99,7 +99,7 @@ async function requestWithProgress(
                 response = {
                     executionTime: executionTime,
                     status: httpResponse.statusCode,
-                    // statusText: httpResponse.statusMessage!,
+                    // statusText: httpResponse.statusMessage,
                     content: httpResponse.body as string,
                     headers: getHeadersAsString(httpResponse.headers),
                     // rawHeaders: httpResponse.rawHeaders,
