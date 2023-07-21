@@ -125,7 +125,11 @@ function createEnvironmentSelector(
             })
             .then((selectedEnvironment) => {
                 if (selectedEnvironment) {
-                    setEnvironment(statusBar, selectedEnvironment.label);
+                    if (selectedEnvironment === defaultEnvironment) {
+                        initialiseStatusBar(statusBar, context);
+                    } else {
+                        setEnvironment(statusBar, selectedEnvironment.label);
+                    }
                 }
             });
     };
@@ -137,6 +141,10 @@ function setEnvironment(statusBar: StatusBarItem, environment: string) {
     statusBar.backgroundColor = undefined;
 }
 
+const defaultEnvironment = {
+    label: "None of the Above",
+    description: "Do not set any environment",
+};
 let environmentsToDisplay: Array<{ label: string; description: string }> = [];
 
 function initialiseEnvironments(statusBar: StatusBarItem) {
@@ -173,6 +181,8 @@ function initialiseEnvironments(statusBar: StatusBarItem) {
             }
         }
     }
+
+    environmentsToDisplay.push(defaultEnvironment);
 }
 
 export function deactivate() {
