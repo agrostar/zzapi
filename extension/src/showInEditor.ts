@@ -2,6 +2,7 @@ import { window, commands, workspace } from "vscode";
 import { getEnvDetails } from "./extension";
 
 let keysInContent = ["executionTime", "status", "content"];
+let keysInHeaders = ["headers"];
 
 export async function openEditorForIndividualReq(
     jsonData: object,
@@ -36,7 +37,7 @@ function getDataOfIndReqAsString(
     name: string
 ): [contentData: string, headersData: string] {
     let currentEnvironment = getEnvDetails()[0];
-    if(currentEnvironment === ""){
+    if (currentEnvironment === "") {
         currentEnvironment = "None Selected";
     }
 
@@ -49,7 +50,7 @@ function getDataOfIndReqAsString(
 
             if (keysInContent.includes(key)) {
                 contentData += `${key}: ${value}\n`;
-            } else {
+            } else if (keysInHeaders.includes(key)) {
                 headersData += `${key}: ${value}\n`;
             }
         }

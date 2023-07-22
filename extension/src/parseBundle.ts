@@ -1,9 +1,9 @@
-import * as YAML from 'yaml';
+import * as YAML from "yaml";
 
 export interface RequestPosition {
     name?: string;
-    start: { line: number, col: number };
-    end: { line: number, col: number };
+    start: { line: number; col: number };
+    end: { line: number; col: number };
 }
 
 /*
@@ -12,7 +12,6 @@ export interface RequestPosition {
  * All other requestPositions will have a name and a position.
  */
 export function getRequestPositions(document: string): Array<RequestPosition> {
-
     let positions: Array<RequestPosition> = [];
 
     const lineCounter = new YAML.LineCounter();
@@ -23,10 +22,14 @@ export function getRequestPositions(document: string): Array<RequestPosition> {
     }
     let contents = doc.contents as YAML.YAMLMap;
 
-    contents.items.forEach(topLevelItem => {
-        if (!YAML.isMap(topLevelItem.value)) { return; }
+    contents.items.forEach((topLevelItem) => {
+        if (!YAML.isMap(topLevelItem.value)) {
+            return;
+        }
         let key = topLevelItem.key as YAML.Scalar;
-        if (key.value !== 'requests') { return; }
+        if (key.value !== "requests") {
+            return;
+        }
 
         const start = key.range?.[0] as number;
         const end = key.range?.[1] as number;
@@ -37,8 +40,10 @@ export function getRequestPositions(document: string): Array<RequestPosition> {
         positions.push(all);
 
         let requests = topLevelItem.value as YAML.YAMLMap;
-        requests.items.forEach(request => {
-            if (!YAML.isMap(request.value)) { return; }
+        requests.items.forEach((request) => {
+            if (!YAML.isMap(request.value)) {
+                return;
+            }
             let key = request.key as YAML.Scalar;
             const name = key.value as string;
             const start = key.range?.[0] as number;
@@ -55,20 +60,22 @@ export function getRequestPositions(document: string): Array<RequestPosition> {
     return positions;
 }
 
-function test() {
-    const yamlString = `
-    common:
-      debug: false
-    requests:
-      request1:
-        method: GET
-      request2:
-        method: POST
-    `;
-    const rps = getRequestPositions(yamlString);
-    rps.forEach(rp => {
-        console.log(`${rp.name}: start: ${rp.start.line} ${rp.start.col}, end: ${rp.end.line} ${rp.end.col}`);
-    });
-}
+// function test() {
+//     const yamlString = `
+//     common:
+//       debug: false
+//     requests:
+//       request1:
+//         method: GET
+//       request2:
+//         method: POST
+//     `;
+//     const rps = getRequestPositions(yamlString);
+//     rps.forEach((rp) => {
+//         console.log(
+//             `${rp.name}: start: ${rp.start.line} ${rp.start.col}, end: ${rp.end.line} ${rp.end.col}`
+//         );
+//     });
+// }
 
-//test()
+// test();
