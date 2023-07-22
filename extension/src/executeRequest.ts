@@ -26,7 +26,7 @@ export async function getIndividualResponse(
     const allData = getMergedDataExceptParams(commonData, requestData);
     const params = getParamsForUrl(commonData.params, requestData.params);
 
-    let [reqCancelled, responseData] = await requestWithProgress(
+    let [reqCancelled, responseData] = await individualRequestWithProgress(
         allData,
         params
     );
@@ -52,10 +52,8 @@ export async function getAllResponses(
                 commonData.params,
                 request.params
             );
-            let [reqCancelled, responseData] = await requestWithProgress(
-                allData,
-                paramsForUrl
-            );
+            let [reqCancelled, responseData] =
+                await individualRequestWithProgress(allData, paramsForUrl);
             if (!reqCancelled) {
                 responses.push({ response: responseData, name: request.name });
                 atleastOneExecuted = true;
@@ -70,7 +68,7 @@ export async function getAllResponses(
     }
 }
 
-async function requestWithProgress(
+async function individualRequestWithProgress(
     requestData: any,
     paramsForUrl: string
 ): Promise<[boolean, object]> {

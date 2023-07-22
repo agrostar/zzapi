@@ -6,6 +6,7 @@
     * envs and varsets, load from zz-envs.yaml
     * Use status bar and dropdown to pick from one of the envs
     * Use vars to replace $variable and $(variable)
+  * Cancelling RunAll should be a single button that immediately stops all subsequent request executions
 
 ## For MVP
 
