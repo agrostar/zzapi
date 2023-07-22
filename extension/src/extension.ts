@@ -14,7 +14,10 @@ import {
 import {
     CodelensProviderForAllReq,
     CodelensProviderForIndReq,
+    CodeLensProvider,
 } from "./CodeLensProviders";
+
+import { test } from "./parseBundle";
 
 import { registerRunRequest, registerRunAllRequests } from "./registerRequests";
 
@@ -72,8 +75,9 @@ export function activate(context: ExtensionContext) {
     context.subscriptions.push(editorChangeListener);
     disposables.push(editorChangeListener);
 
-    languages.registerCodeLensProvider("*", new CodelensProviderForIndReq());
-    languages.registerCodeLensProvider("*", new CodelensProviderForAllReq());
+    // languages.registerCodeLensProvider("*", new CodelensProviderForIndReq());
+    // languages.registerCodeLensProvider("*", new CodelensProviderForAllReq());
+    languages.registerCodeLensProvider("*", new CodeLensProvider());
 
     commands.registerCommand("extension.runRequest", async (name) => {
         await registerRunRequest(name);
@@ -81,6 +85,11 @@ export function activate(context: ExtensionContext) {
 
     commands.registerCommand("extension.runAllRequests", async () => {
         await registerRunAllRequests();
+    });
+
+    commands.registerCommand("extension.test", async () => {
+        // For running random code, activate with Cmd Shift P.
+        test();
     });
 }
 
