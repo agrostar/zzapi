@@ -1,110 +1,74 @@
-import * as fs from 'fs';
 import * as YAML from 'yaml';
-import * as util from 'util';
 
-function getRequestPositions(document: string) {
-    const lineCounter = new YAML.LineCounter();
-
-    const parsed = YAML.parseDocument(document, { lineCounter });
-
-    const ret = { all: {}, each: [] };
-    if (!YAML.isMap(parsed.contents)){
-      return ret;
-    } 
-
-    parsed.contents.items.forEach(topLevelItem => {
-        if (topLevelItem.key.value !== 'requests'){
-          return;
-        } 
-        if (!YAML.isMap(topLevelItem.value)) {
-          return;
-        }
-
-        const [start, end ] = topLevelItem.key.range;
-        // Do we need the end position? lineCounter is expected to be inefficient as it does 
-        // a binary search among the lines. The lesser we call it the better.
-        ret.all = [lineCounter.linePos(start), lineCounter.linePos(end)];
-
-        topLevelItem.value.items.forEach(request => {
-            const name = request.key.value;
-            const [start, end] = request.key.range;
-            ret.each.push({name, range: [lineCounter.linePos(start), lineCounter.linePos(end)]});
-        });
-    });
-    return ret;
+export interface RequestPosition {
+    name?: string;
+    start: { line: number, col: number };
+    end: { line: number, col: number };
 }
 
-const document = fs.readFileSync('tests-alt.zz-bundle.yaml', 'utf-8');
-const { all, each } = getRequestPositions(document);
-console.log(util.inspect(all, {depth: null}));
-console.log(util.inspect(each, {depth: null}));
+/*
+ * Returns an array of requestPosition objects. If the name of a
+ * requestPosition is null or undefined, it is the "all requests" position.
+ * All other requestPositions will have a name and a position.
+ */
+export function getRequestPositions(document: string): Array<RequestPosition> {
 
-/* output: 
-[ { line: 24, col: 1 }, { line: 24, col: 9 } ]
-[
-  {
-    name: 'simple-get',
-    range: [ { line: 26, col: 3 }, { line: 26, col: 13 } ]
-  },
-  {
-    name: 'get-with-params',
-    range: [ { line: 28, col: 3 }, { line: 28, col: 18 } ]
-  },
-  {
-    name: 'post-header-merge',
-    range: [ { line: 39, col: 3 }, { line: 39, col: 20 } ]
-  },
-  {
-    name: 'post-header-override',
-    range: [ { line: 56, col: 3 }, { line: 56, col: 23 } ]
-  },
-  {
-    name: 'status-404',
-    range: [ { line: 66, col: 3 }, { line: 66, col: 13 } ]
-  },
-  {
-    name: 'status-401',
-    range: [ { line: 72, col: 3 }, { line: 72, col: 13 } ]
-  },
-  {
-    name: 'encoding',
-    range: [ { line: 80, col: 3 }, { line: 80, col: 11 } ]
-  },
-  {
-    name: 'no-encoding',
-    range: [ { line: 90, col: 3 }, { line: 90, col: 14 } ]
-  },
-  {
-    name: 'no-redirects',
-    range: [ { line: 101, col: 3 }, { line: 101, col: 15 } ]
-  },
-  {
-    name: 'redirects',
-    range: [ { line: 110, col: 3 }, { line: 110, col: 12 } ]
-  },
-  {
-    name: 'non-json',
-    range: [ { line: 120, col: 3 }, { line: 120, col: 11 } ]
-  },
-  {
-    name: 'response-headers',
-    range: [ { line: 126, col: 3 }, { line: 126, col: 19 } ]
-  },
-  {
-    name: 'override-base-url',
-    range: [ { line: 135, col: 3 }, { line: 135, col: 20 } ]
-  },
-  {
-    name: 'variables-in-params',
-    range: [ { line: 139, col: 3 }, { line: 139, col: 22 } ]
-  },
-  {
-    name: 'variables-in-headers',
-    range: [ { line: 156, col: 3 }, { line: 156, col: 23 } ]
-  },
-  {
-    name: 'variables-in-body',
-    range: [ { line: 165, col: 3 }, { line: 165, col: 20 } ]
-  }
-]
-*/
+    let positions: Array<RequestPosition> = [];
+
+    const lineCounter = new YAML.LineCounter();
+    let doc = YAML.parseDocument(document, { lineCounter });
+
+    if (!YAML.isMap(doc.contents)) {
+        return positions;
+    }
+    let contents = doc.contents as YAML.YAMLMap;
+
+    contents.items.forEach(topLevelItem => {
+        if (!YAML.isMap(topLevelItem.value)) { return; }
+        let key = topLevelItem.key as YAML.Scalar;
+        if (key.value !== 'requests') { return; }
+
+        const start = key.range?.[0] as number;
+        const end = key.range?.[1] as number;
+        const all: RequestPosition = {
+            start: lineCounter.linePos(start),
+            end: lineCounter.linePos(end),
+        };
+        positions.push(all);
+
+        let requests = topLevelItem.value as YAML.YAMLMap;
+        requests.items.forEach(request => {
+            if (!YAML.isMap(request.value)) { return; }
+            let key = request.key as YAML.Scalar;
+            const name = key.value as string;
+            const start = key.range?.[0] as number;
+            const end = key.range?.[1] as number;
+            const each: RequestPosition = {
+                name: name,
+                start: lineCounter.linePos(start),
+                end: lineCounter.linePos(end),
+            };
+            positions.push(each);
+        });
+    });
+
+    return positions;
+}
+
+function test() {
+    const yamlString = `
+    common:
+      debug: false
+    requests:
+      request1:
+        method: GET
+      request2:
+        method: POST
+    `;
+    const rps = getRequestPositions(yamlString);
+    rps.forEach(rp => {
+        console.log(`${rp.name}: start: ${rp.start.line} ${rp.start.col}, end: ${rp.end.line} ${rp.end.col}`);
+    });
+}
+
+//test()
