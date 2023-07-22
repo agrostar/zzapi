@@ -11,10 +11,7 @@ import {
     TextEditor,
 } from "vscode";
 
-import {
-    CodelensProviderForAllReq,
-    CodelensProviderForIndReq,
-} from "./CodeLensProviders";
+import { CodeLensProvider } from "./CodeLensProviders";
 
 import { registerRunRequest, registerRunAllRequests } from "./registerRequests";
 
@@ -72,8 +69,7 @@ export function activate(context: ExtensionContext) {
     context.subscriptions.push(editorChangeListener);
     disposables.push(editorChangeListener);
 
-    languages.registerCodeLensProvider("*", new CodelensProviderForIndReq());
-    languages.registerCodeLensProvider("*", new CodelensProviderForAllReq());
+    languages.registerCodeLensProvider("*", new CodeLensProvider());
 
     commands.registerCommand("extension.runRequest", async (name) => {
         await registerRunRequest(name);

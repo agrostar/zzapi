@@ -138,7 +138,7 @@ requests:
 
   variables-in-params:
     method: GET
-    url: ${getUrl}
+    url: $(getUrl)
     params:
       - { name: replaced1, value: $username }
       - { name: replaced2, value: some$myUsername }
@@ -155,7 +155,7 @@ requests:
 
   variables-in-headers:
     method: GET
-    url: ${getUrl}
+    url: $(getUrl)
     headers:
       - { name: foo, value: $(fooValue) }
     tests:

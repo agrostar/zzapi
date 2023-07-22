@@ -16,8 +16,13 @@ import {
 
 import { loadVariables } from "./variableReplacement";
 
-export async function getIndividualResponse(commonData: any, requestData: any) {
+export async function getIndividualResponse(
+    commonData: any,
+    requestData: any,
+    name: string
+) {
     loadVariables();
+    requestData["name"] = name;
     const allData = getMergedDataExceptParams(commonData, requestData);
     const params = getParamsForUrl(commonData.params, requestData.params);
 
@@ -38,18 +43,23 @@ export async function getAllResponses(
     let atleastOneExecuted = false;
 
     loadVariables();
-    const numRequests = allRequests.length;
-    for (let i = 0; i < numRequests; i++) {
-        let request = allRequests[i];
-        const allData = getMergedDataExceptParams(commonData, request);
-        const paramsForUrl = getParamsForUrl(commonData.params, request.params);
-        let [reqCancelled, responseData] = await requestWithProgress(
-            allData,
-            paramsForUrl
-        );
-        if (!reqCancelled) {
-            responses.push({ response: responseData, name: request.name });
-            atleastOneExecuted = true;
+    for (const name in allRequests) {
+        if (allRequests.hasOwnProperty(name)) {
+            let request = allRequests[name];
+            request["name"] = name;
+            const allData = getMergedDataExceptParams(commonData, request);
+            const paramsForUrl = getParamsForUrl(
+                commonData.params,
+                request.params
+            );
+            let [reqCancelled, responseData] = await requestWithProgress(
+                allData,
+                paramsForUrl
+            );
+            if (!reqCancelled) {
+                responses.push({ response: responseData, name: request.name });
+                atleastOneExecuted = true;
+            }
         }
     }
 
@@ -170,6 +180,6 @@ async function executeHttpRequest(httpRequest: any) {
         }
 
         const message = e.name === "CancelError" ? "Cancelled" : e.message;
-        return { name: e.name, message: message };
+        return { statusCode: e.name, body: message as string };
     }
 }
