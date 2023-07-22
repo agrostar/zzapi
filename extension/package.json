@@ -17,11 +17,7 @@
     "commands": [
       {
         "command": "extension.clickEnvSelector",
-        "title": "zzapi Select Environment"
-      },
-      {
-        "command": "extension.test",
-        "title": "zzapi Test"
+        "title": "Select Environment"
       }
     ],
     "configuration": {}

@@ -55,7 +55,7 @@ export function getRequestPositions(document: string): Array<RequestPosition> {
     return positions;
 }
 
-export function test() {
+function test() {
     const yamlString = `
     common:
       debug: false
@@ -71,4 +71,4 @@ export function test() {
     });
 }
 
-
+//test()
