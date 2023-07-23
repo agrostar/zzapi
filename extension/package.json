@@ -46,6 +46,7 @@
   },
   "dependencies": {
     "got": "11.8.6",
+    "jsonpath": "^1.1.1",
     "yaml": "^2.3.1"
   }
 }

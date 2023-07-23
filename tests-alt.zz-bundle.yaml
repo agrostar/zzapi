@@ -17,7 +17,7 @@ common:
     follow: false    # the default, so this can be omitted
     verifySSL: false # the default, so this can be omitted
   tests:
-    status: { $eq: 300 }
+    status: { $eq: 200 }
     headers:
       Content-type: application/json
 
