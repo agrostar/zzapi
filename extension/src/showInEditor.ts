@@ -1,7 +1,7 @@
 import { window, commands, workspace } from "vscode";
 import { getEnvDetails } from "./extension";
 
-let keysInContent = ["executionTime", "status", "json"];
+let keysInContent = ["executionTime", "status", "body"];
 // let keysInHeaders = ["headers"];
 
 /**

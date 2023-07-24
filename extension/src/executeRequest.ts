@@ -9,12 +9,15 @@ import {
 import {
     getParamsForUrl,
     getMergedDataExceptParamsAndTests,
-    // getMergedData,
     getBody,
     getHeadersAsJSON,
+    getMergedTests,
+    setLowerCaseHeaderKeys,
 } from "./getRequestData";
 
 import { loadVariables } from "./variableReplacement";
+
+import { runAllTests } from "./runTests";
 
 /**
  * @param commonData Stores data under "common" in the yaml bundle
@@ -32,8 +35,10 @@ export async function getIndividualResponse(
     loadVariables();
     requestData.name = name;
     const allData = getMergedDataExceptParamsAndTests(commonData, requestData);
+    allData.headers = setLowerCaseHeaderKeys(allData.headers);
+
     const params = getParamsForUrl(commonData.params, requestData.params);
-    // const tests = getMergedData(commonData.tests, requestData.tests);
+    const tests = getMergedTests(commonData.tests, requestData.tests);
 
     let [reqCancelled, responseData] = await individualRequestWithProgress(
         allData,
@@ -41,6 +46,7 @@ export async function getIndividualResponse(
     );
     if (!reqCancelled) {
         await openEditorForIndividualReq(responseData, allData.name);
+        await runAllTests(tests, responseData);
     }
 }
 
@@ -140,7 +146,7 @@ async function individualRequestWithProgress(
                     executionTime: executionTime,
                     status: httpResponse.statusCode,
                     // statusText: httpResponse.statusMessage,
-                    json: httpResponse.body as string,
+                    body: httpResponse.body as string,
                     headers: getHeadersAsString(httpResponse.headers),
                     // rawHeaders: httpResponse.rawHeaders,
                     // httpVersion: httpResponse.httpVersion,
@@ -167,12 +173,14 @@ export function getHeadersAsString(headersObj: any) {
     for (const key in headersObj) {
         if (headersObj.hasOwnProperty(key)) {
             const value = headersObj[key];
-            formattedString += `\t${key}: ${value}\n`;
+            formattedString += `  ${key}: ${value}\n`;
         }
     }
 
     formattedString = formattedString.trim();
-    return `\n\t${formattedString}`;
+    return `\n  ${formattedString}`;
+
+    // return YAML.stringify(headersObj);
 }
 
 /**

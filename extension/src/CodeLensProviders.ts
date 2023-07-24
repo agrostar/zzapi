@@ -68,10 +68,10 @@ export class CodeLensProvider implements vscode.CodeLensProvider {
         return this.codeLenses;
     }
 
-    public resolveCodeLens(
-        codeLens: vscode.CodeLens,
-        token: vscode.CancellationToken
-    ) {
-        return null;
-    }
+    // public resolveCodeLens(
+    //     codeLens: vscode.CodeLens,
+    //     token: vscode.CancellationToken
+    // ) {
+    //     return null;
+    // }
 }
