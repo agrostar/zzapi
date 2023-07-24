@@ -105,7 +105,7 @@ export function getDirPath() {
 /**
  * @returns both the current selected environment (if any),
  *  as well as the variable sets representing each environment
- *  in @file "@var varFile".
+ *  in '@var varFile'.
  */
 export function getEnvDetails() {
     return [currentEnvironment, allEnvironments];
@@ -175,7 +175,7 @@ function setDefaultStatusBarValues(statusBar: StatusBarItem) {
  *
  * Registers a command to click the environment selector, and then
  *  call @function showEnvironmentOptions to show the options by
- *  reading from @var varFilePath
+ *  reading from '@var varFilePath'
  */
 function createEnvironmentSelector(
     statusBar: StatusBarItem,
@@ -226,7 +226,7 @@ const defaultEnvironment = {
 let environmentsToDisplay: Array<{ label: string; description: string }> = [];
 
 /**
- * @param statusBar Reads from @var varFilePath to provide environments
+ * @param statusBar Reads from '@var varFilePath' to provide environments
  *  to select from.
  */
 function initialiseEnvironments(statusBar: StatusBarItem) {

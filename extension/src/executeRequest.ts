@@ -159,7 +159,7 @@ async function individualRequestWithProgress(
 /**
  * @param headersObj the headers in the http response
  * @returns The headers in the http response in a readable format
- *  to output into the editor, if required. 
+ *  to output into the editor, if required.
  */
 export function getHeadersAsString(headersObj: any) {
     let formattedString = "\n";
@@ -180,7 +180,7 @@ export function getHeadersAsString(headersObj: any) {
  * @param paramsForUrl Stores the parameter list to be appended to the URL
  *
  * @returns The constructed request using npm got, with the required options and URL
- * Calls @function getURL to construct the URL using @param allData. 
+ * Calls @function getURL to construct the URL using @param allData.
  */
 function constructRequest(allData: any, paramsForUrl: string) {
     let completeUrl = getURL(allData.baseUrl, allData.url, paramsForUrl);
@@ -214,9 +214,9 @@ function constructRequest(allData: any, paramsForUrl: string) {
  * @param baseUrl Stores the base-url of the request, if any
  * @param url Stores the url of the request, if any
  * @param paramsForUrl Stores the parameter list to be appended to the URL
- * 
- * @returns The final URL used for the request. It also implements the 
- *  override base url if the url does not begin with a forward-slash. 
+ *
+ * @returns The final URL used for the request. It also implements the
+ *  override base url if the url does not begin with a forward-slash.
  */
 function getURL(
     baseUrl: string | undefined,
@@ -240,7 +240,7 @@ function getURL(
 
 /**
  * @param httpRequest Executes the stored http request
- * 
+ *
  * @returns The response from executing the request
  */
 async function executeHttpRequest(httpRequest: any) {

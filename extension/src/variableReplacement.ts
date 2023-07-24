@@ -1,14 +1,12 @@
-// const text =
-//     "This is a $variable and a word$variable and this is a \\$not_variable and another $(variable) and $123_abc and $456_def.";
-// const outputString = inputString.replace(varRegex, "var");
-// console.log(outputString);
-
 import { getDirPath, getEnvDetails } from "./extension";
 import * as fs from "fs";
 import * as YAML from "yaml";
 
 let variables: any = {};
 
+/**
+ * Stores the variables loaded from the files in the selected environment, if any
+ */
 export function loadVariables() {
     variables = {};
 
@@ -39,6 +37,11 @@ export function loadVariables() {
 const varRegexWithBraces = /(?<!\\)\$\(([_a-zA-Z]\w*)\)/g;
 const varRegexWithoutBraces = /(?<!\\)\$(?:(?![0-9])[_a-zA-Z]\w*(?=\W|$))/g;
 
+/**
+ * @param objectData The object that may have variables that need to be replaced
+ *
+ * @returns the object after replacing the variables wherever required
+ */
 export function replaceVariablesInObject(
     objectData: object
 ): object | undefined {
@@ -48,11 +51,21 @@ export function replaceVariablesInObject(
     return JSON.parse(replaceVariables(JSON.stringify(objectData)));
 }
 
+/**
+ * Replaces variables in the variables object, with variables that are already
+ *  stored in it. This is required because a value in one file may act as a variable
+ *  in another.
+ */
 function replaceVariablesInSelf() {
     variables = JSON.parse(replaceVariables(JSON.stringify(variables)));
 }
 
-export function replaceVariablesInArray(arr: Array<object>): Array<object>{
+/**
+ * @param arr The array that may have variables that need to be replaced
+ *
+ * @returns The array after replacing the variables wherever required
+ */
+export function replaceVariablesInArray(arr: Array<object>): Array<object> {
     let newArr: Array<object> = [];
     arr.forEach((element) => {
         newArr.push(JSON.parse(replaceVariables(JSON.stringify(element))));
@@ -61,10 +74,16 @@ export function replaceVariablesInArray(arr: Array<object>): Array<object>{
     return newArr;
 }
 
+/**
+ * @param text Some string content that may or may not have variable names
+ *
+ * @returns The same text, after replacing the required variable names with
+ *  their respective values from @var variables
+ */
 function replaceVariables(text: string): string {
     const outputTextWithBraces = text.replace(
         varRegexWithBraces,
-        function (match, variable) {
+        (match, variable) => {
             const varVal = variables[variable];
             if (varVal !== undefined) {
                 return varVal;
@@ -75,9 +94,9 @@ function replaceVariables(text: string): string {
 
     const outputTextWithoutBraces = outputTextWithBraces.replace(
         varRegexWithoutBraces,
-        function (match) {
+        (match) => {
             const variable = match.slice(1);
-            if(variable === undefined){
+            if (variable === undefined) {
                 return match;
             }
             const varVal = variables[variable];
