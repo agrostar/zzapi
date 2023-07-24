@@ -2,36 +2,29 @@
 
 ## Immediate:
 
-  * Handle variables
-    * envs and varsets, load from zz-envs.yaml
-    * Use status bar and dropdown to pick from one of the envs
-    * Use vars to replace $variable and $(variable)
-  * Cancelling RunAll should be a single button that immediately stops all subsequent request executions
+  * Handle variables (Done)
+  * Redo JSON Schema with requests as an object
+  * Tests using jsonpath and operators on the value
 
-## For MVP
+## For MVP (v1.0)
 
-  * Tests (to be detailed)
   * Capture (to be detailed)
-
-## Must have soon (hygiene)
-
-* Specify and handle error cases:
-  * Malformed yamls (bundle, varsets, env)
-  * Yaml valid but not as per schema
-
-* Catch circular redirects in follow mode. Can got do this? If so, use it.
-
-* Automatically add header User-Agent: zzapi-runner/<version> (where is the extension version stored?)
-
-## This will be v1.0
+  * Separate the repos into two:
+    * zzapi: Main repo with README, JSON Schemas and pointers to other tools
+    * zzapi-vscode: VS Code Extension
+  * Hygiene (error and corner cases):
+    * Malformed yamls (bundle, varsets, env)
+    * Yaml valid but not as per schema
+    * Catch circular redirects in follow mode. Can got do this? If so, use it.
+    * Automatically add header User-Agent: zzapi-runner/<version> (where is the extension version stored?)
 
 ## Further ahead
 
+* More tools:
+  * zzapi-runner: command-line runner and library, which will be used in the vscode extension
+  * zzapi-doc: documentation generator
+
 * Support `{ foo: bar }` kind of headers and params in addition to arrays. Use case: when need to override, unique keys, they can use the shorter simpler form of `foo: bar`. In more complex cases of repeating parameter names or needing the doc: attribute, they can use the long form. 
-
-* use parseDocument to parse the yaml (compare timings with regex), so that we don't have to get the "best" regex to avoid false positives for making code lenses. If the parse fails, we don't have any codelenses.
-
-* Do we need two codelens providers? Cant a single function return an array of codelenses? That way we need to parse the file (regex or yaml) only once.
 
 * Scaffolding: using Cmd+Shift+P activate the extension and also create a directory and basic files like zz-envs.yaml and test/staging/production/local environments.
 
