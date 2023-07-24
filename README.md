@@ -140,7 +140,7 @@ If there are any json tests, the response is parsed as JSON, provided the conten
 * `$.field.0.value` will match 10 in  `{ field: [ { value: 10 }, { value: 20 } ]}`
 * `$.field[?(@.name==x)].value` will match 10 in `{ field: [ { name: x, value: 10 }, { name: y, value: 20 } ]}`
 
-If the result is a non-scalar (eg, the entire array) it will be used as is when matching against the operators `$size`, `$exists` and `$type`, otherwise will be converted to a string using `toString()`.
+If the result is a non-scalar (eg, the entire array) it will be used as is when matching against the operators `$size`, `$exists` and `$type`, otherwise will be converted to a string using `JSON.stringify(value)`.
 
 ### capture
 

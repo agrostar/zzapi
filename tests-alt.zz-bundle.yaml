@@ -17,7 +17,7 @@ common:
     follow: false    # the default, so this can be omitted
     verifySSL: false # the default, so this can be omitted
   tests:
-    status: { $eq: 200 }
+    status: 200
     headers:
       Content-type: application/json
 
@@ -32,9 +32,7 @@ requests:
       - { name: foo1, value: bar1 }
       - { name: foo2, value: bar2 }
     tests:
-      json:
-        $.args.foo1: bar1
-        $.args.foo2: bar2
+      json: { $.args.foo1: bar1,  $.args.foo2: bar2 }
 
   post-header-merge:
     url: /post
@@ -47,11 +45,8 @@ requests:
         "foo2": 42
       }
     tests:
-      json:
-        $.data.foo1: bar1
-        $.data.foo2: { $type: number, $gt: 41, $lt: 43 }
-      headers:
-        X-Custom-Header: Custom Value
+      json: { $.data.foo1: bar1,  $.data.foo2: { $type: number, $gt: 41, $lt: 43 } }
+      headers: { X-Custom-Header: Custom Value }
 
   post-header-override:
     url: /post
@@ -60,22 +55,17 @@ requests:
       - { name: Content-Type, value: text/plain }
     body: { foo: bar }
     tests:
-      json:
-        $.data: "{ foo bar }"
+      json: { $.data: "{ foo bar }" }
 
   status-404:
     url: /notfound
     method: GET
-    tests:
-      status: 404
+    tests: { status: 404 }
 
   status-401:
     url: /status/401
     method: GET
-    tests:
-      status: 401
-      json:
-        $.status: 401
+    tests: { status: 401, { json: { $.status: 401 } } }
 
   encoding:
     method: GET
@@ -103,9 +93,7 @@ requests:
     url: /cookies/set
     tests:
       status: 302
-      headers:
-        Location: /cookies
-        Content-Type: { $ne: application/json }
+      headers: { Location: /cookies,  Content-Type: { $ne: application/json } }
 
   redirects:
     options:
@@ -114,8 +102,7 @@ requests:
     url: /cookies/set
     tests:
       # code: 200 - this is inherited from common
-      json:
-        $.cookies: { $exists: true } # Header names are case insensitive
+      json: { $.cookies: { $exists: true } } # Header names are case insensitive
 
   non-json:
     method: GET
@@ -128,9 +115,7 @@ requests:
     url: /response-headers
     params:
       - { name: foo, value: bar }
-    tests:
-      headers:
-        foo: bar
+    tests: { headers: { foo: bar } }
 
   override-base-url:
     method: GET
@@ -144,23 +129,21 @@ requests:
       - { name: replaced2, value: some$myUsername }
       - { name: replaced3, value: some$(myUsername)else }
       - { name: verbatim1, value: $usernameelse }
-      - { name: verbatim2, value: \\$(username) }
+      - { name: verbatim2, value: \$(username) }
     tests:
       json:
         $.args.replaced1: vasan.subramanian
         $.args.replaced2: somevasan.subramanian
         $.args.replaced3: somevasan.subramanianelse
         $.args.verbatim1: { $ne: vasan.subramaniansome, $eq: $usernameelse }
-        $.args.verbatim2: { $ne: vasan.subramanian, $eq: \\($username) }
+        $.args.verbatim2: { $ne: vasan.subramanian, $eq: \($username) }
 
   variables-in-headers:
     method: GET
     url: $(getUrl)
     headers:
       - { name: foo, value: $(fooValue) }
-    tests:
-      json:
-        $.headers.foo: bar
+    tests: { json: { $.headers.foo: bar } }
 
   variables-in-body:
     method: POST
@@ -171,7 +154,76 @@ requests:
         "foo2": $pi
       }
     tests:
-      json:
-        $.data.foo1: bar
-        $.data.foo2: { $type: number, $eq: 3.414 }
+      json: { $.data.foo1: bar,  $.data.foo2: { $type: number, $eq: 3.414 } }
 
+  test-tests-positive:
+    method: POST
+    url: /post
+    body: |-
+      {
+        "firstName": "John",
+        "lastName": "Doe",
+        "middleName": null,
+        "age": 26,
+        "address": {
+            "streetAddress": "naist street",
+            "city": "Nara",
+            "postalCode": "560034"
+        },
+        "phoneNumbers": [
+            {
+                "type": "mobile",
+                "number": "0123-4567-8888",
+                "available": [ 7, 22 ]
+            },
+            {
+                "type": "home",
+                "number": "0123-4567-8910",
+                "available": [ 18, 22 ]
+            }
+        ]
+      }
+    tests:
+      json:
+        $.firstName: John
+        $.age: { $type: number, $eq: 26, $ne: "26" }
+        $.address: { $type: object, $size: 3 }
+        $.address.city: Nara
+        $.address.postalCode: { $type: string, $size: 6, $ne: 560034 }
+        $.phoneNumbers: { $type: array, $size: 2 }
+        $.phoneNumbers[0].type: mobile
+        $.phoneNumbers.0.type: mobile
+        $.phoneNumbers[?(@.type=="home")].number: "0123-4567-8910"
+        $.lastName: { $exists: true }
+        $.middleName: { $exists: true, $type: null }
+        $.otherName: { $exists: false }
+        $.phoneNumbers[*].type: '["mobile","home"]'
+        $.phoneNumbers[*].available: '[[7,22],[18,22]]'
+        # stress: ensure corner cases don't crash
+        $.otherName.value: { $exists: false } # don't recurse down undefined
+        
+
+  # All these tests should fail
+  test-tests-negative:
+    method: POST
+    url: /post
+    body: |-
+      {
+        age: 26
+        name: John
+        numbers: [ 1, 2 ]
+      }
+    tests:
+      json:
+        $.name: { $type: array }
+        $.missing: { $size: 0, $exists: true } # should report 2 failures
+        $.missing.missing.missing: { $exists: true }
+        $.numbers.0: "1" # "1" is not same as 1. We use === for $eq and !== for $neq
+
+        # stress: ensure corner cases don't crash
+        $.age: { $size: 2 }  # .length not supported for type: number
+        $.operator: { $badop: any }  # invalid operator
+        $.value: { $ne: { nonesting: any } } # invalid assertion value, expecting a scalar
+        $.values: { $ne: [1, 2] } # invalid assertion value, expecitng a scalar
+        $.numbers[?(.@)]: 4 # invalid path
+        $.numbers: { $size: two } # invalid assertion value, expecting a number
