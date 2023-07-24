@@ -33,8 +33,8 @@ requests:
       - { name: foo2, value: bar2 }
     tests:
       json:
-        args.foo1: bar1
-        args.foo2: bar2
+        $.args.foo1: bar1
+        $.args.foo2: bar2
 
   post-header-merge:
     url: /post
@@ -48,8 +48,8 @@ requests:
       }
     tests:
       json:
-        data.foo1: bar1
-        data.foo2: { $type: number, $gt: 41, $lt: 43 }
+        $.data.foo1: bar1
+        $.data.foo2: { $type: number, $gt: 41, $lt: 43 }
       headers:
         X-Custom-Header: Custom Value
 
@@ -61,7 +61,7 @@ requests:
     body: { foo: bar }
     tests:
       json:
-        data: "{ foo bar }"
+        $.data: "{ foo bar }"
 
   status-404:
     url: /notfound
@@ -75,7 +75,7 @@ requests:
     tests:
       status: 401
       json:
-        status: 401
+        $.status: 401
 
   encoding:
     method: GET
@@ -84,8 +84,8 @@ requests:
       - { name: foo, value: 30% of 200 is 60 }
     tests:
       json:
-        url: https://postman-echo.com/get?foo=30%25%20of%20200%20is%2060
-        args.foo: 30% of 200 is 60
+        $.url: https://postman-echo.com/get?foo=30%25%20of%20200%20is%2060
+        $.args.foo: 30% of 200 is 60
 
   no-encoding:
     method: GET
@@ -94,8 +94,8 @@ requests:
       - { name: foo, value: 30%25+of+200, encode: false }
     tests:
       json:
-        url: https://postman-echo.com/get?foo=30%25%+of%+200
-        args: 30% of 200
+        $.url: https://postman-echo.com/get?foo=30%25%+of%+200
+        $.args: 30% of 200
 
   # The cookies endpoint does a redirect (no clue why), let's use that.
   no-redirects:
@@ -115,7 +115,7 @@ requests:
     tests:
       # code: 200 - this is inherited from common
       json:
-        cookies: { $exists: true } # Header names are case insensitive
+        $.cookies: { $exists: true } # Header names are case insensitive
 
   non-json:
     method: GET
@@ -147,11 +147,11 @@ requests:
       - { name: verbatim2, value: \\$(username) }
     tests:
       json:
-        args.replaced1: vasan.subramanian
-        args.replaced2: somevasan.subramanian
-        args.replaced3: somevasan.subramanianelse
-        args.verbatim1: { $ne: vasan.subramaniansome, $eq: $usernameelse }
-        args.verbatim2: { $ne: vasan.subramanian, $eq: \\($username) }
+        $.args.replaced1: vasan.subramanian
+        $.args.replaced2: somevasan.subramanian
+        $.args.replaced3: somevasan.subramanianelse
+        $.args.verbatim1: { $ne: vasan.subramaniansome, $eq: $usernameelse }
+        $.args.verbatim2: { $ne: vasan.subramanian, $eq: \\($username) }
 
   variables-in-headers:
     method: GET
@@ -160,7 +160,7 @@ requests:
       - { name: foo, value: $(fooValue) }
     tests:
       json:
-        headers.foo: bar
+        $.headers.foo: bar
 
   variables-in-body:
     method: POST
@@ -172,6 +172,6 @@ requests:
       }
     tests:
       json:
-        data.foo1: bar
-        data.foo2: { $type: number, $eq: 3.414 }
+        $.data.foo1: bar
+        $.data.foo2: { $type: number, $eq: 3.414 }
 

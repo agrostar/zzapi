@@ -56,7 +56,7 @@ You can find two sample bundles `doc.zz-bundle.yml` and `tests.zz-bundle.yml` in
 ## Top level objects
 
 * `common`: optional, applies to all requests. Each of the sub-elements is also optional.
-* `requests`: a list of Request objects
+* `requests`: a collection of requests as key-value pairs where the key is the request name (or title) and the value is a request object.
 
 ### common
 
@@ -69,7 +69,6 @@ You can find two sample bundles `doc.zz-bundle.yml` and `tests.zz-bundle.yml` in
 
 ### request
 
-* `name`: required, to identify the request and print it during all executions
 * `url`: required, URL of the request (baseUrl from common settings will be prefixed if the URL starts with a /)
 * `method`: required, one of GET, POST, PUT, PATCH etc
 * `headers`: an array of `header`s, in addition to the common set, or overridden if the name is the same
@@ -128,23 +127,22 @@ Assertions are similar to MongoDB filters. The key is the element (a path in cas
 Operators supported in the RHS are:
 * `$eq`, `$ne`, `$lt`, `$gt`, `$lte`, `$gte`: against the value
 * `$regex`: against the value, with `$options` like ignore-case
-* `$size`: for length of arrays, or the length of the string if it is not an array
+* `$size`: for length of arrays and objects, or the length of the string if it is not an array
 * `$exists`: true|false, to check existance of a field
 * `$type`: string|number|object|array|null: to ensure the type of the field
 
 ### json
 
-If there are any json tests, the response is parsed as JSON, provided the content type is `application/json`. The key of the test is a path to the (nested) field in the JSON document, using the . notation as in MongoDB filters. The kind of paths supported are:
+If there are any json tests, the response is parsed as JSON, provided the content type is `application/json`. The key of the test is a path to the (nested) field in the JSON document. The path is evaluated using JSONPATH (see https://www.npmjs.com/package/jsonpath and https://jsonpath.com/) and the first result is (or the result of jp.value) used as the value to test agains. Here are some examples:
 
-* `field.nested.value`: will match 10 if the response body is like `{ field: { nested: { value: 10 } } }` 
-* `field.0` will match 10 in  `{ field: [ 10, 20 ]}`
-* `field.0.value` will match 10 in  `{ field: [ { value: 10 }, { value: 20 } ]}`
+* `$.field.nested.value`: will match 10 if the response body is like `{ field: { nested: { value: 10 } } }` 
+* `$.field.0` or `field[0]` will match 10 in  `{ field: [ 10, 20 ]}`
+* `$.field.0.value` will match 10 in  `{ field: [ { value: 10 }, { value: 20 } ]}`
+* `$.field[?(@.name==x)].value` will match 10 in `{ field: [ { name: x, value: 10 }, { name: y, value: 20 } ]}`
 
-(Things like $elemMatch as in MongoDB filters may be supported in the future)
+If the result is a non-scalar (eg, the entire array) it will be used as is when matching against the operators `$size`, `$exists` and `$type`, otherwise will be converted to a string using `toString()`.
 
 ### capture
-
-(TODO)
 
 * `path`: the path of the field whose value needs to be saved (in the same format as tests)
 * `var`: the name of the variable into which the value is saved.
@@ -154,9 +152,8 @@ If there are any json tests, the response is parsed as JSON, provided the conten
 Variables are simple YAML files of a list of name value pairs. For example:
 
 ```
--
-  name: value
-  type: free
+name: value
+type: free
 ```
 
 ## Type
