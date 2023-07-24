@@ -1,6 +1,6 @@
 import * as YAML from "yaml";
 
-export interface RequestPosition {
+interface RequestPosition {
     name?: string;
     start: { line: number; col: number };
     end: { line: number; col: number };
