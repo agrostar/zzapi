@@ -1,5 +1,17 @@
-import { replaceVariablesInObject, replaceVariablesInArray } from "./variableReplacement";
+import {
+    replaceVariablesInObject,
+    replaceVariablesInArray,
+} from "./variableReplacement";
 
+/**
+ * @param body The body in got must be in a readable format
+ *  Thus, we ensure to return either string or undefined.
+ * @returns If body is undefined, we can return undefined as we
+ *  do not want to set a body in got options.
+ *  Else, if the body is not parsed as an object, we can return it
+ *      immediately as it must be a string of readable format.
+ *  If it is an object, we pass the stringified version.
+ */
 export function getBody(body: any) {
     if (body === undefined || !(typeof body === "object")) {
         return body;
@@ -8,9 +20,20 @@ export function getBody(body: any) {
     return JSON.stringify(body);
 }
 
-export function getHeadersAsJSON(
-    objectSet: Array<{ name: string; value: any }>
-) {
+/**
+ * @param objectSet May be an array of type {name: "name",  value: "value"}, or a JSON
+ *  object, or may remain undefined.
+ * @returns a JSON version of type {"name": "value", ....} that can be passed
+ *  as an option in got.
+ * If headers are defined in both the request itself as well as in "common",
+ *  then the objectSet may already be converted by the
+ *  @function getMergedDataExceptParamsAndTests, which is why we pass it back if it
+ *  it not an array. Else, we call @function getObjectSetAsJSON to perform the above
+ *  stated operation.
+ * If headers are not defined, then we do not want it as an option in got, so we
+ *  simply return undefined, as before.
+ */
+export function getHeadersAsJSON(objectSet: any) {
     //If both common and request has headers then mergeData itself will make it JSON,
     // so we can immediately return it, else we handle it ourselves
     if (objectSet === undefined || !Array.isArray(objectSet)) {
@@ -20,7 +43,10 @@ export function getHeadersAsJSON(
     return getObjectSetAsJSON(objectSet);
 }
 
-//converts an array of {name: , value: } objects into a JSON object
+/**
+ * @param objectSet an array of type {name: "name",  value: "value"}
+ * @returns a JSON object of type {"name": "value"} for each element in the array
+ */
 function getObjectSetAsJSON(objectSet: Array<{ name: string; value: any }>) {
     let finalObject: { [key: string]: any } = {};
 
@@ -37,29 +63,38 @@ function getObjectSetAsJSON(objectSet: Array<{ name: string; value: any }>) {
     return finalObject;
 }
 
-export function getHeadersAsString(headersObj: any) {
-    let formattedString = "\n";
-
-    for (const key in headersObj) {
-        if (headersObj.hasOwnProperty(key)) {
-            const value = headersObj[key];
-            formattedString += `\t${key}: ${value}\n`;
-        }
-    }
-
-    formattedString = formattedString.trim();
-    return `\n\t${formattedString}`;
-}
-
-export function getMergedDataExceptParams(
+/**
+ * @param commonData The data under "common" in the yaml bundle
+ * @param requestData The data of the particular request in the yaml bundle
+ *
+ * @returns the merged data except the parameters and the tests
+ */
+export function getMergedDataExceptParamsAndTests(
     commonData: any,
     requestData: any
 ): any {
+    delete commonData.params,
+        requestData.params,
+        commonData.tests,
+        requestData.tests;
+
+    return replaceVariablesInObject(getMergedData(commonData, requestData));
+}
+
+/**
+ * @param commonData Usually, the data under common in the yaml bundle, but may
+ *  represent any inferior JSON object, with values that need to be overwritten
+ *  by values in requestData in case of a common key.
+ * @param requestData Usually, the data of the particular request in the yaml bundle,
+ *  but may represent any superior JSON object.
+ *
+ * @returns the merged data, with requestData being given precedence.
+ */
+export function getMergedData(commonData: any, requestData: any) {
     let mergedData = Object.assign({}, commonData, requestData);
-    delete mergedData.params;
 
     for (const key in requestData) {
-        if (requestData.hasOwnProperty(key) && key !== "params") {
+        if (requestData.hasOwnProperty(key)) {
             if (
                 commonData.hasOwnProperty(key) &&
                 Array.isArray(requestData[key])
@@ -95,9 +130,15 @@ export function getMergedDataExceptParams(
         }
     }
 
-    return replaceVariablesInObject(mergedData);
+    return mergedData;
 }
 
+/**
+ * @param commonParams The params array under "common" in the yaml bundle
+ * @param requestParams the params array under the particular request in the yaml bundle
+ *
+ * @returns the string component representing the params to be appended to the URL
+ */
 export function getParamsForUrl(
     commonParams: Array<any>,
     requestParams: Array<any>

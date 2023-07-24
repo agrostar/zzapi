@@ -8,25 +8,34 @@ import {
 
 import {
     getParamsForUrl,
-    getMergedDataExceptParams,
+    getMergedDataExceptParamsAndTests,
+    // getMergedData,
     getBody,
     getHeadersAsJSON,
-    getHeadersAsString,
 } from "./getRequestData";
 
 import { loadVariables } from "./variableReplacement";
 
+/**
+ * @param commonData Stores data under "common" in the yaml bundle
+ * @param requestData Stores the data specific to the request with name "name"
+ * @param name Stores the name of the running request
+ *
+ * Calls @function individualRequestWithProgress to get the response, and opens
+ * it in an editor if it wasn't cancelled.
+ */
 export async function getIndividualResponse(
     commonData: any,
     requestData: any,
     name: string
 ) {
     loadVariables();
-    requestData["name"] = name;
-    const allData = getMergedDataExceptParams(commonData, requestData);
+    requestData.name = name;
+    const allData = getMergedDataExceptParamsAndTests(commonData, requestData);
     const params = getParamsForUrl(commonData.params, requestData.params);
+    // const tests = getMergedData(commonData.tests, requestData.tests);
 
-    let [reqCancelled, responseData] = await requestWithProgress(
+    let [reqCancelled, responseData] = await individualRequestWithProgress(
         allData,
         params
     );
@@ -35,6 +44,16 @@ export async function getIndividualResponse(
     }
 }
 
+/**
+ * @param commonData Stores the data under "common" in the yaml bundle
+ * @param allRequests Stores all the data of all the requests under "requests" in
+ *  the yaml bundle
+ *
+ * Calls @function individualRequestWithProgress for each request in @param allRequests
+ *      to get the response and appends it to an object containing all responses, if it
+ *      wasn't cancelled.
+ * Opens these responses in an editor, if there are any.
+ */
 export async function getAllResponses(
     commonData: any,
     allRequests: Array<any>
@@ -46,16 +65,17 @@ export async function getAllResponses(
     for (const name in allRequests) {
         if (allRequests.hasOwnProperty(name)) {
             let request = allRequests[name];
-            request["name"] = name;
-            const allData = getMergedDataExceptParams(commonData, request);
+            request.name = name;
+            const allData = getMergedDataExceptParamsAndTests(
+                commonData,
+                request
+            );
             const paramsForUrl = getParamsForUrl(
                 commonData.params,
                 request.params
             );
-            let [reqCancelled, responseData] = await requestWithProgress(
-                allData,
-                paramsForUrl
-            );
+            let [reqCancelled, responseData] =
+                await individualRequestWithProgress(allData, paramsForUrl);
             if (!reqCancelled) {
                 responses.push({ response: responseData, name: request.name });
                 atleastOneExecuted = true;
@@ -70,7 +90,17 @@ export async function getAllResponses(
     }
 }
 
-async function requestWithProgress(
+/**
+ * @param requestData Stores all the data of the the request, required to
+ *  run the request, except the parameters and the tests
+ * @param paramsForUrl Stores the parameter list to be appended to the URL
+ *
+ * @returns whether or not the request was cancelled, as well as the response data
+ *
+ * Calls @function constructRequest to create the request and @function executeHttpRequest
+ * to actually call it. Creates a response object and returns it.
+ */
+async function individualRequestWithProgress(
     requestData: any,
     paramsForUrl: string
 ): Promise<[boolean, object]> {
@@ -110,7 +140,7 @@ async function requestWithProgress(
                     executionTime: executionTime,
                     status: httpResponse.statusCode,
                     // statusText: httpResponse.statusMessage,
-                    content: httpResponse.body as string,
+                    json: httpResponse.body as string,
                     headers: getHeadersAsString(httpResponse.headers),
                     // rawHeaders: httpResponse.rawHeaders,
                     // httpVersion: httpResponse.httpVersion,
@@ -126,8 +156,34 @@ async function requestWithProgress(
     return [cancelled, response];
 }
 
+/**
+ * @param headersObj the headers in the http response
+ * @returns The headers in the http response in a readable format
+ *  to output into the editor, if required. 
+ */
+export function getHeadersAsString(headersObj: any) {
+    let formattedString = "\n";
+
+    for (const key in headersObj) {
+        if (headersObj.hasOwnProperty(key)) {
+            const value = headersObj[key];
+            formattedString += `\t${key}: ${value}\n`;
+        }
+    }
+
+    formattedString = formattedString.trim();
+    return `\n\t${formattedString}`;
+}
+
+/**
+ * @param allData The data to given to construct the request, except the params
+ * @param paramsForUrl Stores the parameter list to be appended to the URL
+ *
+ * @returns The constructed request using npm got, with the required options and URL
+ * Calls @function getURL to construct the URL using @param allData. 
+ */
 function constructRequest(allData: any, paramsForUrl: string) {
-    let completeUrl = getURL(allData, paramsForUrl);
+    let completeUrl = getURL(allData.baseUrl, allData.url, paramsForUrl);
 
     let options = {
         body: getBody(allData.body),
@@ -154,22 +210,39 @@ function constructRequest(allData: any, paramsForUrl: string) {
     }
 }
 
-function getURL(allData: any, paramsForUrl: string) {
+/**
+ * @param baseUrl Stores the base-url of the request, if any
+ * @param url Stores the url of the request, if any
+ * @param paramsForUrl Stores the parameter list to be appended to the URL
+ * 
+ * @returns The final URL used for the request. It also implements the 
+ *  override base url if the url does not begin with a forward-slash. 
+ */
+function getURL(
+    baseUrl: string | undefined,
+    url: string | undefined,
+    paramsForUrl: string
+) {
     let completeUrl = "";
-    if (allData.baseUrl !== undefined) {
-        completeUrl += allData.baseUrl;
+    if (baseUrl !== undefined) {
+        completeUrl += baseUrl;
     }
-    if (allData.url !== undefined) {
-        if (allData.url !== "" && allData.url[0] !== "/") {
-            return allData.url + paramsForUrl;
+    if (url !== undefined) {
+        if (url !== "" && url[0] !== "/") {
+            return url + paramsForUrl;
         } else {
-            completeUrl += allData.url;
+            completeUrl += url;
         }
     }
 
     return completeUrl + paramsForUrl;
 }
 
+/**
+ * @param httpRequest Executes the stored http request
+ * 
+ * @returns The response from executing the request
+ */
 async function executeHttpRequest(httpRequest: any) {
     try {
         return await httpRequest;

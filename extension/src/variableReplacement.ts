@@ -23,7 +23,7 @@ export function loadVariables() {
             let filePath = dirPath + filesToLoad[i];
             if (fs.existsSync(filePath)) {
                 let fileData = fs.readFileSync(filePath, "utf-8");
-                let parsedVariables = YAML.parse(fileData)[0];
+                let parsedVariables = YAML.parse(fileData);
 
                 for (const key in parsedVariables) {
                     if (parsedVariables.hasOwnProperty(key)) {
@@ -77,6 +77,9 @@ function replaceVariables(text: string): string {
         varRegexWithoutBraces,
         function (match) {
             const variable = match.slice(1);
+            if(variable === undefined){
+                return match;
+            }
             const varVal = variables[variable];
             if (varVal !== undefined) {
                 return varVal;

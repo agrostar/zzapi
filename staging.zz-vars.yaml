@@ -1,4 +1,3 @@
--
-  myserver: https://staging.example.com
-  username: $myUsername
-  authToken: $(stagingAuthToken)
+myserver: https://staging.example.com
+username: $myUsername
+authToken: $(stagingAuthToken)
