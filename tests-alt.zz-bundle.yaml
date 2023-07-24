@@ -136,7 +136,7 @@ requests:
         $.args.replaced2: somevasan.subramanian
         $.args.replaced3: somevasan.subramanianelse
         $.args.verbatim1: { $ne: vasan.subramaniansome, $eq: $usernameelse }
-        $.args.verbatim2: { $ne: vasan.subramanian, $eq: \($username) }
+        $.args.verbatim2: { $ne: vasan.subramanian, $eq: \$(username) }
 
   variables-in-headers:
     method: GET

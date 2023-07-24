@@ -47,7 +47,7 @@ export async function getIndividualResponse(
     );
     if (!reqCancelled) {
         await openEditorForIndividualReq(responseData, allData.name);
-        await runAllTests(tests, responseData);
+        await runAllTests(name, tests, responseData);
     }
 }
 
@@ -77,14 +77,17 @@ export async function getAllResponses(
                 commonData,
                 request
             );
-            const paramsForUrl = getParamsForUrl(
-                commonData.params,
-                request.params
-            );
+            allData.headers = setLowerCaseHeaderKeys(allData.headers);
+
+            const params = getParamsForUrl(commonData.params, request.params);
+            const tests = getMergedTests(commonData.tests, request.tests);
+
+            tests.headers = setLowerCaseHeaderKeys(tests.headers);
             let [reqCancelled, responseData] =
-                await individualRequestWithProgress(allData, paramsForUrl);
+                await individualRequestWithProgress(allData, params);
             if (!reqCancelled) {
                 responses.push({ response: responseData, name: request.name });
+                runAllTests(name, tests, responseData);
                 atleastOneExecuted = true;
             }
         }

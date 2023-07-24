@@ -1,23 +1,27 @@
 import jp from "jsonpath";
-import * as vscode from "vscode";
 import * as YAML from "yaml";
+import { getOutputChannel } from "./extension";
+import { OutputChannel } from "vscode";
 
-export async function runAllTests(tests: any, responseData: any) {
+let outputChannel: OutputChannel;
+const spaceBetweenTestAndStatus = "\t";
+
+export async function runAllTests(name: string, tests: any, responseData: any) {
     if (tests === undefined) {
         return;
     }
 
-    let results = "";
+    outputChannel = getOutputChannel();
+    outputChannel.appendLine("--------------------------------------");
+    outputChannel.appendLine(`Running Request '${name}'`);
     for (const test in tests) {
         if (tests.hasOwnProperty(test)) {
             if (test === "json") {
-                results += runJSONTests(
-                    tests.json,
-                    JSON.parse(responseData.body)
-                );
+                runJSONTests(tests.json, JSON.parse(responseData.body));
             } else if (test === "headers") {
                 const headers = YAML.parse(responseData.headers);
 
+                outputChannel.appendLine("Headers");
                 const headerTests = tests[test];
                 for (const headerTest in headerTests) {
                     if (headerTests.hasOwnProperty(headerTest)) {
@@ -26,12 +30,16 @@ export async function runAllTests(tests: any, responseData: any) {
 
                         if (typeof required !== "object") {
                             if (received === required) {
-                                results += `${test} : ${required} test PASSED\n`;
+                                outputChannel.appendLine(
+                                    `\tPASSED ${spaceBetweenTestAndStatus} ${headerTest} : ${required}`
+                                );
                             } else {
-                                results += `${test} : ${required} test FAILED received ${received}\n`;
+                                outputChannel.appendLine(
+                                    `\tFAILED ${spaceBetweenTestAndStatus} ${headerTest} : ${required} \t Received ${received}`
+                                );
                             }
                         } else {
-                            results += runObjectTests(required, received, test);
+                            runObjectTests(required, received, test);
                         }
                     }
                 }
@@ -41,23 +49,28 @@ export async function runAllTests(tests: any, responseData: any) {
 
                 if (typeof required !== "object") {
                     if (received === required) {
-                        results += `${test} : ${required} test PASSED\n`;
+                        outputChannel.appendLine(
+                            `PASSED ${spaceBetweenTestAndStatus} ${test} : ${required}`
+                        );
                     } else {
-                        results += `${test} : ${required} test FAILED received ${received}\n`;
+                        outputChannel.appendLine(
+                            `FAILED ${spaceBetweenTestAndStatus} ${test} : ${required} \t Received ${received}`
+                        );
                     }
                 } else {
-                    results += runObjectTests(required, received, test);
+                    runObjectTests(required, received, test);
                 }
             }
         }
     }
 
-    vscode.commands.executeCommand("workbench.action.newGroupBelow");
-    await openDocument(results);
+    outputChannel.appendLine("--------------------------------------");
+    outputChannel.show();
 }
 
 function runJSONTests(jsonTests: any, responseContent: object) {
     let testResult = "";
+    outputChannel.appendLine("JSON:");
     for (const key in jsonTests) {
         if (jsonTests.hasOwnProperty(key)) {
             const required = jsonTests[key];
@@ -66,12 +79,16 @@ function runJSONTests(jsonTests: any, responseContent: object) {
 
             if (typeof required !== "object") {
                 if (received === required) {
-                    testResult += `${key} : ${required} test PASSED\n`;
+                    outputChannel.appendLine(
+                        `\tPASSED ${spaceBetweenTestAndStatus} ${key} : ${required}`
+                    );
                 } else {
-                    testResult += `${key} : ${required} test FAILED received ${received}\n`;
+                    outputChannel.appendLine(
+                        `\tFAILED ${spaceBetweenTestAndStatus} ${key} : ${required} \t Received ${received}`
+                    );
                 }
             } else {
-                testResult += runObjectTests(required, received, key);
+                runObjectTests(required, received, key);
             }
         }
     }
@@ -81,7 +98,6 @@ function runJSONTests(jsonTests: any, responseContent: object) {
 
 //if RHS is an object
 function runObjectTests(required: any, received: any, keyName: string) {
-    let testResult = "";
     for (const key in required) {
         if (required.hasOwnProperty(key)) {
             let compareTo = required[key];
@@ -93,9 +109,13 @@ function runObjectTests(required: any, received: any, keyName: string) {
                 }
 
                 if (received === compareTo) {
-                    testResult += `${keyName} $eq ${compareTo} test PASSED\n`;
+                    outputChannel.appendLine(
+                        `\tPASSED ${spaceBetweenTestAndStatus} ${keyName} == ${compareTo} `
+                    );
                 } else {
-                    testResult += `${keyName} $eq ${compareTo} test FAILED received ${received}\n`;
+                    outputChannel.appendLine(
+                        `\tFAILED ${spaceBetweenTestAndStatus} ${keyName} == ${compareTo} \t Received ${received}`
+                    );
                 }
             } else if (key === "$ne") {
                 if (Array.isArray(compareTo)) {
@@ -105,9 +125,13 @@ function runObjectTests(required: any, received: any, keyName: string) {
                 }
 
                 if (received !== compareTo) {
-                    testResult += `${keyName} $ne ${compareTo} test PASSED\n`;
+                    outputChannel.appendLine(
+                        `\tPASSED ${spaceBetweenTestAndStatus} ${keyName} != ${compareTo} `
+                    );
                 } else {
-                    testResult += `${keyName} $ne ${compareTo} test FAILED received ${received}\n`;
+                    outputChannel.appendLine(
+                        `\tFAILED ${spaceBetweenTestAndStatus} ${keyName} != ${compareTo} \t Received ${received}`
+                    );
                 }
             } else if (key === "$lt") {
                 if (
@@ -115,9 +139,13 @@ function runObjectTests(required: any, received: any, keyName: string) {
                     canBeNumber(compareTo) &&
                     parseFloat(received) < parseFloat(compareTo)
                 ) {
-                    testResult += `${keyName} $lt ${compareTo} test PASSED\n`;
+                    outputChannel.appendLine(
+                        `\tPASSED ${spaceBetweenTestAndStatus} ${keyName} < ${compareTo} `
+                    );
                 } else {
-                    testResult += `${keyName} $lt ${compareTo} test FAILED received ${received}\n`;
+                    outputChannel.appendLine(
+                        `\tFAILED ${spaceBetweenTestAndStatus} ${keyName} < ${compareTo} \t Received ${received}`
+                    );
                 }
             } else if (key === "$gt") {
                 if (
@@ -125,9 +153,13 @@ function runObjectTests(required: any, received: any, keyName: string) {
                     canBeNumber(compareTo) &&
                     parseFloat(received) > parseFloat(compareTo)
                 ) {
-                    testResult += `${keyName} $gt ${compareTo} test PASSED\n`;
+                    outputChannel.appendLine(
+                        `\tPASSED ${spaceBetweenTestAndStatus} ${keyName} > ${compareTo}  `
+                    );
                 } else {
-                    testResult += `${keyName} $gt ${compareTo} test FAILED received ${received}\n`;
+                    outputChannel.appendLine(
+                        `\tFAILED ${spaceBetweenTestAndStatus} ${keyName} > ${compareTo} \t Received ${received}`
+                    );
                 }
             } else if (key === "$lte") {
                 if (
@@ -135,9 +167,13 @@ function runObjectTests(required: any, received: any, keyName: string) {
                     canBeNumber(compareTo) &&
                     parseFloat(received) <= parseFloat(compareTo)
                 ) {
-                    testResult += `${keyName} $lte ${compareTo} test PASSED\n`;
+                    outputChannel.appendLine(
+                        `\tPASSED ${spaceBetweenTestAndStatus} ${keyName} <= ${compareTo}  `
+                    );
                 } else {
-                    testResult += `${keyName} $lte ${compareTo} test FAILED received ${received}\n`;
+                    outputChannel.appendLine(
+                        `\tFAILED ${spaceBetweenTestAndStatus} ${keyName} <= ${compareTo} \t Received ${received}`
+                    );
                 }
             } else if (key === "$gte") {
                 if (
@@ -145,9 +181,13 @@ function runObjectTests(required: any, received: any, keyName: string) {
                     canBeNumber(compareTo) &&
                     parseFloat(received) >= parseFloat(compareTo)
                 ) {
-                    testResult += `${keyName} $gte ${compareTo} test PASSED\n`;
+                    outputChannel.appendLine(
+                        `\tPASSED ${spaceBetweenTestAndStatus} ${keyName} >= ${compareTo} `
+                    );
                 } else {
-                    testResult += `${keyName} $gte ${compareTo} test FAILED received ${received}\n`;
+                    outputChannel.appendLine(
+                        `\tFAILED ${spaceBetweenTestAndStatus} ${keyName} >= ${compareTo} \t Received ${received}`
+                    );
                 }
             } else if (key === "$size") {
                 let receivedLen: number;
@@ -166,27 +206,37 @@ function runObjectTests(required: any, received: any, keyName: string) {
                     canBeNumber(required) &&
                     receivedLen === parseInt(compareTo)
                 ) {
-                    testResult += `${keyName} $size ${compareTo} test PASSED\n`;
+                    outputChannel.appendLine(
+                        `\tPASSED ${spaceBetweenTestAndStatus} size of ${keyName} == ${compareTo} `
+                    );
                 } else {
-                    testResult += `${keyName} $size ${compareTo} test FAILED received ${received}\n`;
+                    outputChannel.appendLine(
+                        `\tFAILED ${spaceBetweenTestAndStatus} size of ${keyName} == ${compareTo} \t Received ${received} of size ${receivedLen}`
+                    );
                 }
             } else if (key === "$exists") {
                 if (received !== undefined) {
-                    testResult += `${keyName} $exists ${compareTo} test PASSED\n`;
+                    outputChannel.appendLine(
+                        `\tPASSED ${spaceBetweenTestAndStatus} ${keyName} exists ${compareTo}  `
+                    );
                 } else {
-                    testResult += `${keyName} $exists ${compareTo} test FAILED received ${received}\n`;
+                    outputChannel.appendLine(
+                        `\tFAILED ${spaceBetweenTestAndStatus} ${keyName} exists ${compareTo}  `
+                    );
                 }
             } else if (key === "$type") {
                 if (typeof received === compareTo) {
-                    testResult += `${keyName} $type ${compareTo} test PASSED\n`;
+                    outputChannel.appendLine(
+                        `\tPASSED ${spaceBetweenTestAndStatus} type of ${keyName} is ${compareTo}  `
+                    );
                 } else {
-                    testResult += `${keyName} $type ${compareTo} test FAILED received ${received}\n`;
+                    outputChannel.appendLine(
+                        `\tFAILED ${spaceBetweenTestAndStatus} type of ${keyName} is ${compareTo} \t Received ${received} of type ${typeof received}`
+                    );
                 }
             }
         }
     }
-
-    return testResult;
 }
 
 function canBeNumber(input: any): boolean {
@@ -198,15 +248,3 @@ function canBeNumber(input: any): boolean {
 
     return /^[+-]?\d+(\.\d+)?$/.test(input);
 }
-
-async function openDocument(content: string) {
-    await vscode.workspace
-        .openTextDocument({ content: content })
-        .then((document) => {
-            vscode.window.showTextDocument(document, {
-                preserveFocus: false,
-            });
-        });
-}
-
-// commands.executeCommand("workbench.action.newGroupBelow");

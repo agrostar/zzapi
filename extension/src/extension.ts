@@ -9,6 +9,7 @@ import {
     Disposable,
     ThemeColor,
     TextEditor,
+    OutputChannel,
 } from "vscode";
 
 import { CodeLensProvider } from "./CodeLensProviders";
@@ -92,6 +93,14 @@ export function activate(context: ExtensionContext) {
     commands.registerCommand("extension.runAllRequests", async () => {
         await registerRunAllRequests();
     });
+
+    outputChannel = window.createOutputChannel("zzAPI", "java");
+}
+
+let outputChannel: OutputChannel;
+
+export function getOutputChannel() {
+    return outputChannel;
 }
 
 /**
