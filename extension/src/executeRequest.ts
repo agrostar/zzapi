@@ -39,6 +39,7 @@ export async function getIndividualResponse(
 
     const params = getParamsForUrl(commonData.params, requestData.params);
     const tests = getMergedTests(commonData.tests, requestData.tests);
+    tests.headers = setLowerCaseHeaderKeys(tests.headers);
 
     let [reqCancelled, responseData] = await individualRequestWithProgress(
         allData,

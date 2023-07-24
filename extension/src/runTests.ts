@@ -16,7 +16,7 @@ export async function runAllTests(tests: any, responseData: any) {
                     JSON.parse(responseData.body)
                 );
             } else if (test === "headers") {
-                let headers = YAML.parse(responseData.headers);
+                const headers = YAML.parse(responseData.headers);
 
                 const headerTests = tests[test];
                 for (const headerTest in headerTests) {

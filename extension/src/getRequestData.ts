@@ -3,15 +3,15 @@ import {
     replaceVariablesInArray,
 } from "./variableReplacement";
 
-export function setLowerCaseHeaderKeys(headers: any): any{
-    if(headers === undefined){
+export function setLowerCaseHeaderKeys(headers: any): any {
+    if (headers === undefined) {
         return undefined;
     }
 
-    let newObj: {[key: string]: any} = {};
-    for(const key in headers){
-        if(headers.hasOwnProperty(key)){
-            newObj[key.toLocaleLowerCase()] = headers[key]; 
+    let newObj: { [key: string]: any } = {};
+    for (const key in headers) {
+        if (headers.hasOwnProperty(key)) {
+            newObj[key.toLocaleLowerCase()] = headers[key];
         }
     }
 
@@ -149,8 +149,8 @@ export function getMergedData(commonData: any, requestData: any) {
 }
 
 //reason for distinction from getMergedData is because of non-array specification
-// of headers as well as non-usage of name:, value: words. 
-export function getMergedTests(commonTests: any, requestTests: any){
+// of headers as well as non-usage of name:, value: words.
+export function getMergedTests(commonTests: any, requestTests: any) {
     let mergedData = Object.assign({}, commonTests, requestTests);
 
     for (const test in requestTests) {
@@ -165,7 +165,7 @@ export function getMergedTests(commonTests: any, requestTests: any){
                 //  thus, if there is a common key, then the requestTests value will overwrite
                 if (typeof commonTests[test] === "object") {
                     for (const cTest in commonTests[test]) {
-                        if(commonTests[test].hasOwnProperty(cTest)){
+                        if (commonTests[test].hasOwnProperty(cTest)) {
                             const key = cTest;
                             const value = commonTests[test][cTest];
                             finalKeyData[key] = value;
@@ -174,7 +174,7 @@ export function getMergedTests(commonTests: any, requestTests: any){
                 }
 
                 for (const rTest in requestTests[test]) {
-                    if(requestTests[test].hasOwnProperty(rTest)){
+                    if (requestTests[test].hasOwnProperty(rTest)) {
                         const key = rTest;
                         const value = requestTests[test][rTest];
                         finalKeyData[key] = value;
