@@ -94,7 +94,7 @@ export function activate(context: ExtensionContext) {
         await registerRunAllRequests();
     });
 
-    outputChannel = window.createOutputChannel("zzAPI", "java");
+    outputChannel = window.createOutputChannel("zzAPI");
 }
 
 let outputChannel: OutputChannel;

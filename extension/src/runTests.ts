@@ -5,6 +5,8 @@ import { OutputChannel } from "vscode";
 
 let outputChannel: OutputChannel;
 const spaceBetweenTestAndStatus = "\t";
+const fail = "❌FAILED";
+const pass = "✅PASSED";
 
 export async function runAllTests(name: string, tests: any, responseData: any) {
     if (tests === undefined) {
@@ -13,7 +15,7 @@ export async function runAllTests(name: string, tests: any, responseData: any) {
 
     outputChannel = getOutputChannel();
     outputChannel.appendLine("--------------------------------------");
-    outputChannel.appendLine(`Running Request '${name}'`);
+    outputChannel.appendLine(`Running Request '${name}'\n`);
     for (const test in tests) {
         if (tests.hasOwnProperty(test)) {
             if (test === "json") {
@@ -31,11 +33,11 @@ export async function runAllTests(name: string, tests: any, responseData: any) {
                         if (typeof required !== "object") {
                             if (received === required) {
                                 outputChannel.appendLine(
-                                    `\tPASSED ${spaceBetweenTestAndStatus} ${headerTest} : ${required}`
+                                    `\t${pass} ${spaceBetweenTestAndStatus} ${headerTest} : ${required}`
                                 );
                             } else {
                                 outputChannel.appendLine(
-                                    `\tFAILED ${spaceBetweenTestAndStatus} ${headerTest} : ${required} \t Received ${received}`
+                                    `\t${fail} ${spaceBetweenTestAndStatus} ${headerTest} : ${required} \t Received ${received}`
                                 );
                             }
                         } else {
@@ -50,11 +52,11 @@ export async function runAllTests(name: string, tests: any, responseData: any) {
                 if (typeof required !== "object") {
                     if (received === required) {
                         outputChannel.appendLine(
-                            `PASSED ${spaceBetweenTestAndStatus} ${test} : ${required}`
+                            `${pass} ${spaceBetweenTestAndStatus} ${test} : ${required}`
                         );
                     } else {
                         outputChannel.appendLine(
-                            `FAILED ${spaceBetweenTestAndStatus} ${test} : ${required} \t Received ${received}`
+                            `${fail} ${spaceBetweenTestAndStatus} ${test} : ${required} \t Received ${received}`
                         );
                     }
                 } else {
@@ -80,11 +82,11 @@ function runJSONTests(jsonTests: any, responseContent: object) {
             if (typeof required !== "object") {
                 if (received === required) {
                     outputChannel.appendLine(
-                        `\tPASSED ${spaceBetweenTestAndStatus} ${key} : ${required}`
+                        `\t${pass} ${spaceBetweenTestAndStatus} ${key} : ${required}`
                     );
                 } else {
                     outputChannel.appendLine(
-                        `\tFAILED ${spaceBetweenTestAndStatus} ${key} : ${required} \t Received ${received}`
+                        `\t${fail} ${spaceBetweenTestAndStatus} ${key} : ${required} \t Received ${received}`
                     );
                 }
             } else {
@@ -110,11 +112,11 @@ function runObjectTests(required: any, received: any, keyName: string) {
 
                 if (received === compareTo) {
                     outputChannel.appendLine(
-                        `\tPASSED ${spaceBetweenTestAndStatus} ${keyName} == ${compareTo} `
+                        `\t${pass} ${spaceBetweenTestAndStatus} ${keyName} == ${compareTo} `
                     );
                 } else {
                     outputChannel.appendLine(
-                        `\tFAILED ${spaceBetweenTestAndStatus} ${keyName} == ${compareTo} \t Received ${received}`
+                        `\t${fail} ${spaceBetweenTestAndStatus} ${keyName} == ${compareTo} \t Received ${received}`
                     );
                 }
             } else if (key === "$ne") {
@@ -126,11 +128,11 @@ function runObjectTests(required: any, received: any, keyName: string) {
 
                 if (received !== compareTo) {
                     outputChannel.appendLine(
-                        `\tPASSED ${spaceBetweenTestAndStatus} ${keyName} != ${compareTo} `
+                        `\t${pass} ${spaceBetweenTestAndStatus} ${keyName} != ${compareTo} `
                     );
                 } else {
                     outputChannel.appendLine(
-                        `\tFAILED ${spaceBetweenTestAndStatus} ${keyName} != ${compareTo} \t Received ${received}`
+                        `\t${fail} ${spaceBetweenTestAndStatus} ${keyName} != ${compareTo} \t Received ${received}`
                     );
                 }
             } else if (key === "$lt") {
@@ -140,11 +142,11 @@ function runObjectTests(required: any, received: any, keyName: string) {
                     parseFloat(received) < parseFloat(compareTo)
                 ) {
                     outputChannel.appendLine(
-                        `\tPASSED ${spaceBetweenTestAndStatus} ${keyName} < ${compareTo} `
+                        `\t${pass} ${spaceBetweenTestAndStatus} ${keyName} < ${compareTo} `
                     );
                 } else {
                     outputChannel.appendLine(
-                        `\tFAILED ${spaceBetweenTestAndStatus} ${keyName} < ${compareTo} \t Received ${received}`
+                        `\t${fail} ${spaceBetweenTestAndStatus} ${keyName} < ${compareTo} \t Received ${received}`
                     );
                 }
             } else if (key === "$gt") {
@@ -154,11 +156,11 @@ function runObjectTests(required: any, received: any, keyName: string) {
                     parseFloat(received) > parseFloat(compareTo)
                 ) {
                     outputChannel.appendLine(
-                        `\tPASSED ${spaceBetweenTestAndStatus} ${keyName} > ${compareTo}  `
+                        `\t${pass} ${spaceBetweenTestAndStatus} ${keyName} > ${compareTo}  `
                     );
                 } else {
                     outputChannel.appendLine(
-                        `\tFAILED ${spaceBetweenTestAndStatus} ${keyName} > ${compareTo} \t Received ${received}`
+                        `\t${fail} ${spaceBetweenTestAndStatus} ${keyName} > ${compareTo} \t Received ${received}`
                     );
                 }
             } else if (key === "$lte") {
@@ -168,11 +170,11 @@ function runObjectTests(required: any, received: any, keyName: string) {
                     parseFloat(received) <= parseFloat(compareTo)
                 ) {
                     outputChannel.appendLine(
-                        `\tPASSED ${spaceBetweenTestAndStatus} ${keyName} <= ${compareTo}  `
+                        `\t${pass} ${spaceBetweenTestAndStatus} ${keyName} <= ${compareTo}  `
                     );
                 } else {
                     outputChannel.appendLine(
-                        `\tFAILED ${spaceBetweenTestAndStatus} ${keyName} <= ${compareTo} \t Received ${received}`
+                        `\t${fail} ${spaceBetweenTestAndStatus} ${keyName} <= ${compareTo} \t Received ${received}`
                     );
                 }
             } else if (key === "$gte") {
@@ -182,11 +184,11 @@ function runObjectTests(required: any, received: any, keyName: string) {
                     parseFloat(received) >= parseFloat(compareTo)
                 ) {
                     outputChannel.appendLine(
-                        `\tPASSED ${spaceBetweenTestAndStatus} ${keyName} >= ${compareTo} `
+                        `\t${pass} ${spaceBetweenTestAndStatus} ${keyName} >= ${compareTo} `
                     );
                 } else {
                     outputChannel.appendLine(
-                        `\tFAILED ${spaceBetweenTestAndStatus} ${keyName} >= ${compareTo} \t Received ${received}`
+                        `\t${fail} ${spaceBetweenTestAndStatus} ${keyName} >= ${compareTo} \t Received ${received}`
                     );
                 }
             } else if (key === "$size") {
@@ -207,31 +209,31 @@ function runObjectTests(required: any, received: any, keyName: string) {
                     receivedLen === parseInt(compareTo)
                 ) {
                     outputChannel.appendLine(
-                        `\tPASSED ${spaceBetweenTestAndStatus} size of ${keyName} == ${compareTo} `
+                        `\t${pass} ${spaceBetweenTestAndStatus} size of ${keyName} == ${compareTo} `
                     );
                 } else {
                     outputChannel.appendLine(
-                        `\tFAILED ${spaceBetweenTestAndStatus} size of ${keyName} == ${compareTo} \t Received ${received} of size ${receivedLen}`
+                        `\t${fail} ${spaceBetweenTestAndStatus} size of ${keyName} == ${compareTo} \t Received ${received} of size ${receivedLen}`
                     );
                 }
             } else if (key === "$exists") {
                 if (received !== undefined) {
                     outputChannel.appendLine(
-                        `\tPASSED ${spaceBetweenTestAndStatus} ${keyName} exists ${compareTo}  `
+                        `\t${pass} ${spaceBetweenTestAndStatus} ${keyName} exists ${compareTo}  `
                     );
                 } else {
                     outputChannel.appendLine(
-                        `\tFAILED ${spaceBetweenTestAndStatus} ${keyName} exists ${compareTo}  `
+                        `\t${fail} ${spaceBetweenTestAndStatus} ${keyName} exists ${compareTo}  `
                     );
                 }
             } else if (key === "$type") {
                 if (typeof received === compareTo) {
                     outputChannel.appendLine(
-                        `\tPASSED ${spaceBetweenTestAndStatus} type of ${keyName} is ${compareTo}  `
+                        `\t${pass} ${spaceBetweenTestAndStatus} type of ${keyName} is ${compareTo}  `
                     );
                 } else {
                     outputChannel.appendLine(
-                        `\tFAILED ${spaceBetweenTestAndStatus} type of ${keyName} is ${compareTo} \t Received ${received} of type ${typeof received}`
+                        `\t${fail} ${spaceBetweenTestAndStatus} type of ${keyName} is ${compareTo} \t Received ${received} of type ${typeof received}`
                     );
                 }
             }

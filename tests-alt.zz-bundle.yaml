@@ -85,7 +85,7 @@ requests:
     tests:
       json:
         $.url: https://postman-echo.com/get?foo=30%25%+of%+200
-        $.args: 30% of 200
+        $.args.foo: 30% of 200
 
   # The cookies endpoint does a redirect (no clue why), let's use that.
   no-redirects:
