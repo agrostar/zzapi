@@ -14,6 +14,8 @@ export async function runAllTests(name: string, tests: any, responseData: any) {
     }
 
     outputChannel = getOutputChannel();
+    outputChannel.show();
+
     outputChannel.appendLine("--------------------------------------");
     outputChannel.appendLine(`Running Request '${name}'\n`);
     for (const test in tests) {
@@ -67,7 +69,7 @@ export async function runAllTests(name: string, tests: any, responseData: any) {
     }
 
     outputChannel.appendLine("--------------------------------------");
-    outputChannel.show();
+    // outputChannel.show();
 }
 
 function runJSONTests(jsonTests: any, responseContent: object) {
@@ -192,7 +194,7 @@ function runObjectTests(required: any, received: any, keyName: string) {
                     );
                 }
             } else if (key === "$size") {
-                let receivedLen: number;
+                let receivedLen: number | undefined = undefined;
                 if (typeof received === "object") {
                     receivedLen = Object.keys(received).length;
                 } else if (
@@ -200,12 +202,11 @@ function runObjectTests(required: any, received: any, keyName: string) {
                     Array.isArray(received)
                 ) {
                     receivedLen = received.length;
-                } else {
-                    receivedLen = 0;
                 }
 
                 if (
-                    canBeNumber(required) &&
+                    receivedLen !== undefined &&
+                    canBeNumber(compareTo) &&
                     receivedLen === parseInt(compareTo)
                 ) {
                     outputChannel.appendLine(
@@ -217,7 +218,10 @@ function runObjectTests(required: any, received: any, keyName: string) {
                     );
                 }
             } else if (key === "$exists") {
-                if (received !== undefined) {
+                if (
+                    typeof compareTo === "boolean" &&
+                    (received !== undefined) === compareTo
+                ) {
                     outputChannel.appendLine(
                         `\t${pass} ${spaceBetweenTestAndStatus} ${keyName} exists ${compareTo}  `
                     );
@@ -227,9 +231,15 @@ function runObjectTests(required: any, received: any, keyName: string) {
                     );
                 }
             } else if (key === "$type") {
-                if (typeof received === compareTo) {
+                if (
+                    (typeof compareTo === "string" &&
+                        compareTo.toLowerCase() === "array" &&
+                        Array.isArray(received)) ||
+                    (compareTo === null && received === null) ||
+                    typeof received === compareTo
+                ) {
                     outputChannel.appendLine(
-                        `\t${pass} ${spaceBetweenTestAndStatus} type of ${keyName} is ${compareTo}  `
+                        `\t${pass} ${spaceBetweenTestAndStatus} type of ${keyName} is ${compareTo}`
                     );
                 } else {
                     outputChannel.appendLine(

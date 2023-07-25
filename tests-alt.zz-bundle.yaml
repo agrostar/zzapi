@@ -185,22 +185,22 @@ requests:
       }
     tests:
       json:
-        $.firstName: John
-        $.age: { $type: number, $eq: 26, $ne: "26" }
-        $.address: { $type: object, $size: 3, $exists: true }
-        $.address.city: Nara
-        $.address.postalCode: { $type: string, $size: 6, $ne: 560034 }
-        $.phoneNumbers: { $type: array, $size: 2, $exists: true }
-        $.phoneNumbers[0].type: mobile
-        $.phoneNumbers.0.type: mobile
-        $.phoneNumbers[?(@.type=="home")].number: "0123-4567-8910"
-        $.lastName: { $exists: true }
-        $.middleName: { $exists: true, $type: null }
-        $.otherName: { $exists: false }
-        $.phoneNumbers[*].type: '["mobile","home"]'
-        $.phoneNumbers[*].available: '[[7,22],[18,22]]'
+        $.data.firstName: John
+        $.data.age: { $type: number, $eq: 26, $ne: "26" }
+        $.data.address: { $type: object, $size: 3, $exists: true }
+        $.data.address.city: Nara
+        $.data.address.postalCode: { $type: string, $size: 6, $ne: 560034 }
+        $.data.phoneNumbers: { $type: array, $size: 2, $exists: true }
+        $.data.phoneNumbers[0].type: mobile
+        $.data.phoneNumbers.0.type: mobile
+        $.data.phoneNumbers[?(@.type=="home")].number: "0123-4567-8910"
+        $.data.lastName: { $exists: true }
+        $.data.middleName: { $exists: true, $type: null }
+        $.data.otherName: { $exists: false }
+        $.data.phoneNumbers[*].type: '["mobile","home"]'
+        $.data.phoneNumbers[*].available: '[[7,22],[18,22]]'
         # stress: ensure corner cases don't crash
-        $.otherName.value: { $exists: false } # don't recurse down undefined
+        $.data.otherName.value: { $exists: false } # don't recurse down undefined
         
 
   # All these tests should fail
@@ -215,16 +215,16 @@ requests:
       }
     tests:
       json:
-        $.name: { $type: array }
-        $.missing: { $size: 0, $exists: true } # should report 2 failures
-        $.missing.missing.missing: { $exists: true }
-        $.numbers.0: "1" # "1" is not same as 1. We use === for $eq and !== for $neq
+        $.data.name: { $type: array }
+        $.data.missing: { $size: 0, $exists: true } # should report 2 failures
+        $.data.missing.missing.missing: { $exists: true }
+        $.data.numbers.0: "1" # "1" is not same as 1. We use === for $eq and !== for $neq
 
         # stress: ensure corner cases don't crash
-        $.age: { $size: 2 }  # .length not supported for type: number
-        $.operator: { $badop: any }  # invalid operator
-        $.values: { $ne: [1, 2] } # invalid assertion value, expecitng a scalar
-        $.value: { $ne: { nonesting: any } } # invalid assertion value, expecting a scalar
-        $.numbers: { $size: two } # invalid assertion value, expecting a number
-        $.exists: { $exists: 4 } # invalid assertion value, expecitng a boolean
-        $.numbers[?(.@)]: 4 # invalid path
+        $.data.age: { $size: 2 }  # .length not supported for type: number
+        $.data.operator: { $badop: any }  # invalid operator
+        $.data.values: { $ne: [1, 2] } # invalid assertion value, expecitng a scalar
+        $.data.value: { $ne: { nonesting: any } } # invalid assertion value, expecting a scalar
+        $.data.numbers: { $size: two } # invalid assertion value, expecting a number
+        $.data.exists: { $exists: 4 } # invalid assertion value, expecitng a boolean
+        $.data.numbers[?(.@)]: 4 # invalid path
