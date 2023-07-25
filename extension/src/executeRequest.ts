@@ -41,13 +41,13 @@ export async function getIndividualResponse(
     const tests = getMergedTests(commonData.tests, requestData.tests);
     tests.headers = setLowerCaseHeaderKeys(tests.headers);
 
-    let [reqCancelled, responseData] = await individualRequestWithProgress(
+    let [reqCancelled, responseData, headers] = await individualRequestWithProgress(
         allData,
         params
     );
     if (!reqCancelled) {
         await openEditorForIndividualReq(responseData, allData.name);
-        await runAllTests(name, tests, responseData);
+        await runAllTests(name, tests, responseData, headers);
     }
 }
 
@@ -83,11 +83,11 @@ export async function getAllResponses(
             const tests = getMergedTests(commonData.tests, request.tests);
 
             tests.headers = setLowerCaseHeaderKeys(tests.headers);
-            let [reqCancelled, responseData] =
+            let [reqCancelled, responseData, headers] =
                 await individualRequestWithProgress(allData, params);
             if (!reqCancelled) {
                 responses.push({ response: responseData, name: request.name });
-                runAllTests(name, tests, responseData);
+                runAllTests(name, tests, responseData, headers);
                 atleastOneExecuted = true;
             }
         }
@@ -113,10 +113,10 @@ export async function getAllResponses(
 async function individualRequestWithProgress(
     requestData: any,
     paramsForUrl: string
-): Promise<[boolean, object]> {
+): Promise<[boolean, object, object | undefined]> {
     let seconds = 0;
 
-    const [cancelled, response]: any = await window.withProgress(
+    const [cancelled, response, headers]: any = await window.withProgress(
         {
             location: ProgressLocation.Window,
             cancellable: true,
@@ -145,25 +145,25 @@ async function individualRequestWithProgress(
             const executionTime = new Date().getTime() - startTime;
 
             clearInterval(interval);
+            // displaying rawHeaders, testing against headers
             if (!cancelled) {
                 response = {
                     executionTime: executionTime,
                     status: httpResponse.statusCode,
                     // statusText: httpResponse.statusMessage,
                     body: httpResponse.body as string,
-                    headers: getHeadersAsString(httpResponse.headers),
-                    // rawHeaders: httpResponse.rawHeaders,
+                    headers: getHeadersAsString(httpResponse.rawHeaders),
                     // httpVersion: httpResponse.httpVersion,
                 };
 
-                return [false, response];
+                return [false, response, httpResponse.headers];
             }
 
-            return [cancelled, httpResponse];
+            return [cancelled, httpResponse, httpResponse.headers];
         }
     );
 
-    return [cancelled, response];
+    return [cancelled, response, headers];
 }
 
 /**
@@ -171,14 +171,22 @@ async function individualRequestWithProgress(
  * @returns The headers in the http response in a readable format
  *  to output into the editor, if required.
  */
-export function getHeadersAsString(headersObj: any) {
+export function getHeadersAsString(headersObj: Array<string>) {
     let formattedString = "\n";
+    if(headersObj === undefined){
+        return formattedString;
+    }
 
-    for (const key in headersObj) {
-        if (headersObj.hasOwnProperty(key)) {
-            const value = headersObj[key];
-            formattedString += `  ${key}: ${value}\n`;
-        }
+    // for (const key in headersObj) {
+    //     if (headersObj.hasOwnProperty(key)) {
+    //         const value = headersObj[key];
+    //         formattedString += `  ${key}: ${value}\n`;
+    //     }
+    // }
+
+    const numElement = headersObj.length;
+    for(let i = 0; i < numElement - 1; i += 2){
+        formattedString += `  ${headersObj[i]}: ${headersObj[i+1]}\n`;
     }
 
     formattedString = formattedString.trim();

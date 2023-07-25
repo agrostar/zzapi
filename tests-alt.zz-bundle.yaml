@@ -19,7 +19,7 @@ common:
   tests:
     status: 200
     headers:
-      Content-type: application/json
+      Content-type: application/json; charset=utf-8
 
 requests:
 
@@ -228,3 +228,10 @@ requests:
         $.data.numbers: { $size: two } # invalid assertion value, expecting a number
         $.data.exists: { $exists: 4 } # invalid assertion value, expecitng a boolean
         $.data.numbers[?(.@)]: 4 # invalid path
+        
+  extra-test:
+    method: GOT
+    url: https://test-farmerapp.agrostar.in/userservice/ping/
+    tests: 
+      headers:
+        Content-type: application/json

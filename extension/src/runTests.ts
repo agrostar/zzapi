@@ -1,5 +1,4 @@
 import jp from "jsonpath";
-import * as YAML from "yaml";
 import { getOutputChannel } from "./extension";
 import { OutputChannel } from "vscode";
 
@@ -8,7 +7,17 @@ const spaceBetweenTestAndStatus = "\t";
 const fail = "❌FAILED";
 const pass = "✅PASSED";
 
-export async function runAllTests(name: string, tests: any, responseData: any) {
+function getStringIfScalar(data: any) {
+    if (Array.isArray(data)) {
+        return data.toString();
+    } else if (typeof data === "object") {
+        return JSON.stringify(data);
+    }
+
+    return data;
+}
+
+export async function runAllTests(name: string, tests: any, responseData: any, headers: any) {
     if (tests === undefined) {
         return;
     }
@@ -16,15 +25,21 @@ export async function runAllTests(name: string, tests: any, responseData: any) {
     outputChannel = getOutputChannel();
     outputChannel.show();
 
+    let numFailed: number = 0;
+    let numTests: number = 0;
+
     outputChannel.appendLine("--------------------------------------");
     outputChannel.appendLine(`Running Request '${name}'\n`);
     for (const test in tests) {
         if (tests.hasOwnProperty(test)) {
             if (test === "json") {
-                runJSONTests(tests.json, JSON.parse(responseData.body));
+                const [incrementNumFailed, incrementNumTests] = runJSONTests(
+                    tests.json,
+                    JSON.parse(responseData.body)
+                );
+                numFailed += incrementNumFailed;
+                numTests += incrementNumTests;
             } else if (test === "headers") {
-                const headers = YAML.parse(responseData.headers);
-
                 outputChannel.appendLine("Headers");
                 const headerTests = tests[test];
                 for (const headerTest in headerTests) {
@@ -33,6 +48,8 @@ export async function runAllTests(name: string, tests: any, responseData: any) {
                         let received = headers[headerTest];
 
                         if (typeof required !== "object") {
+                            required = getStringIfScalar(required);
+                            received = getStringIfScalar(received);
                             if (received === required) {
                                 outputChannel.appendLine(
                                     `\t${pass} ${spaceBetweenTestAndStatus} ${headerTest} : ${required}`
@@ -41,17 +58,24 @@ export async function runAllTests(name: string, tests: any, responseData: any) {
                                 outputChannel.appendLine(
                                     `\t${fail} ${spaceBetweenTestAndStatus} ${headerTest} : ${required} \t Received ${received}`
                                 );
+                                numFailed++;
                             }
+                            numTests++;
                         } else {
-                            runObjectTests(required, received, test);
+                            const [incrementNumFailed, incrementNumTests] =
+                                runObjectTests(required, received, test);
+                            numFailed += incrementNumFailed;
+                            numTests += incrementNumTests;
                         }
                     }
                 }
             } else {
-                const required = tests[test];
-                const received = responseData[test];
+                let required = tests[test];
+                let received = responseData[test];
 
                 if (typeof required !== "object") {
+                    required = getStringIfScalar(required);
+                    received = getStringIfScalar(received);
                     if (received === required) {
                         outputChannel.appendLine(
                             `${pass} ${spaceBetweenTestAndStatus} ${test} : ${required}`
@@ -60,28 +84,41 @@ export async function runAllTests(name: string, tests: any, responseData: any) {
                         outputChannel.appendLine(
                             `${fail} ${spaceBetweenTestAndStatus} ${test} : ${required} \t Received ${received}`
                         );
+                        numFailed++;
                     }
+                    numTests++;
                 } else {
-                    runObjectTests(required, received, test);
+                    const [incrementNumFailed, incrementNumTests] =
+                        runObjectTests(required, received, test);
+                    numFailed += incrementNumFailed;
+                    numTests += incrementNumTests;
                 }
             }
         }
     }
 
+    const numPassed = numTests - numFailed;
+    outputChannel.appendLine(
+        `\n${fail}: ${numFailed}/${numTests}\t\t${pass}: ${numPassed}/${numTests}`
+    );
     outputChannel.appendLine("--------------------------------------");
     // outputChannel.show();
 }
 
 function runJSONTests(jsonTests: any, responseContent: object) {
-    let testResult = "";
+    let numFailed = 0;
+    let numTests = 0;
+
     outputChannel.appendLine("JSON:");
     for (const key in jsonTests) {
         if (jsonTests.hasOwnProperty(key)) {
-            const required = jsonTests[key];
+            let required = jsonTests[key];
 
             let received = jp.value(responseContent, key);
 
             if (typeof required !== "object") {
+                required = getStringIfScalar(required);
+                received = getStringIfScalar(received);
                 if (received === required) {
                     outputChannel.appendLine(
                         `\t${pass} ${spaceBetweenTestAndStatus} ${key} : ${required}`
@@ -90,27 +127,35 @@ function runJSONTests(jsonTests: any, responseContent: object) {
                     outputChannel.appendLine(
                         `\t${fail} ${spaceBetweenTestAndStatus} ${key} : ${required} \t Received ${received}`
                     );
+                    numFailed++;
                 }
+                numTests++;
             } else {
-                runObjectTests(required, received, key);
+                const [incrementNumFailed, incrementNumTests] = runObjectTests(
+                    required,
+                    received,
+                    key
+                );
+                numFailed += incrementNumFailed;
+                numTests += incrementNumTests;
             }
         }
     }
 
-    return testResult;
+    return [numFailed, numTests];
 }
 
 //if RHS is an object
 function runObjectTests(required: any, received: any, keyName: string) {
+    let numFailed = 0;
+    let numTests = 0;
+
     for (const key in required) {
         if (required.hasOwnProperty(key)) {
             let compareTo = required[key];
             if (key === "$eq") {
-                if (Array.isArray(compareTo)) {
-                    compareTo = compareTo.toString();
-                } else if (typeof compareTo === "object") {
-                    compareTo = JSON.stringify(compareTo);
-                }
+                compareTo = getStringIfScalar(compareTo);
+                received = getStringIfScalar(compareTo);
 
                 if (received === compareTo) {
                     outputChannel.appendLine(
@@ -120,7 +165,9 @@ function runObjectTests(required: any, received: any, keyName: string) {
                     outputChannel.appendLine(
                         `\t${fail} ${spaceBetweenTestAndStatus} ${keyName} == ${compareTo} \t Received ${received}`
                     );
+                    numFailed++;
                 }
+                numTests++;
             } else if (key === "$ne") {
                 if (Array.isArray(compareTo)) {
                     compareTo = compareTo.toString();
@@ -136,7 +183,9 @@ function runObjectTests(required: any, received: any, keyName: string) {
                     outputChannel.appendLine(
                         `\t${fail} ${spaceBetweenTestAndStatus} ${keyName} != ${compareTo} \t Received ${received}`
                     );
+                    numFailed++;
                 }
+                numTests++;
             } else if (key === "$lt") {
                 if (
                     canBeNumber(received) &&
@@ -150,7 +199,9 @@ function runObjectTests(required: any, received: any, keyName: string) {
                     outputChannel.appendLine(
                         `\t${fail} ${spaceBetweenTestAndStatus} ${keyName} < ${compareTo} \t Received ${received}`
                     );
+                    numFailed++;
                 }
+                numTests++;
             } else if (key === "$gt") {
                 if (
                     canBeNumber(received) &&
@@ -164,7 +215,9 @@ function runObjectTests(required: any, received: any, keyName: string) {
                     outputChannel.appendLine(
                         `\t${fail} ${spaceBetweenTestAndStatus} ${keyName} > ${compareTo} \t Received ${received}`
                     );
+                    numFailed++;
                 }
+                numTests++;
             } else if (key === "$lte") {
                 if (
                     canBeNumber(received) &&
@@ -178,7 +231,9 @@ function runObjectTests(required: any, received: any, keyName: string) {
                     outputChannel.appendLine(
                         `\t${fail} ${spaceBetweenTestAndStatus} ${keyName} <= ${compareTo} \t Received ${received}`
                     );
+                    numFailed++;
                 }
+                numTests++;
             } else if (key === "$gte") {
                 if (
                     canBeNumber(received) &&
@@ -192,7 +247,9 @@ function runObjectTests(required: any, received: any, keyName: string) {
                     outputChannel.appendLine(
                         `\t${fail} ${spaceBetweenTestAndStatus} ${keyName} >= ${compareTo} \t Received ${received}`
                     );
+                    numFailed++;
                 }
+                numTests++;
             } else if (key === "$size") {
                 let receivedLen: number | undefined = undefined;
                 if (typeof received === "object") {
@@ -216,7 +273,9 @@ function runObjectTests(required: any, received: any, keyName: string) {
                     outputChannel.appendLine(
                         `\t${fail} ${spaceBetweenTestAndStatus} size of ${keyName} == ${compareTo} \t Received ${received} of size ${receivedLen}`
                     );
+                    numFailed++;
                 }
+                numTests++;
             } else if (key === "$exists") {
                 if (
                     typeof compareTo === "boolean" &&
@@ -229,7 +288,9 @@ function runObjectTests(required: any, received: any, keyName: string) {
                     outputChannel.appendLine(
                         `\t${fail} ${spaceBetweenTestAndStatus} ${keyName} exists ${compareTo}  `
                     );
+                    numFailed++;
                 }
+                numTests++;
             } else if (key === "$type") {
                 if (
                     (typeof compareTo === "string" &&
@@ -245,10 +306,14 @@ function runObjectTests(required: any, received: any, keyName: string) {
                     outputChannel.appendLine(
                         `\t${fail} ${spaceBetweenTestAndStatus} type of ${keyName} is ${compareTo} \t Received ${received} of type ${typeof received}`
                     );
+                    numFailed++;
                 }
+                numTests++;
             }
         }
     }
+
+    return [numFailed, numTests];
 }
 
 function canBeNumber(input: any): boolean {
