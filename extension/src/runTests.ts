@@ -4,20 +4,26 @@ import { OutputChannel } from "vscode";
 
 let outputChannel: OutputChannel;
 const spaceBetweenTestAndStatus = "\t";
-const fail = "❌FAILED";
-const pass = "✅PASSED";
+const fail = "❌ FAILED";
+const pass = "✅ PASSED";
 
 function getStringIfScalar(data: any) {
-    if (Array.isArray(data)) {
-        return data.toString();
-    } else if (typeof data === "object") {
+    if (
+        data !== undefined &&
+        (Array.isArray(data) || typeof data === "object")
+    ) {
         return JSON.stringify(data);
     }
 
     return data;
 }
 
-export async function runAllTests(name: string, tests: any, responseData: any, headers: any) {
+export async function runAllTests(
+    name: string,
+    tests: any,
+    responseData: any,
+    headers: any
+) {
     if (tests === undefined) {
         return;
     }

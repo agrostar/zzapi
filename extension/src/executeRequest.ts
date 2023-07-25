@@ -41,10 +41,8 @@ export async function getIndividualResponse(
     const tests = getMergedTests(commonData.tests, requestData.tests);
     tests.headers = setLowerCaseHeaderKeys(tests.headers);
 
-    let [reqCancelled, responseData, headers] = await individualRequestWithProgress(
-        allData,
-        params
-    );
+    let [reqCancelled, responseData, headers] =
+        await individualRequestWithProgress(allData, params);
     if (!reqCancelled) {
         await openEditorForIndividualReq(responseData, allData.name);
         await runAllTests(name, tests, responseData, headers);
@@ -167,32 +165,23 @@ async function individualRequestWithProgress(
 }
 
 /**
- * @param headersObj the headers in the http response
+ * @param headersObj the rawHeaders in the http response
  * @returns The headers in the http response in a readable format
  *  to output into the editor, if required.
  */
 export function getHeadersAsString(headersObj: Array<string>) {
     let formattedString = "\n";
-    if(headersObj === undefined){
+    if (headersObj === undefined) {
         return formattedString;
     }
 
-    // for (const key in headersObj) {
-    //     if (headersObj.hasOwnProperty(key)) {
-    //         const value = headersObj[key];
-    //         formattedString += `  ${key}: ${value}\n`;
-    //     }
-    // }
-
     const numElement = headersObj.length;
-    for(let i = 0; i < numElement - 1; i += 2){
-        formattedString += `  ${headersObj[i]}: ${headersObj[i+1]}\n`;
+    for (let i = 0; i < numElement - 1; i += 2) {
+        formattedString += `\t${headersObj[i]}: ${headersObj[i + 1]}\n`;
     }
 
     formattedString = formattedString.trim();
-    return `\n  ${formattedString}`;
-
-    // return YAML.stringify(headersObj);
+    return `\n\t${formattedString}`;
 }
 
 /**

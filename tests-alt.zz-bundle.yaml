@@ -213,9 +213,9 @@ requests:
     url: /post
     body: |-
       {
-        age: 26
-        name: John
-        numbers: [ 1, 2 ]
+        "age": 26,
+        "name": "John",
+        "numbers": [ 1, 2 ]
       }
     tests:
       json:
