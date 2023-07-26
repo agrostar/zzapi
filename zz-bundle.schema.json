@@ -65,7 +65,7 @@
           "type": "object",
           "additionalProperties": false,
           "properties": {
-            "$eq": { "$ref": "#/$defs/scalar" },
+            "$eq": { "description": "Equals" },
             "$ne": { "$ref": "#/$defs/scalar" },
             "$lt": { "$ref": "#/$defs/scalar" },
             "$gt": { "$ref": "#/$defs/scalar" },
@@ -132,31 +132,32 @@
       }
     },
     "requests": {
-      "type": "array",
+      "type": "object",
       "description": "Each request defines an HTTP request",
-      "items": {
-        "type": "object",
-        "required": ["name", "url", "method"],
-        "properties": {
-          "name": { "type": "string" },
-          "url": { "type": "string" },
-          "method": {
-            "type": "string",
-            "enum": ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"]
-          },
-          "headers": {
-            "description": "HTTP Headers to be sent as part of the request. This is in addition to any header defined in common. Headers can be overridden.",
-            "type": "array",
-            "items": { "$ref": "#/$defs/header" }
-          },
-          "params": {
-            "description": "Query string parameters",
-            "type": "array",
-            "items": { "$ref": "#/$defs/param" }
-          },
-          "options": { "$ref": "#/$defs/options" },
-          "tests": { "$ref": "#/$defs/tests" }
+      "patternProperties": {
+        "": {
+          "type": "object",
+          "required": ["url", "method"],
+          "properties": {
+            "url": { "type": "string" },
+            "method": {
+              "type": "string",
+              "enum": ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"]
+            },
+            "headers": {
+              "description": "HTTP Headers to be sent as part of the request. This is in addition to any header defined in common. Headers can be overridden.",
+              "type": "array",
+              "items": { "$ref": "#/$defs/header" }
+            },
+            "params": {
+              "description": "Query string parameters",
+              "type": "array",
+              "items": { "$ref": "#/$defs/param" }
+            },
+            "options": { "$ref": "#/$defs/options" },
+            "tests": { "$ref": "#/$defs/tests" }
           }
+        }
       }
     }
   }
