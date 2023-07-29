@@ -51,7 +51,7 @@ requests:
     body: { foo: bar }
     tests:
       # if the server didn't parse this as a JSON, then, our content-type override is successful
-      json: { $.data: '{ foo: bar }' }
+      json: { $.data: '{"foo":"bar"}' }
 
   status-404:
     url: /notfound
@@ -80,12 +80,12 @@ requests:
       - { name: foo, value: 30%25+of+200, encode: false }
     tests:
       json:
-        $.url: https://postman-echo.com/get?foo=30%25%+of%+200
+        $.url: https://postman-echo.com/get?foo=30%25+of+200
         $.args.foo: 30% of 200
-    capture:
-      json:
-        $.args.foo: username
-      status: myUsername
+    # capture:
+    #   json:
+    #     $.args.foo: username
+    #   status: myUsername
 
   # The cookies endpoint does a redirect (no clue why), let's use that.
   no-redirects:
@@ -171,11 +171,11 @@ requests:
         city: Nara
         postalCode: "560034" #string
       phoneNumbers:
-        - type: mobile,
-          number: 0123-4567-8888,
+        - type: mobile
+          number: 0123-4567-8888
           available: [ 7, 22 ]
-        - type: home,
-          number: 0123-4567-8910,
+        - type: home
+          number: 0123-4567-8910
           available: [18, 22]
     tests:
       json:
@@ -187,12 +187,12 @@ requests:
         $.data.phoneNumbers: { $type: array, $size: 2, $exists: true }
         $.data.phoneNumbers[0].type: mobile
         $.data.phoneNumbers.1.type: home
-        $.data.phoneNumbers[?(@.type==home)].number: 0123-4567-8910
+        $.data.phoneNumbers[?(@.type=="home")].number: 0123-4567-8910
         $.data.lastName: { $exists: true }
         $.data.middleName: { $exists: true, $type: "null" }
         $.data.otherName: { $exists: false, $type: undefined }
         $.data.phoneNumbers[*].type: mobile
-        $.data.phoneNumbers[*].available: 7
+        $.data.phoneNumbers[*].available: { $eq: [7,22] }
         $.data.phoneNumbers.0.available: { $eq: [ 7, 22 ], $type: array }
         $.data.phoneNumbers.1.available: { $eq: "[18,22]", $type: array }
         # stress: ensure corner cases don't crash

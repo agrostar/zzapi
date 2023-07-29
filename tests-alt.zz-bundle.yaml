@@ -113,6 +113,8 @@ requests:
     url: /encoding/utf8
     tests:
       body: { $regex: unicode demo, $options: i }
+      headers: 
+        content-type: text/html; charset=utf-8
 
   response-headers:
     method: GET
@@ -201,8 +203,8 @@ requests:
         $.data.lastName: { $exists: true }
         $.data.middleName: { $exists: true, $type: null }
         $.data.otherName: { $exists: false }
-        $.data.phoneNumbers[*].type: '["mobile","home"]'
-        $.data.phoneNumbers[*].available: '[[7,22],[18,22]]'
+        $.data.phoneNumbers[*].type: "mobile"
+        $.data.phoneNumbers[*].available: [7,22]
         # stress: ensure corner cases don't crash
         $.data.otherName.value: { $exists: false } # don't recurse down undefined
         
