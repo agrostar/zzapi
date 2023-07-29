@@ -46,7 +46,7 @@ requests:
       }
     tests:
       json: 
-        $.data.foo1: bar1,
+        $.data.foo1: bar1
         $.data.foo2: { $type: number, $gt: 41, $lt: 43 }
         $.headers.X-Custom-Header: Custom Value
 
