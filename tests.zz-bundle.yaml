@@ -8,9 +8,6 @@ common:
   baseUrl: https://postman-echo.com
   headers:
     - { name: Content-type, value: application/json }
-  options:
-    follow: false    # the default, so this can be omitted
-    verifySSL: false # the default, so this can be omitted
   tests:
     status: 200
     headers:
@@ -204,8 +201,8 @@ requests:
     method: POST
     url: /post
     body:
-      age: 26,
-      name: John,
+      age: 26
+      name: John
       address: 1, example street
       numbers: [ 444, 222 ]
       object: { foo: bar }
