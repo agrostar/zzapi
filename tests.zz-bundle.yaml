@@ -88,6 +88,8 @@ requests:
   no-redirects:
     method: GET
     url: /cookies/set
+    options:
+      follow: false
     tests:
       status: 302
       headers: { Location: /cookies,  Content-Type: { $ne: application/json } }
