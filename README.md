@@ -133,7 +133,7 @@ Operators supported in the RHS are:
 
 ### json
 
-If there are any json tests, the response is parsed as JSON, provided the content type is `application/json`. The key of the test is a path to the (nested) field in the JSON document. The path is evaluated using JSONPATH (see https://www.npmjs.com/package/jsonpath and https://jsonpath.com/) and the first result is (or the result of jp.value) used as the value to test agains. Here are some examples:
+If there are any json tests, the response is parsed as JSON, provided the content type is `application/json`. The key of the test is a path to the (nested) field in the JSON document. The path is evaluated using JSONPATH (see https://www.npmjs.com/package/jsonpath and https://jsonpath.com/) and the first result is (or the result of jp.value) used as the value to test against. Here are some examples:
 
 * `$.field.nested.value`: will match 10 if the response body is like `{ field: { nested: { value: 10 } } }` 
 * `$.field.0` or `field[0]` will match 10 in  `{ field: [ 10, 20 ]}`
@@ -152,27 +152,27 @@ If the result is a non-scalar (eg, the entire array) it will be used as is when 
 Variables are simple YAML files of a list of name value pairs. For example:
 
 ```
-name: value
-type: free
+username: Tom
+userID: 45
 ```
 
 ## Type
 
-Variables can only be of the string type. This is because they will be replaced within strings only.
+Variables can only be of the string type. This is because they will be replaced within strings only. They will be converted to strings using toString() if they are not strings.
 
 ## Use of Variables
 
 Variables can be used as values in the following places:
 
 * URL
-* Parameter valuues
+* Parameter values
 * Header values
 * Post Body
 * Test values
 
 We will follow the makefile convention of variables, restircted to the round bracked `()`.
 
-* `$variable` if followed by a non-word character or EOL, or the $ is preceded by a \
+* `$variable` if followed by a non-word character or EOL, unless the $ is preceded by a \
 * `$(variable)`, unless the $ is preceded by a \
 
 # Environments
