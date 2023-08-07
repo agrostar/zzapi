@@ -4,18 +4,18 @@ zzapi (prounounced like pizza, the syllables interchanged) is an API documentati
 
 Our manifesto:
 
-* **Simplicity above all**: Do one thing (or two) and do it well. Single responsibility. Allow stuff to be built on top.
+* **Simplicity**: Do one thing (or two) and do it well. Single responsibility. Allow building on top.
 * **Stand on the shoulders of giants**: Do not reinvent what has already been solved. We will use existing conveniences, which may not be "perfect" but will work well.
-* **No GUI to enter data**: Developers don't need a GUI. Copy paste within an editor is far more efficient compared to multiple mouse clicks to enter data. We will use YAML files to specify requests.
-* **Only JSON**: We don't support XML multipart-formdata etc. while running tests against responses. Request body can be anything, though, like curl.
-* **API doc/tests part of code**: Storage will be on the local file system (ie, not the cloud). Whatever you have typed belongs to you. We expect you to save the YAMLs within your code repository.
+* **No GUI to enter data**: Developers don't need a GUI. Copy paste within an editor is far more efficient compared to multiple mouse clicks to enter data. We will use YAML files instead.
+* **Prefer JSON**: Though the request body can be anything, we have some extra conveniences for JSON body, especially in the tests.
+* **API doc/tests shouuld be in your repo**: Storage will be on the local file system (ie, not the cloud). Whatever you have typed belongs to you. We expect you to save the YAMLs within your code repository.
 * **Open source**: If you have an idea that is useful to you and can be to others as well, build it, test it and send us a PR.
 
 # Alternatives
 
 Here are some alternatives and good things about them. Yet, none of these fit into the above set of goals completely.
 
-* **Postman**: Postman is a great tool, but the storage is on the cloud, making it hard for the tests and documentation be alongside the code. And it is not open source. We borrow the concept of keeping the same tool for tests and documentation from Postman.
+* **Postman**: Postman is a great tool, but the storage is on the cloud, making it hard for the tests and documentation be alongside the code. We borrow the concept of keeping the same tool for tests and documentation from Postman.
 * **OpenAPI**: OpenAPI is meant for documentation alone, it does not cover tests. The YAML spec is also very elaborate and too structured. It is hard to hand-create OpenAPI YAMLs. We borrow the concept of YAML files for saving the API details from OpenAPI.
 * **ThunderClient**: ThunderClient is a great tool but the UI is elaborate and hard to maintain, and it is not open source. We borrow the concept of a VS Code extension from ThunderClient.
 
@@ -23,10 +23,8 @@ Here are some alternatives and good things about them. Yet, none of these fit in
 
 zzapi is made up of (at least):
 
-1. **Specs**: The YAML schema and description. The YAML parsing and conversion to requests can be made into a reference implementation library.
-2. **Runners**: The tool thats can make one or more API requests. The current support is for:
-   a. A command line runner
-   b. A VS Code extension that prvovides CodeLenses to run a request(s) in a bundle
+1. **Specs**: The YAML schema and description. The YAML parsing and conversion to requests can be made into a reference implementation.
+2. **Runners**: The tool thats can make one or more API requests. The current support is for a VS Code extension, but soon a command line runner will be available making it possible to integrate with a CI/CD pipeline
 3. **Documentation generators**: these will generate in different formats: We envisage a markdown generator to begin with.
 
 # Storage
@@ -55,7 +53,7 @@ You can find two sample bundles `doc.zz-bundle.yml` and `tests.zz-bundle.yml` in
 
 ## Top level objects
 
-* `common`: optional, applies to all requests. Each of the sub-elements is also optional.
+* `common`: optional, applies to all requests (unless overridden in a request). Each of the sub-elements is also optional.
 * `requests`: a collection of requests as key-value pairs where the key is the request name (or title) and the value is a request object.
 
 ### common
@@ -73,7 +71,7 @@ You can find two sample bundles `doc.zz-bundle.yml` and `tests.zz-bundle.yml` in
 * `method`: required, one of GET, POST, PUT, PATCH etc
 * `headers`: an array of `header`s, in addition to the common set, or overridden if the name is the same
 * `params`: an array of `params`s, in addition to the common set. Parameters cannot be overridden.
-* `body`: the raw request body. (Use the value `@filename` to read from a file, like in `curl`)
+* `body`: the raw request body. (Use the value `@filename` to read from a file, like in `curl`), or a JSON object, which will be converted to a JSON string.
 * `response`: a sample response, useful for documentation (doesn't affect the request)
   * `headers`: the headers expected in the response
   * `body`: the raw response body. Use `@filename` to read from a file.
@@ -108,7 +106,7 @@ HTTP Headers that will be sent along with the request.
 
 ### tests
 
-Tests are run against (each of them is a property of `tests`). 
+Tests are run against (each of them is a property of `tests`) the following:
 
 * `status`: an `assertion` against the HTTP status code
 * `body`: an `assertion` against the entire raw body
@@ -117,12 +115,12 @@ Tests are run against (each of them is a property of `tests`).
 
 ### asssertion
 
-Assertions are similar to MongoDB filters. The key is the element (a path in case of json), and the value is something that checks the contents of the element. The value can be a plain value, or a specification with the operator and value.
+Assertions are similar to MongoDB filters. The key is the element (a path in case of json), and the value is the expected value of the element. The value can be a plain value, or a specification with the operator and value.
 
 * `status: 400`: status must be equal to 400
 * `body: {$regex: /\<html\>/}`: the body must contain the characters `<html>` (using the `$regex` operator,)
-* `json: - { field.nested.value: 42 }`: the nested value must be equal to 42 (and match the type)
-* `json: - { other: {$gt: 41 } }`: the other value must be greater than 41
+* `json: { field.nested.value: 42 }`: the nested value must be equal to 42 (and match the type)
+* `json: { other: {$gt: 41 } }`: the other value must be greater than 41
 
 Operators supported in the RHS are:
 * `$eq`, `$ne`, `$lt`, `$gt`, `$lte`, `$gte`: against the value
@@ -135,7 +133,7 @@ Operators supported in the RHS are:
 
 If there are any json tests, the response is parsed as JSON, provided the content type is `application/json`. The key of the test is a path to the (nested) field in the JSON document. The path is evaluated using JSONPATH (see https://www.npmjs.com/package/jsonpath and https://jsonpath.com/) and the first result is (or the result of jp.value) used as the value to test against. Here are some examples:
 
-* `$.field.nested.value`: will match 10 if the response body is like `{ field: { nested: { value: 10 } } }` 
+* `$.field.nested.value: 10`: will match 10 if the response body is like `{ field: { nested: { value: 10 } } }` 
 * `$.field.0` or `field[0]` will match 10 in  `{ field: [ 10, 20 ]}`
 * `$.field.0.value` will match 10 in  `{ field: [ { value: 10 }, { value: 20 } ]}`
 * `$.field[?(@.name==x)].value` will match 10 in `{ field: [ { name: x, value: 10 }, { name: y, value: 20 } ]}`

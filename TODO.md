@@ -1,21 +1,10 @@
 # TODO
 
-## Immediate:
-
-  * Handle variables (Done)
-  * Redo JSON Schema with requests as an object
-  * Tests using jsonpath and operators on the value (Done)
-
 ## For MVP (v1.0)
 
-  * Capture (to be detailed)
-  * Separate the repos into two:
-    * zzapi: Main repo with README, JSON Schemas and pointers to other tools
-    * zzapi-vscode: VS Code Extension
   * Hygiene (error and corner cases):
     * Malformed yamls (bundle, varsets, env)
     * Yaml valid but not as per schema
-    * Catch circular redirects in follow mode. Can got do this? If so, use it.
     * Automatically add header User-Agent: zzapi-runner/<version> (where is the extension version stored?)
   * Cleanup:
     * Switch to MIT licence

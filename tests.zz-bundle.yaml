@@ -147,7 +147,7 @@ requests:
   variables-in-body:
     method: POST
     url: /post
-    body: |   # Alternate way of supplying the JSON string itself.
+    body: |   # Alternate way of supplying the JSON string or any raw content
       {
         "foo1": "$(fooValue)",
         "foo2": $pi
