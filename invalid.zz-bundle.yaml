@@ -1,7 +1,7 @@
 # This is an invalid bundle. It is not as per the schema
 
-commomn:
+commomn:  # there is a typo here
   a: b
 requests:
-  - name: y
+  - name: y  # name is invalid, also url and method are not defined
   - name: z

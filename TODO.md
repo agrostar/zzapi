@@ -9,6 +9,9 @@
   * Cleanup:
     * Switch to MIT licence
     * Remove unnecessary files (or make them meaningful. eg, README.md, CHANGELOG.md. The vsc-estension-quicstart.md surely can go.)
+  * Schema:
+    * See what it takes to change the extensions to .zzb and .zzv
+    * Schema for variables and zz-env.yaml
 
 ## Further ahead
 
@@ -27,3 +30,6 @@
 * Path params: eg, /employees/345: URL should be /employees/:id and params can have :id set to a value
 
 * Commands should be visbile in the command pallette (or somewhere else). Cannot rely on CodeLens alone.
+
+* Show output as "http" language and get it automatically formatted. (see https://marketplace.visualstudio.com/items?itemName=humao.rest-client)
+

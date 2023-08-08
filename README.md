@@ -1,6 +1,6 @@
 # zzapi
 
-zzapi (prounounced like pizza, the syllables interchanged) is an API documentation and testing tool set, a very simplified version of Postman.
+zzapi (prounounced like pizza, the syllables interchanged) is an HTTP API documentation and testing tool set.
 
 Our manifesto:
 
@@ -23,9 +23,9 @@ Here are some alternatives and good things about them. Yet, none of these fit in
 
 zzapi is made up of (at least):
 
-1. **Specs**: The YAML schema and description. The YAML parsing and conversion to requests can be made into a reference implementation.
-2. **Runners**: The tool thats can make one or more API requests. The current support is for a VS Code extension, but soon a command line runner will be available making it possible to integrate with a CI/CD pipeline
-3. **Documentation generators**: these will generate in different formats: We envisage a markdown generator to begin with.
+1. **Specs**: The YAML schema and description.
+2. **Runners**: The tools that can make one or more API requests. The current support is for a VS Code extension, but soon a command line runner will be available making it possible to integrate with a CI/CD pipeline
+3. **Documentation generators**: These will generate in different formats: We envisage a markdown generator to begin with.
 
 # Storage
 
@@ -47,7 +47,7 @@ The schema for the above (except request and response files) will be discussed i
 Although the file format does not make a real distinction, practically there are two types of bundles:
 
 1. **Documentation bundles**: the primary purpose is to document an API set. Documentation bundles will have one entry for each API endpoint, with lots of documentation accompanying it on different ways to use the API endpoint, expected responses, and samples.
-2. **Test bundles**: the purpose is to automate testing. The same endpoint typically appears multiple times with different parameters and failure cases. Tests are run against the response to ensure the API is responding as it is supposed to.
+2. **Test bundles**: the purpose is to automate testing. The same endpoint typically appears multiple times with different parameters and test cases. Tests are run against the response to ensure the API is responding as it is supposed to.
 
 You can find two sample bundles `doc.zz-bundle.yml` and `tests.zz-bundle.yml` in this directory. Please refer to them as you read the explanation below.
 

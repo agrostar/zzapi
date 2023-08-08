@@ -1,4 +1,4 @@
-# yaml-language-server: $schema=zz-bundle.schema.json
+# yaml-language-server: $schema=https://raw.githubusercontent.com/agrostar/zzapi/main/schema.json
 
 # This bundle contains a series of test requests against various endpoints,
 # most of them being the postman echo service. We use this to both serve as
@@ -155,7 +155,15 @@ requests:
     tests:
       json: { $.data.foo1: bar,  $.data.foo2: { $type: number, $eq: 3.414 } }
 
-  test-tests-positive:
+  # This returns headers in capital case. Ensure we match it.
+  header-case:
+    method: GET
+    url: https://test-farmerapp.agrostar.in/userservice/ping/
+    tests: 
+      headers:
+        content-type: application/json
+
+  tests-positive:
     method: POST
     url: /post
     body:
@@ -197,7 +205,7 @@ requests:
         $.data.middleName.value: { $exists: false } # don't recurse down null
 
   # All these tests should fail
-  test-tests-negative:
+  tests-negative-response:
     method: POST
     url: /post
     body:
@@ -220,17 +228,82 @@ requests:
         $.data.age.something: 55  # jsonpath should take care of this.
         $.data.numbers[5]: 0  # jsonpath should take care of this 
 
-        # These are invalid as per the schema itself. Still, they should not crash.
-        # If we implement schema validation, then, we don't need these.
+  # This request should not even be processed due to bad tests schema
+  tests-negative-schema:
+    method: GET
+    url: /get
+    tests:
+      json:
         $.data.operator: { badop: any }  # invalid operator badop. If you want to match an entire object/array, use it as the value of the $eq operator.
         $.data.numbers: { $size: two } # invalid assertion value, expecting a number
         $.data.address: { $type: invalid } # invalid assertion value, expecting one of number|string|array|object|null|undefined
         $.data.exists: { $exists: 4 } # invalid assertion value, expecitng a boolean
 
-  # This returns headers in capital case. Ensure we match it.
-  header-case-test:
+  capture-json:
+    method: POST
+    url: /post
+    body:
+      name: Tom
+      address: { city: Bangalore, pincode: 560001 }
+    capture:
+      json:
+        $.data.name: nameVar
+        $.data.address: addressVar
+        $.data.address.city: cityVar
+        $.data.address.pincode: pincodeVar
+
+  capture-header:
     method: GET
-    url: https://test-farmerapp.agrostar.in/userservice/ping/
-    tests: 
+    url: /response-headers
+    params:
+      - { name: X-Custom-Header, value: Custom header value }
+    capture:
       headers:
-        content-type: application/json
+        X-Custom-Header: customHeaderVar
+
+  capture-checks-scalar:
+    method: POST
+    url: /post
+    body:
+      name: $nameVar
+      city: $cityVar
+      pincode: $pincodeVar
+      customHeader: $customHeaderVar
+    tests:
+      json:
+        $.data.name: Tom
+        $.data.city: Bangalore
+        $.data.pincode: 560001
+        $.data.customHeader: Custom Header Value
+
+  capture-checks-object-option-1:
+    method: POST
+    url: /post
+    # The body is a string, so that we can use the JSON as is in the replacement
+    # Therefore, it is NOT "$addressVar"
+    body: |
+      "name": "Tom"
+      "address": $addressVar
+    tests:
+      json:
+        $.data.name: Tom
+        $.data.address.city: Bangalore
+        $.data.address.pincode: 560001  # this time it is NOT a string.
+
+  capture-checks-object-option-2:
+    method: POST
+    url: /post
+    # The body is a string, so that we can use the JSON as is in the replacement
+    body:
+      name: Tom
+      address: $addressVar
+    tests:
+      json:
+        $.data.name: Tom
+        $.data.address: { $eq: { city: Bangalore, pincode: 560001 } }
+
+# Do we capture variables in their native data type, or do we stringify them?
+# Best of both would be the best. We favour JSON, so capturing native data type
+# and using them in the body: (not string format, but object format) would appear
+# natural. But that is hard work. We have to dscend into each nested object and
+# replace all the values. Even array values. Is it worth it? Yes.
