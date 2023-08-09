@@ -190,7 +190,7 @@ requests:
         $.data.phoneNumbers.1.type: home
         $.data.phoneNumbers[?(@.type=="home")].number: 0123-4567-8910
         $.data.lastName: { $exists: true }
-        $.data.middleName: { $exists: true, $type: "null" }
+        $.data.middleName: { $exists: true, $type: null }
         $.data.otherName: { $exists: false, $type: undefined }
         $.data.phoneNumbers[*].type: mobile
         $.data.phoneNumbers[*].available: { $eq: [7,22] }
