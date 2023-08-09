@@ -1,27 +1,27 @@
-# zzapi
+# zzAPI
 
-zzapi (prounounced like pizza, the syllables interchanged) is an HTTP API documentation and testing tool set.
+zzAPI (prounounced like pizza, the syllables interchanged) is an HTTP API documentation and testing tool set.
 
 Our manifesto:
 
 * **Simplicity**: Do one thing (or two) and do it well. Single responsibility. Allow building on top.
 * **Stand on the shoulders of giants**: Do not reinvent what has already been solved. We will use existing conveniences, which may not be "perfect" but will work well.
 * **No GUI to enter data**: Developers don't need a GUI. Copy paste within an editor is far more efficient compared to multiple mouse clicks to enter data. We will use YAML files instead.
-* **Prefer JSON**: Though the request body can be anything, we have some extra conveniences for JSON body, especially in the tests.
+* **JSON First**: Though the request body can be anything, we have some extra conveniences for JSON body in the request as well as response.
 * **API doc/tests shouuld be in your repo**: Storage will be on the local file system (ie, not the cloud). Whatever you have typed belongs to you. We expect you to save the YAMLs within your code repository.
 * **Open source**: If you have an idea that is useful to you and can be to others as well, build it, test it and send us a PR.
 
 # Alternatives
 
-Here are some alternatives and good things about them. Yet, none of these fit into the above set of goals completely.
+Here are some alternatives and good things about them. Yet, none of these fit into the above set of goals.
 
 * **Postman**: Postman is a great tool, but the storage is on the cloud, making it hard for the tests and documentation be alongside the code. We borrow the concept of keeping the same tool for tests and documentation from Postman.
 * **OpenAPI**: OpenAPI is meant for documentation alone, it does not cover tests. The YAML spec is also very elaborate and too structured. It is hard to hand-create OpenAPI YAMLs. We borrow the concept of YAML files for saving the API details from OpenAPI.
-* **ThunderClient**: ThunderClient is a great tool but the UI is elaborate and hard to maintain, and it is not open source. We borrow the concept of a VS Code extension from ThunderClient.
+* **ThunderClient**: ThunderClient is a great tool but the UI is elaborate and it takes too many clicks to create a request. We borrow the concept of a VS Code extension from ThunderClient.
 
-# zzapi Constituents
+# zzAPI Constituents
 
-zzapi is made up of (at least):
+zzAPI is made up of (at least):
 
 1. **Specs**: The YAML schema and description.
 2. **Runners**: The tools that can make one or more API requests. The current support is for a VS Code extension, but soon a command line runner will be available making it possible to integrate with a CI/CD pipeline
@@ -60,7 +60,7 @@ You can find two sample bundles `doc.zz-bundle.yml` and `tests.zz-bundle.yml` in
 
   * `baseUrl`: a prefix applied to the url of a request that starts with a /
   * `headers`: an array of header elements, which can be overridden in individual requests
-     * By default, the header `user-agent` will be set to `zzapi/<version>` unless overridden
+     * By default, the header `user-agent` will be set to `zzAPI/<version>` unless overridden
   * `params`: query parameters added to all requests.
   * `tests`: a set of tests applied to all the requests in this bundle
   * `options`: options applicable to all requests, unless overridden
@@ -246,5 +246,5 @@ VS Code extensions are awesome because they can do magic. A few magics we would 
 
 * Action items (aka Code Lenses) above any bundle ("Run all") or request: ("Run"). This similar to the golang "Run test" and "Debug test" actions that automagically appear above any test functions
 * A console window that shows the status of the request(s)
-* Multiple output windows that show the response of the requests(s)
+* Multiple output windows that show the response of the request(s)
 * An ability to save a single run's response as a file: we can use it as the response sample in the documentation
