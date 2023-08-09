@@ -283,8 +283,10 @@ requests:
     # The body is a string, so that we can use the JSON as is in the replacement
     # Therefore, it is NOT "$addressVar"
     body: |
-      "name": "Tom"
-      "address": $addressVar
+      {
+        "name": "Tom",
+        "address": $addressVar
+      }
     tests:
       json:
         $.data.name: Tom
