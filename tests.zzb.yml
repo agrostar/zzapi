@@ -53,7 +53,7 @@ requests:
   status-404:
     url: /notfound
     method: GET
-    tests: { status: 404 }
+    tests: { status: 404, headers: {content-type: {$exists: false}} }
 
   status-401:
     url: /status/401
@@ -232,6 +232,9 @@ requests:
     method: GET
     url: /get
     tests:
+      status: {$ne: 200}
+      headers:
+        content-type: {$exists: false}
       json:
         $.data.operator: { badop: any }  # invalid operator badop. If you want to match an entire object/array, use it as the value of the $eq operator.
         $.data.numbers: { $size: two } # invalid assertion value, expecting a number
@@ -281,8 +284,10 @@ requests:
     # The body is a string, so that we can use the JSON as is in the replacement
     # Therefore, it is NOT "$addressVar"
     body: |
-      "name": "Tom"
-      "address": $addressVar
+      {
+        "name": "Tom",
+        "address": $addressVar
+      }
     tests:
       json:
         $.data.name: Tom
