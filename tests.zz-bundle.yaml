@@ -16,7 +16,7 @@ common:
 
 requests:
 
-  simple-get: { method: GET, url: /simpleget }
+  simple-get: { method: GET, url: /get }
 
   get-with-params:
     method: GET
@@ -39,7 +39,6 @@ requests:
       json: 
         $.data.foo1: bar1
         $.data.foo2: { $type: number, $gt: 41, $lt: 43 }
-        $.headers.X-Custom-Header: Custom Value
 
   post-header-override:
     url: /post
@@ -80,10 +79,6 @@ requests:
       json:
         $.url: https://postman-echo.com/get?foo=30%25+of+200
         $.args.foo: 30% of 200
-    # capture:
-    #   json:
-    #     $.args.foo: username
-    #   status: myUsername
 
   # The cookies endpoint does a redirect (no clue why), let's use that.
   no-redirects:
@@ -186,7 +181,7 @@ requests:
     tests:
       json:
         $.data.firstName: John
-        $.data.age: { $type: number, $eq: 26, $ne: 26, $gt: 25, $lt: 27 }
+        $.data.age: { $type: number, $eq: 26, $ne: 30, $gt: 25, $lt: 27 }
         $.data.address: { $type: object, $size: 3, $exists: true }
         $.data.address.city: Nara
         $.data.address.postalCode: { $type: string, $size: 6, $ne: 560034 }
@@ -216,6 +211,9 @@ requests:
       numbers: [ 444, 222 ]
       object: { foo: bar }
     tests:
+      status: {$ne: 200}
+      headers:
+        content-type: {$exists: false}
       json:
         # regular things that should fail
         $.data.name: { $type: array }
@@ -257,7 +255,7 @@ requests:
     method: GET
     url: /response-headers
     params:
-      - { name: X-Custom-Header, value: Custom header value }
+      - { name: X-Custom-Header, value: Custom Header Value }
     capture:
       headers:
         X-Custom-Header: customHeaderVar
