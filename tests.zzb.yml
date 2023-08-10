@@ -1,5 +1,5 @@
-# yaml-language-server: $schema=https://raw.githubusercontent.com/agrostar/zzapi/main/schema.json
 # yaml-language-server: $schema=./schema.json
+# yaml-language-server: $schema=https://raw.githubusercontent.com/agrostar/zzapi/main/schema.json
 
 # This bundle contains a series of test requests against various endpoints,
 # most of them being the postman echo service. We use this to both serve as
@@ -19,8 +19,7 @@ requests:
   simple-get: { method: GET, url: /get }
 
   get-with-params:
-    method: GET
-    url: /get
+    <<: { method: GET,  url: /get }
     params:
       - { name: foo1, value: bar1 }
       - { name: foo2, value: bar2 }
@@ -190,7 +189,7 @@ requests:
         $.data.phoneNumbers.1.type: home
         $.data.phoneNumbers[?(@.type=="home")].number: 0123-4567-8910
         $.data.lastName: { $exists: true }
-        $.data.middleName: { $exists: true, $type: null }
+        $.data.middleName: { $exists: true, $type: "null" }
         $.data.otherName: { $exists: false, $type: undefined }
         $.data.phoneNumbers[*].type: mobile
         $.data.phoneNumbers[*].available: { $eq: [7,22] }
@@ -238,7 +237,7 @@ requests:
       json:
         $.data.operator: { badop: any }  # invalid operator badop. If you want to match an entire object/array, use it as the value of the $eq operator.
         $.data.numbers: { $size: two } # invalid assertion value, expecting a number
-        $.data.address: { $type: invalid } # invalid assertion value, expecting one of number|string|array|object|null|undefined
+        $.data.address: { $type: invalid } # invalid assertion value, expecting one of number|string|boolean|array|object|null|undefined
         $.data.exists: { $exists: 4 } # invalid assertion value, expecitng a boolean
 
   capture-json:
