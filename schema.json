@@ -71,7 +71,10 @@
             "$gt": { "$ref": "#/$defs/scalar" },
             "$lte": { "$ref": "#/$defs/scalar" },
             "$gte": { "$ref": "#/$defs/scalar" },
-            "$type": { "type": "string" },
+            "$type": {
+              "type": "string",
+              "enum": ["number", "string", "boolean", "object", "array", "null", "undefined"]
+            },
             "$regex": { "type": "string" },
             "$options": { "type": "string" },
             "$exists": { "type": "boolean" },
@@ -138,11 +141,12 @@
         "": {
           "type": "object",
           "required": ["url", "method"],
+          "additionalProperties": false,
           "properties": {
             "url": { "type": "string" },
             "method": {
               "type": "string",
-              "enum": ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"]
+              "enum": ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS", "HEAD"]
             },
             "headers": {
               "description": "HTTP Headers to be sent as part of the request. This is in addition to any header defined in common. Headers can be overridden.",
@@ -154,8 +158,29 @@
               "type": "array",
               "items": { "$ref": "#/$defs/param" }
             },
+            "body": {
+              "description": "The request body",
+              "type": ["string", "object", "array"] 
+            },
             "options": { "$ref": "#/$defs/options" },
-            "tests": { "$ref": "#/$defs/tests" }
+            "tests": { "$ref": "#/$defs/tests" },
+            "capture": {
+              "type": "object",
+              "properties": {
+                "json": {
+                  "type": "object",
+                  "patternProperties": {
+                    "": { "type": "string" }
+                  }
+                },
+                "headers": {
+                  "type": "object",
+                  "patternProperties": {
+                    "": { "type": "string" }
+                  }
+                }
+              }
+            }
           }
         }
       }

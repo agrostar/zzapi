@@ -71,10 +71,10 @@ You can find two sample bundles `doc.zz-bundle.yml` and `tests.zz-bundle.yml` in
 * `method`: required, one of GET, POST, PUT, PATCH etc
 * `headers`: an array of `header`s, in addition to the common set, or overridden if the name is the same
 * `params`: an array of `params`s, in addition to the common set. Parameters cannot be overridden.
-* `body`: the raw request body. (Use the value `@filename` to read from a file, like in `curl`), or a JSON object, which will be converted to a JSON string.
+* `body`: the raw request body. (Use the value `@filename` to read from a file, like in `curl`), or a JSON object, which will be converted to a JSON string after variable replacements.
 * `response`: a sample response, useful for documentation (doesn't affect the request)
   * `headers`: the headers expected in the response
-  * `body`: the raw response body. Use `@filename` to read from a file.
+  * `body`: the raw response body, or a JSON object. Use `@filename` to read from a file.
   * `doc`: documentation to describe the response.
 * `options`: options specific to this request, overrides common options
 * `doc`: general documentation, typically in markdown (use `@filename` to read from a file)
@@ -104,12 +104,12 @@ HTTP Headers that will be sent along with the request.
 * `value`: requuired, value of the parameter
 * `doc`: helpful descriptions about what this parameter does, has no effect on the actual request
 
-### tests
+### test
 
 Tests are run against (each of them is a property of `tests`) the following:
 
 * `status`: an `assertion` against the HTTP status code
-* `body`: an `assertion` against the entire raw body
+* `body`: an `assertion` against the entire body. This can be a string, or an object.
 * `json`: a list of `assertion`s against elements (`path`s) of the body parsed as JSON
 * `headers`: a list of `assertion`s against the headers
 
@@ -118,9 +118,11 @@ Tests are run against (each of them is a property of `tests`) the following:
 Assertions are similar to MongoDB filters. The key is the element (a path in case of json), and the value is the expected value of the element. The value can be a plain value, or a specification with the operator and value.
 
 * `status: 400`: status must be equal to 400
+* `status: { $lt: 300 }`: status must be less than 300
 * `body: {$regex: /\<html\>/}`: the body must contain the characters `<html>` (using the `$regex` operator,)
 * `json: { field.nested.value: 42 }`: the nested value must be equal to 42 (and match the type)
-* `json: { other: {$gt: 41 } }`: the other value must be greater than 41
+
+Note that an assertion value can be a non-scalar, especially when matching a non-scalar in the response JSON. The comparison will be done by JSON.stringif()ing both the RHS and the LHS.
 
 Operators supported in the RHS are:
 * `$eq`, `$ne`, `$lt`, `$gt`, `$lte`, `$gte`: against the value
@@ -129,7 +131,7 @@ Operators supported in the RHS are:
 * `$exists`: true|false, to check existance of a field
 * `$type`: string|number|object|array|null: to ensure the type of the field
 
-### json
+### tests.json
 
 If there are any json tests, the response is parsed as JSON, provided the content type is `application/json`. The key of the test is a path to the (nested) field in the JSON document. The path is evaluated using JSONPATH (see https://www.npmjs.com/package/jsonpath and https://jsonpath.com/) and the first result is (or the result of jp.value) used as the value to test against. Here are some examples:
 
@@ -140,10 +142,28 @@ If there are any json tests, the response is parsed as JSON, provided the conten
 
 If the result is a non-scalar (eg, the entire array) it will be used as is when matching against the operators `$size`, `$exists` and `$type`, otherwise will be converted to a string using `JSON.stringify(value)`.
 
+### tests.headers
+
+The key of the test is the name of the header, and the value is an assertion. For example:
+
+* `Content-type: application/json`
+
+
 ### capture
 
-* `path`: the path of the field whose value needs to be saved (in the same format as tests)
-* `var`: the name of the variable into which the value is saved.
+Values from the response (headers and JSON body) can be captured and set as variables. We allow variables which are not scalars also (eg, objects and arrays), when capturing values from the response JSON.
+
+### capture.json
+
+Similar to tests, the key is a JSONPATH specification of the path of the field. The value is a string, the name of the variable to which the value will be set to. Eg:
+
+* `address.city: citiyVar`
+
+### capture.headers
+
+Similar to tests, each header is a key-value pair where the key is the name of the header and the value is the variable to capture the value into.
+
+* `Content-type: contentTypeVar`
 
 # Variables
 
@@ -156,7 +176,7 @@ userID: 45
 
 ## Type
 
-Variables can only be of the string type. This is because they will be replaced within strings only. They will be converted to strings using toString() if they are not strings.
+Variables can be of any type, even objects and arrays. (unlike Postman or Thunderclient, where they have to be variables). This is especially useful in making comparisons against responses.
 
 ## Use of Variables
 
@@ -172,6 +192,8 @@ We will follow the makefile convention of variables, restircted to the round bra
 
 * `$variable` if followed by a non-word character or EOL, unless the $ is preceded by a \
 * `$(variable)`, unless the $ is preceded by a \
+
+While using as test values, the comparison will do an object deep-comparison if the value being compared and the variable both are objects or arrays. If either of them is a string, the other will be converted to a string using JSON.stringify() for non-scalars and toString() for scalars.
 
 # Environments
 
@@ -198,47 +220,7 @@ All the hand-edited YAML files are meant to be that way: they will not be touche
 
 # Runners
 
-Runners combine variables from one or more variable sets and execute one or all the requests in a bundle.
-
-## Runner parameters
-
-A command-line based runner may take the following parameter:
-
-* Directory where the files are stored (current directory if not specified)
-* Name of the request bundle (all bundles if not specified)
-* Name of the request to run (all requests if not specified)
-* Variable Sets to use: (in addition to all variable sets marked "default", in alphabetical order)
-* File name (or pattern) to store the response(s), 
-* Suppress printiong response to console
-
-## Command line runs
-
-Here are a few example runs:
-
-Load all default variable sets, run one request, print the output on console:
-```
-$ zzapi-run --dir /Users/self/my-zzapi-tests --bundle tests --request login 
-```
-
-Use current directory, load all default variable sets, followed by 'prod' variable set, run all tests in the bundle and save responses:
-```
-$ zzapi-run --vars prod --bundle tests --save '$r-out.json'
-```
-
-Run all bundles in the current directory, save responses using the default '$b-$r-response.json' pattern
-```
-$ zzapi-run --save
-```
-
-Run the 'login' request in all bundles, suppress the responses (show only test results), save the response as a specified file.
-```
-$ zzapi-run --request login --suppress --save login.json
-```
-
-Say we had `1-secrets-d-vars.yml`, `2-common-d-vars.yml`, `prod-vars.yml` and `staging-vars.yml`. The following will first load the secrets, override with common, then override with prod. Note that even though 1-secrets-d and 2-common-d are not specified, they are loaded because they are "defaults" due to the `-d`
-```
-$ zzapi-run --request login --vars prod
-```
+Runners combine variables from one or more variable sets and execute one or all the requests in a bundle, capture values and run tests specified.
 
 ## VS Code Extension
 
@@ -248,3 +230,7 @@ VS Code extensions are awesome because they can do magic. A few magics we would 
 * A console window that shows the status of the request(s)
 * Multiple output windows that show the response of the request(s)
 * An ability to save a single run's response as a file: we can use it as the response sample in the documentation
+
+## Command line runner
+
+TBD

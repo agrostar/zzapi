@@ -33,3 +33,4 @@
 
 * Show output as "http" language and get it automatically formatted. (see https://marketplace.visualstudio.com/items?itemName=humao.rest-client)
 
+* Cookie-jar to capture cookies automatically and add them to following requests with in the same run (or even persist?)
