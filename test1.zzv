@@ -1,0 +1,11 @@
+# **-yaml--**
+
+# yaml-language-server: $schema=./schema.json
+
+common:
+  baseUrl: tst
+
+requests:
+  request-1:
+    url: /
+    method: GET

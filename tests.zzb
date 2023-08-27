@@ -1,5 +1,5 @@
-# yaml-language-server: $schema=./schema.json
 # yaml-language-server: $schema=https://raw.githubusercontent.com/agrostar/zzapi/main/schema.json
+# yaml-language-server: $schema=./schema.json
 
 # This bundle contains a series of test requests against various endpoints,
 # most of them being the postman echo service. We use this to both serve as
@@ -19,7 +19,8 @@ requests:
   simple-get: { method: GET, url: /get }
 
   get-with-params:
-    <<: { method: GET,  url: /get }
+    method: GET
+    url: /get
     params:
       - { name: foo1, value: bar1 }
       - { name: foo2, value: bar2 }
@@ -296,7 +297,6 @@ requests:
   capture-checks-object-option-2:
     method: POST
     url: /post
-    # The body is a string, so that we can use the JSON as is in the replacement
     body:
       name: Tom
       address: $addressVar
@@ -304,9 +304,3 @@ requests:
       json:
         $.data.name: Tom
         $.data.address: { $eq: { city: Bangalore, pincode: 560001 } }
-
-# Do we capture variables in their native data type, or do we stringify them?
-# Best of both would be the best. We favour JSON, so capturing native data type
-# and using them in the body: (not string format, but object format) would appear
-# natural. But that is hard work. We have to dscend into each nested object and
-# replace all the values. Even array values. Is it worth it? Yes.
