@@ -4,9 +4,9 @@
 #
 staging:
   server: https://staging.example.com
-  username: test
-  password: test-password
+  username: vasan
+  password: vasan-password
 prod:
   server: https://prod.example.com
-  username: test
-  # password: test-password  # From secrets.zzv
+  username: vasan
+  # password: test-password  # From personal.zzv

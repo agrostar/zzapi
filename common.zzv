@@ -1,4 +1,10 @@
-getUrl: /get
-fooValue: bar
-postmanEcho: https://postman-echo.com
-pi: 3.414
+staging:
+  getUrl: /get
+  fooValue: bar
+  postmanEcho: https://postman-echo.com
+  pi: 3.414
+prod:
+  getUrl: /get
+  fooValue: bar
+  postmanEcho: https://postman-echo.com
+  pi: 3.414

@@ -1,4 +1,4 @@
-# yaml-language-server: $schema=https://raw.githubusercontent.com/agrostar/zzapi/main/schema.json
+# yaml-language-server: $schema=https://raw.githubusercontent.com/agrostar/zzapi/main/zzb.schema.json
 # yaml-language-server: $schema=./schema.json
 
 # This bundle contains a series of test requests against various endpoints,
@@ -131,16 +131,16 @@ requests:
     url: $(getUrl)
     params:
       - { name: replaced1, value: $username }
-      - { name: replaced2, value: some$myUsername }
-      - { name: replaced3, value: some$(myUsername)else }
+      - { name: replaced2, value: some$username }
+      - { name: replaced3, value: some$(username)else }
       - { name: verbatim1, value: $usernameelse }
       - { name: verbatim2, value: \$(username) }
     tests:
       json:
-        $.args.replaced1: vasan.subramanian
-        $.args.replaced2: somevasan.subramanian
-        $.args.replaced3: somevasan.subramanianelse
-        $.args.verbatim1: { $ne: vasan.subramaniansome, $eq: $usernameelse }
+        $.args.replaced1: vasan
+        $.args.replaced2: some$username
+        $.args.replaced3: somevasanelse
+        $.args.verbatim1: { $ne: vasanelse, $eq: $usernameelse }
         $.args.verbatim2: { $ne: vasan.subramanian, $eq: \$(username) }
 
   variables-in-headers:

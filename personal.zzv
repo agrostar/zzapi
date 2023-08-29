@@ -4,5 +4,5 @@
 staging:
   adminPassword: secret123
 prod:
-  password: secret123
+  password: vasan-password
   adminPassword: secret123
