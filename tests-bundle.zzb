@@ -14,6 +14,16 @@ common:
     headers:
       Content-type: application/json; charset=utf-8
 
+variables:
+  addressVar:
+    streetAddress: 7th street
+    city: Nara
+    postalCode: "960001"
+  getUrl: /get
+  fooVar: bar
+  agrostar: https://test-farmerapp.agrostar.in
+  pi: 3.14
+
 requests:
 
   simple-get: { method: GET, url: /get }
@@ -137,7 +147,7 @@ requests:
     method: GET
     url: $(getUrl)
     headers:
-      - { name: foo, value: $(fooValue) }
+      - { name: foo, value: $(fooVar) }
     tests: { json: { $.headers.foo: bar } }
 
   variables-in-body:
@@ -145,16 +155,25 @@ requests:
     url: /post
     body: |   # Alternate way of supplying the JSON string or any raw content
       {
-        "foo1": "$(fooValue)",
+        "foo1": "$(fooVar)",
         "foo2": $pi
       }
     tests:
-      json: { $.data.foo1: bar,  $.data.foo2: { $type: number, $eq: 3.414 } }
+      json: { $.data.foo1: bar,  $.data.foo2: { $type: number, $eq: 3.14 } }
+
+  object-variables-in-body:
+    method: POST
+    url: /post
+    body:
+      name: Tom
+      address: $addressVar
+    tests:
+      json: { $.data.name: Tom,  $.data.address.postalCode: { $type: string, $eq: "560001" } }
 
   # This returns headers in capital case. Ensure we match it.
   header-case:
     method: GET
-    url: https://test-farmerapp.agrostar.in/userservice/ping/
+    url: $agrostar/userservice/ping/
     tests: 
       headers:
         content-type: application/json
@@ -170,7 +189,7 @@ requests:
       address:
         streetAddress: naist street
         city: Nara
-        postalCode: "560034" #string
+        postalCode: "560001" #string
       phoneNumbers:
         - type: mobile
           number: 0123-4567-8888
@@ -235,11 +254,12 @@ requests:
       status: {$ne: 200}
       headers:
         content-type: {$exists: false}
-      json:
-        $.data.operator: { badop: any }  # invalid operator badop. If you want to match an entire object/array, use it as the value of the $eq operator.
-        $.data.numbers: { $size: two } # invalid assertion value, expecting a number
-        $.data.address: { $type: invalid } # invalid assertion value, expecting one of number|string|boolean|array|object|null|undefined
-        $.data.exists: { $exists: 4 } # invalid assertion value, expecitng a boolean
+      # Uncomment the following to run tests. Schema validation makes these invalid.
+      # json:
+      #   $.data.operator: { badop: any }  # invalid operator badop. If you want to match an entire object/array, use it as the value of the $eq operator.
+      #   $.data.numbers: { $size: two } # invalid assertion value, expecting a number
+      #   $.data.address: { $type: invalid } # invalid assertion value, expecting one of number|string|boolean|array|object|null|undefined
+      #   $.data.exists: { $exists: 4 } # invalid assertion value, expecitng a boolean
 
   capture-json:
     method: POST

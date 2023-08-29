@@ -1,0 +1,12 @@
+#
+# Variables that differ among environments are kept here
+# (common ones like Pi can go into the bundle itself, under common/variables)
+#
+staging:
+  server: https://staging.example.com
+  username: test
+  password: test-password
+prod:
+  server: https://prod.example.com
+  username: test
+  # password: test-password  # From secrets.zzv

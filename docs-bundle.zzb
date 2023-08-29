@@ -1,5 +1,3 @@
-# yaml-language-server: $schema=zz-bundle.schema.json
----
 common:
   baseUrl: "https://jsonplaceholder.org"
   headers:

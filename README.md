@@ -24,7 +24,7 @@ Here are some alternatives and good things about them. Yet, none of these fit in
 zzAPI is made up of (at least):
 
 1. **Specs**: The YAML schema and description.
-2. **Runners**: The tools that can make one or more API requests. The current support is for a VS Code extension, but soon a command line runner will be available making it possible to integrate with a CI/CD pipeline
+2. **Runners**: The tools that can make one or more API requests. Currently the only runner available is the [VS Code extension](https://github.com/agrostar/zzapi-vscode)
 3. **Documentation generators**: These will generate in different formats: We envisage a markdown generator to begin with.
 
 # Storage
@@ -33,10 +33,9 @@ All files will be stored locally (ie, not on the cloud, unlike Postman). A direc
 
 The directory will hold the following kinds of files.
 
-* **Bundles**: these are YAML files containing many requests. This is a "Collection" in Postman terminlogy. The directory can have any number of request bundles. Files ending with `.zz-bundle.yml` will be recognized as request bundles.
-* **Variables**: these are also YAML files, containing variable definitions. Files ending with `.zz-vars.yml` will be recognized as variable files.
-* **Environments**: YAML files, containing combinations of variables and a name for each. The file named `zz-envs.yaml` will be recognized as _the_ environment configuration file.
-* **Files**: All other files (typically `.json`) are request and response body samples. These will be referenced from within the bundles, so we don't really need a naming convention.
+* **Bundles**: these are YAML files containing many requests. This is a "Collection" in Postman terminlogy. The directory can have any number of request bundles. Files ending with `.zzb` will be recognized as request bundles.
+* **Variable-sets**: these are also YAML files, containing variable definitions. Files ending with `.zzv` will be recognized as variable files.
+* **Files**: All other files (typically `.json`) can be used as requests and response samples. These will be referenced from within the bundles, so we don't really need a naming convention.
 
 The schema for the above (except request and response files) will be discussed in detail below.
 
@@ -49,12 +48,17 @@ Although the file format does not make a real distinction, practically there are
 1. **Documentation bundles**: the primary purpose is to document an API set. Documentation bundles will have one entry for each API endpoint, with lots of documentation accompanying it on different ways to use the API endpoint, expected responses, and samples.
 2. **Test bundles**: the purpose is to automate testing. The same endpoint typically appears multiple times with different parameters and test cases. Tests are run against the response to ensure the API is responding as it is supposed to.
 
-You can find two sample bundles `doc.zz-bundle.yml` and `tests.zz-bundle.yml` in this directory. Please refer to them as you read the explanation below.
+You can find two sample bundles `docs-bundle.zzb` and `tests-bundle.zzb` in this directory. Please refer to them as you read the explanation below.
 
 ## Top level objects
 
-* `common`: optional, applies to all requests (unless overridden in a request). Each of the sub-elements is also optional.
+* `variables`: optional variables that can be used in all the requests.
+* `common`: optional, request details that applies to all requests (unless overridden in a request). Each of the sub-elements is also optional.
 * `requests`: a collection of requests as key-value pairs where the key is the request name (or title) and the value is a request object.
+
+### variables
+
+This is an object containing a set of name: value pairs, where the value can be anything, even objects, see the Variables section below for an explanation how non-scalars will be used.
 
 ### common
 
@@ -109,9 +113,9 @@ HTTP Headers that will be sent along with the request.
 Tests are run against (each of them is a property of `tests`) the following:
 
 * `status`: an `assertion` against the HTTP status code
+* `headers`: a list of `assertion`s against the headers
 * `body`: an `assertion` against the entire body. This can be a string, or an object.
 * `json`: a list of `assertion`s against elements (`path`s) of the body parsed as JSON
-* `headers`: a list of `assertion`s against the headers
 
 ### asssertion
 
@@ -165,72 +169,54 @@ Similar to tests, each header is a key-value pair where the key is the name of t
 
 * `Content-type: contentTypeVar`
 
-# Variables
+# Variable sets
 
-Variables are simple YAML files of a list of name value pairs. For example:
+Variable sets files contain variables grouped under the set's name. For example:
 
 ```
-username: Tom
-userID: 45
+staging:  # variable set: staging
+  username: Tom  # variable: username
+  userID: 45
+production:
+  username: Xi
+  userID: 89
 ```
 
 ## Type
 
-Variables can be of any type, even objects and arrays. (unlike Postman or Thunderclient, where they have to be variables). This is especially useful in making comparisons against responses.
+Variables can be of any type, even objects and arrays. (unlike Postman or Thunderclient, where they have to be strings). This is especially useful in making comparisons against responses, or even variables for using nested objects within Post bodies.
 
 ## Use of Variables
 
-Variables can be used as values in the following places:
-
-* URL
-* Parameter values
-* Header values
-* Post Body
-* Test values
-
-We will follow the makefile convention of variables, restircted to the round bracked `()`.
+We will follow the makefile convention of variables, restircted to the round brace `()`.
 
 * `$variable` if followed by a non-word character or EOL, unless the $ is preceded by a \
 * `$(variable)`, unless the $ is preceded by a \
 
+Variables can be placed in any of the following:
+
+* URL
+* Parameter values
+* Header values
+* Body
+* Test values
+
+Of the above, the variable value will be converted to a string before being used in the URL, Parameter values, Header values and Body (if it is a string).
+
 While using as test values, the comparison will do an object deep-comparison if the value being compared and the variable both are objects or arrays. If either of them is a string, the other will be converted to a string using JSON.stringify() for non-scalars and toString() for scalars.
 
-# Environments
+## Merging variable sets
 
-Environments consist of a sequence of variable sets loaded one after the other. The file `zz-envs.yaml` describes the environments. It is just a list of `{name: someenv, varsets: [list of varset files]}`.
+If there are multiple `.zzv` files in a directory, all of them will be loaded and merged such that the result will have the union of all variable sets in each variable set file. Within a variable set, the variable names will be combined. In case the same variable name is used, it will be overwritten. Files will be processed in alphabetical order, so if the order is important, you can use 0-first.zzv, 1-second.zzv etc. as the file names.
 
-The order of the variable sets is important. Each variable set is processed in the order in which it is specified, and the following actions are taken:
+The need for multiple files arises solely to support personal values (or secrets) that you don't want to share with your team. Each team member will need to create the personal variable set file themselves, with their own unique credentials. This file is typically not committed to the repository, whereas the common shared variable set file is usually committed along with the bundles in the directory.
 
-* The variable will be set to the value.
-* It will overwrite any previously set value from previous variable sets.
-* The value itself can contain another variable (which should have already been set).
+## Captured Variables
 
-A typical directory will have some personal variables which you don't want to share, some common variables and one variable set for each different environment, eg, production and staging and local. We would want them to be loaded in the following example orders:
-
-* secrets, common, production
-* secrets, common, staging
-
-The variable set _secrets_ may contain different passwords for each environment, eg, `prodpassword` and `stagingpassword`. The production and staging variable sets can then use one of these as the value for the variable `password`. The variable set `common` will have common variables which can be overridden by the environment specific variables.
-
-# Runtime Variables
-
-Variables that are set during run-time using the `capture` option of a request are _not_ written back into any of the variable sets. They may overwrite existing variables of the same name loaded from the variable sets during the run session, but they are not saved permanently.
+Variables that are set using the `capture` option of a request are _not_ written back into any of the variable set files. They may overwrite existing variables of the same name loaded from the variable sets during the run session, but they are not saved permanently.
 
 All the hand-edited YAML files are meant to be that way: they will not be touched by runners or document generators.
 
-# Runners
+## Varaiable values as variables
 
-Runners combine variables from one or more variable sets and execute one or all the requests in a bundle, capture values and run tests specified.
-
-## VS Code Extension
-
-VS Code extensions are awesome because they can do magic. A few magics we would like to implement in our VS Code extension are:
-
-* Action items (aka Code Lenses) above any bundle ("Run all") or request: ("Run"). This similar to the golang "Run test" and "Debug test" actions that automagically appear above any test functions
-* A console window that shows the status of the request(s)
-* Multiple output windows that show the response of the request(s)
-* An ability to save a single run's response as a file: we can use it as the response sample in the documentation
-
-## Command line runner
-
-TBD
+This is not supported. Variables cannot be used in other variables.

@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
-  "description": "zzapi is an API testing and documentation tool + vs code extension",
+  "description": "Schema for zzAPI bundle (collection of HTTP requests for doc/testing) used by the zzAPI toolset and VS Code extension.",
   "$defs": {
     "header": {
       "type": "object",
@@ -117,6 +117,16 @@
   "required": ["requests"],
   "additionalProperties": false,
   "properties": {
+    "variables": {
+      "type": "object",
+      "description": "Variables that can be used in any request",
+      "patternProperties": {
+        "[_a-zA-Z][_a-zA-Z0-9]*": {
+          "type": "object",
+          "description": "Variable names can only contain _a-zA-Z0-9, and cannot start with a digit"
+        }
+      }
+    },
     "common": {
       "description": "Some properties that are applied to all requests.",
       "type": "object",

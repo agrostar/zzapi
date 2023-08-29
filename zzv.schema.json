@@ -1,0 +1,16 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "description": "Schema for zzAPI variable set, used by the zzAPI toolset and VS Code extension.",
+  "patternProperties": {
+    "": {
+      "description": "Name of the environment to which this set of variables is applicable",
+      "type": "object",
+      "patternProperties": {
+        "[_a-zA-Z][_a-zA-Z0-9]*": {
+          "type": "object"
+        }
+      }
+    }
+  }
+}
