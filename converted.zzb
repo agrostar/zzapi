@@ -1,0 +1,187 @@
+requests:
+    Get anon authToken:
+        method: POST
+        url: $(userserver)/userservice/user/
+        headers:
+            - { name: Content-Type, value: application/json }
+        body: |
+            {
+              "androidId": "db61caa5db656046",
+              "gcmCode": "",
+              "isBlackListed": false,
+              "deviceDetails": {
+                "app_version_code": "140",
+                "app_version_name": "5.8.10-21.03.23",
+                "Device": "cereus",
+                "Model": "Redmi 6 (cereus)",
+                "net_operator": "40422",
+                "OS API Level": "8.1.0(27)",
+                "OS Version": "4.9.77+(V10.2.4.0.OCGMIXM)",
+                "sim_operator": "40422"
+              },
+              "userId": 0,
+              "verified": false
+            }
+
+    Get anon authToken Copy:
+        method: POST
+        url: $(userserver)/userservice/user/
+        headers:
+            - { name: Content-Type, value: application/json }
+        body: |
+            {
+              "androidId": "69e3dd8ffcdec54d",
+              "gcmCode": "",
+              "isBlackListed": false,
+              "deviceDetails": {
+                "app_version_code": "140",
+                "app_version_name": "5.8.10-21.03.23",
+                "Device": "cereus",
+                "Model": "Redmi 6 (cereus)",
+                "net_operator": "40422",
+                "OS API Level": "8.1.0(27)",
+                "OS Version": "4.9.77+(V10.2.4.0.OCGMIXM)",
+                "sim_operator": "40422"
+              },
+              "userId": 0,
+              "verified": false
+            }
+
+    Send OTP:
+        method: GET
+        url: $(userserver)/userservice/otp/
+        headers: []
+        params:
+            - { name: app, value: AgroStar }
+            - { name: phoneNumber, value: $(phone) }
+
+    Verify OTP:
+        method: POST
+        url: $(userserver)/userservice/otp/
+        headers:
+            - { name: Content-Type, value: application/json }
+            - { name: X-Authorization-Token, value: $(anonAuthToken) }
+        body: |
+            {
+              "otpToken": "$(otpToken)",
+              "otp": "$(otp)"
+            }
+
+    CRM Login with username:
+        method: POST
+        url: $(userserver)/userservice/uservalidation/
+        headers:
+            - { name: Source, value: CSR }
+        body:
+            emailId: vasan.subramanian
+            password: Gelusil1!
+            rememberMe: false
+
+    AgroWiki login with username:
+        method: POST
+        url: $(userserver)/userservice/login/
+        headers:
+            - { name: Source, value: CSR }
+        body:
+            emailId: vasan.subramanian
+            password: Gelusil1!
+            rememberMe: false
+
+    Farmer login with username:
+        method: POST
+        url: $(userserver)/userservice/uservalidation/
+        headers:
+            - { name: Source, value: CSR }
+        body:
+            emailId: 8c134984-4342-40e3-9d71-31f6f1
+            password: ""
+
+    Vasan Permanent authToken:
+        method: POST
+        url: $(crmserver)/userservice/uservalidation/
+        headers:
+            - { name: Source, value: CSR }
+        body:
+            emailId: $(vasanUserName)
+            password: ""
+            userType: S2S
+            rememberMe: false
+
+    Get Current User:
+        method: GET
+        url: $(userserver)/userservice/activeuser
+        headers:
+            - {
+                  name: X-Authorization-Token,
+                  value: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiIsImtpZCI6IlRDMCJ9.eyJzdWIiOjIwMzIyMDcsInB3ZCI6InBia2RmMl9zaGEyNTYkMjAwMDAkYUNvcnFocnpPdVhsJHhYVjFiMWtzb09yOHAvTDlHWENERFhBZzFBeFRuVTdPSU1GNVNsTmVFQTQ9IiwiaWF0IjoxNjc0MjA5MjUxLCJleHBhdCI6bnVsbCwidHlwIjoiQ1JNIiwiZ3JwIjpbImFwcENTUl9NSCJdfQ.XL1C-PQzFFnXBMER6gpLH0q3080qt3YacK5AhSJwVAw,
+              }
+            - { name: X-Authorization-Token, value: $(authToken) }
+            - { name: X-Authorization-Token, value: $(authTokenVasan) }
+            - { name: X-Authorization-Token, value: $(authTokenS2S) }
+            - {
+                  name: X-Authorization-Token,
+                  value: f88c4c2e-32a6-4556-b3c5-3ba99f70918f,
+              }
+
+    Get Current With Type:
+        method: GET
+        url: $(userserver)/userservice/activeuserwithtype
+        headers:
+            - {
+                  name: X-Authorization-Token,
+                  value: e4f09a75-80f6-4929-9ddb-eccaf6f59cc4,
+              }
+            - { name: X-Authorization-Token, value: $(authToken) }
+            - { name: X-Authorization-Token, value: $(authTokenVasan) }
+            - { name: X-Authorization-Token, value: $(authTokenS2S) }
+            - {
+                  name: X-Authorization-Token,
+                  value: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiIsImtpZCI6IlRBMCJ9.eyJzdWIiOjE4NTAwMDgsInB3ZCI6InBia2RmMl9zaGEyNTYkMjAwMDAkeDBzRTNaU25uTnI5JGRUUDkxdnZ5ZmdLbzUrTnl2VkZ1WVZOREE1SXowMmcxMVNPQlBvQUY3YW89IiwiaWF0IjoxNjQwNjA0MTg3LCJleHBhdCI6bnVsbCwidHlwIjoiQVBQIiwiZ3JwIjpbIkFQUE1IIiwiQVBQR0oiLCJBUFBSSiIsIndlYl91c2VyIl19.-CCFOJ57Zya9uh6V5D1ecdArvPRFFnIT8EmBMzo0R2Y,
+              }
+
+    Get User Source:
+        method: GET
+        url: $(userserver)/userservice/usersources/
+        headers:
+            - {
+                  name: X-Authorization-Token,
+                  value: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiIsImtpZCI6IlRDMCJ9.eyJzdWIiOjIwMzIyMDcsInB3ZCI6InBia2RmMl9zaGEyNTYkMjAwMDAkYUNvcnFocnpPdVhsJHhYVjFiMWtzb09yOHAvTDlHWENERFhBZzFBeFRuVTdPSU1GNVNsTmVFQTQ9IiwiaWF0IjoxNjc0MjA5MjUxLCJleHBhdCI6bnVsbCwidHlwIjoiQ1JNIiwiZ3JwIjpbImFwcENTUl9NSCJdfQ.XL1C-PQzFFnXBMER6gpLH0q3080qt3YacK5AhSJwVAw,
+              }
+            - { name: X-Authorization-Token, value: $(authToken) }
+            - { name: X-Authorization-Token, value: $(authTokenVasan) }
+            - { name: X-Authorization-Token, value: $(authTokenS2S) }
+
+    User details from authToken:
+        method: GET
+        url: $(userserver)/userservice/userdetails/
+        headers:
+            - { name: X-Authorization-Token, value: $(authToken) }
+        params:
+            - {
+                  name: authToken,
+                  value: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiIsImtpZCI6IlRDMCJ9.eyJzdWIiOjIwMzIyMDcsInB3ZCI6InBia2RmMl9zaGEyNTYkMjAwMDAkYUNvcnFocnpPdVhsJHhYVjFiMWtzb09yOHAvTDlHWENERFhBZzFBeFRuVTdPSU1GNVNsTmVFQTQ9IiwiaWF0IjoxNjc0MjEyNzY1LCJleHBhdCI6bnVsbCwidHlwIjoiQ1JNIiwiZ3JwIjpbImFwcENTUl9NSCJdfQ.lYmdqAyWjWDMwGOZkXtTMfwIHFNRu1ifj-zhCd9qUaU,
+              }
+
+    User details from emailId:
+        method: GET
+        url: $(userserver)/userservice/userdetails/
+        headers:
+            - { name: X-Authorization-Token, value: $(authToken) }
+        params:
+            - { name: authToken, value: $(authToken) }
+            - { name: email, value: vasan.subramanian@agrostar.in }
+            - { name: username, value: vasan.subramanian }
+
+    Refresh Token:
+        method: POST
+        url: $(userserver)/userservice/token/
+        headers: []
+        body:
+            oldAuthToken: 71741d98-88c4-4caa-ac91-8d208dda3c0b
+            userType: APP
+
+    Logout:
+        method: DELETE
+        url: $(userserver)/userservice/login/
+        headers:
+            - { name: X-Authorization-Token, value: asdfasdfasdf }

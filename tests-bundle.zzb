@@ -18,7 +18,7 @@ variables:
   addressVar:
     streetAddress: 7th street
     city: Nara
-    postalCode: "960001"
+    postalCode: "560001"
   getUrl: /get
   fooVar: bar
   agrostar: https://test-farmerapp.agrostar.in
