@@ -123,7 +123,7 @@ Assertions are similar to MongoDB filters. The key is the element (a path in cas
 
 * `status: 400`: status must be equal to 400
 * `status: { $lt: 300 }`: status must be less than 300
-* `body: {$regex: /\<html\>/}`: the body must contain the characters `<html>` (using the `$regex` operator,)
+* `body: {$regex: "\<html\>"}`: the body must contain the characters `<html>` (using the `$regex` operator,)
 * `json: { field.nested.value: 42 }`: the nested value must be equal to 42 (and match the type)
 
 Note that an assertion value can be a non-scalar, especially when matching a non-scalar in the response JSON. The comparison will be done by JSON.stringif()ing both the RHS and the LHS.
@@ -137,12 +137,15 @@ Operators supported in the RHS are:
 
 ### tests.json
 
-If there are any json tests, the response is parsed as JSON, provided the content type is `application/json`. The key of the test is a path to the (nested) field in the JSON document. The path is evaluated using JSONPATH (see https://www.npmjs.com/package/jsonpath and https://jsonpath.com/) and the first result is (or the result of jp.value) used as the value to test against. Here are some examples:
+If there are any json tests, the response is parsed as JSON, provided the content type is `application/json`. The key of the test is a path to the (nested) field in the JSON document. The path is evaluated using JSONPATH (see https://www.npmjs.com/package/jsonpath and https://jsonpath.com/) and the first result (or the result of jp.value) is used as the value to test against. Here are some examples:
 
-* `$.field.nested.value: 10`: will match 10 if the response body is like `{ field: { nested: { value: 10 } } }` 
-* `$.field.0` or `field[0]` will match 10 in  `{ field: [ 10, 20 ]}`
-* `$.field.0.value` will match 10 in  `{ field: [ { value: 10 }, { value: 20 } ]}`
-* `$.field[?(@.name==x)].value` will match 10 in `{ field: [ { name: x, value: 10 }, { name: y, value: 20 } ]}`
+Object | Path | Result
+--------- | ------- | -------
+ `{ field: { nested: { value: 10 } } }` | `$.field.nested.value: 10` | 10
+`{ field: [ 10, 20 ]}` | `$.field.0` | 10
+`{ field: [ 10, 20 ]}` | `$.field[0]` | 10
+`{ field: [ { value: 10 }, { value: 20 } ]}` | `$.field.1.value` | 20
+`{ field: [ { name: x, value: 10 }, { name: y, value: 20 } ]}` | `$.field[?(@.name=="x")].value` | 10
 
 If the result is a non-scalar (eg, the entire array) it will be used as is when matching against the operators `$size`, `$exists` and `$type`, otherwise will be converted to a string using `JSON.stringify(value)`.
 

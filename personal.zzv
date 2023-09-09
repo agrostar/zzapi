@@ -1,5 +1,5 @@
 #
-# Variables that are personal and not shared (do not commit this to the repo)
+# Variables that are personal (do not commit this to the repo)
 #
 staging:
   adminPassword: secret123

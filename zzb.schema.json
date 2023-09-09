@@ -122,7 +122,6 @@
       "description": "Variables that can be used in any request",
       "patternProperties": {
         "[_a-zA-Z][_a-zA-Z0-9]*": {
-          "type": "object",
           "description": "Variable names can only contain _a-zA-Z0-9, and cannot start with a digit"
         }
       }

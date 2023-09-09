@@ -8,6 +8,7 @@
       "type": "object",
       "patternProperties": {
         "[_a-zA-Z][_a-zA-Z0-9]*": {
+          "description": "Variable names can only contain _a-zA-Z0-9, and cannot start with a digit"
         }
       }
     }
