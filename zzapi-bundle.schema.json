@@ -48,6 +48,14 @@
           "description": "If set, will automatically follow redirects (default: false)",
           "type": "boolean"
         },
+        "showHeaders": {
+          "description": "Show the headers along with status etc (like -v in curl)",
+          "type": "boolean"
+        },
+        "formatJSON": {
+          "description": "If the response is JSON, format the response before displaying",
+          "type": "boolean"
+        },
         "verifySSL": {
           "description": "If set, will verify the SSL certificate (default: false)",
           "type": "boolean"
