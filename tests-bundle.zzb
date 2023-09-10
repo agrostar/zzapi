@@ -1,5 +1,4 @@
 # yaml-language-server: $schema=https://raw.githubusercontent.com/agrostar/zzapi/main/zzb.schema.json
-# yaml-language-server: $schema=./schema.json
 
 # This bundle contains a series of test requests against various endpoints,
 # most of them being the postman echo service. We use this to both serve as

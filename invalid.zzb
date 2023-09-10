@@ -3,5 +3,7 @@
 commomn:  # there is a typo here
   a: b
 requests:
-  - name: y  # name is invalid, also url and method are not defined
-  - name: z
+
+  request1:
+    name: the request  # name is invalid, also url and method are not defined
+  

@@ -189,6 +189,13 @@
                   }
                 }
               }
+            },
+            "response": {
+              "description": "A sample response. A string starting with < denotes file name"
+            },
+            "doc": {
+              "type": "string",
+              "description": "Documentation about the entire request, typically in Markdown"
             }
           }
         }
