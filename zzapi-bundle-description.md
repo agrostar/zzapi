@@ -25,7 +25,19 @@ requests:
 
 ## variables
 
-This is an object containing a set of name: value pairs, where the value can be anything, even objects, see the [Variable sets specification](zzapi-varset-description.md) section below for an explanation how non-scalars will be used.
+This is an object containing variable sets as described in [Variable sets specification](zzapi-varset-description.md). Requests are executed with one of the variable sets, to be selected before running the request(s). Typically, each variable set has the same set of variables defined, possibly with different values. An example:
+
+```
+variables:
+  production:
+    myServer: https://example.com
+  staging:
+    myServer: https://staging.example.com
+
+requests:
+  ping:
+    url: $myServer/ping
+```
 
 ## common
 

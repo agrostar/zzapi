@@ -1,4 +1,4 @@
-# yaml-language-server: $schema=https://raw.githubusercontent.com/agrostar/zzapi/main/zzapi-bundle.schema.json
+# yaml-language-server: $schema=https://agrostar.in/zzapi-bundle.schema.json
 
 common:
   baseUrl: https://example.com
@@ -10,7 +10,7 @@ requests:
     body:
       userId: 123456
       password: secret
-      varify: false    
+      verify: false
     response:
       status: OK
       responseData:

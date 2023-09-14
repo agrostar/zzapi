@@ -126,11 +126,15 @@
   "additionalProperties": false,
   "properties": {
     "variables": {
-      "type": "object",
-      "description": "Variables that can be used in any request",
       "patternProperties": {
-        "[_a-zA-Z][_a-zA-Z0-9]*": {
-          "description": "Variable names can only contain _a-zA-Z0-9, and cannot start with a digit"
+        "": {
+          "description": "Name of the environment to which this set of variables is applicable",
+          "type": "object",
+          "patternProperties": {
+            "[_a-zA-Z][_a-zA-Z0-9]*": {
+              "description": "Variable names can only contain _a-zA-Z0-9, and cannot start with a digit"
+            }
+          }
         }
       }
     },
