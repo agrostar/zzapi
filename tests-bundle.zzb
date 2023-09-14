@@ -12,14 +12,15 @@ common:
       Content-type: application/json; charset=utf-8
 
 variables:
-  addressVar:
-    streetAddress: 7th street
-    city: Nara
-    postalCode: "560001"
-  getUrl: /get
-  fooVar: bar
-  agrostar: https://test-farmerapp.agrostar.in
-  pi: 3.14
+  prod:
+    addressVar:
+      streetAddress: 7th street
+      city: Nara
+      postalCode: "560001"
+    getUrl: /get
+    fooVar: bar
+    agrostar: https://test-farmerapp.agrostar.in
+    pi: 3.14
 
 requests:
 
