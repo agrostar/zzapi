@@ -72,6 +72,8 @@ These are options that can be switches on/off, both at the common level as well 
 
 * `follow`: whether to follow redirects (default is false)
 * `verifySSL`: whether to enfoce SSL certificate validation (default is false)
+* `showHeaders`: whether to show the response headers for each request (default is false)
+* `formatJSON`: whether to format (add indents etc.) the response JSON in the editor window (default is true)
 
 ### header
 
