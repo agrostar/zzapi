@@ -6,9 +6,9 @@ zzAPI (prounounced like pizza, the syllables interchanged) is a REST API testing
 
 * **Simplicity**: Do one thing (or two) and do it well. Single responsibility. Allow building on top.
 * **Stand on the shoulders of giants**: Do not reinvent what has already been solved. We will use existing conveniences, which may not be perfect but will work well.
-* **No GUI to enter data**: Developers don't need a GUI. Copy paste within an editor is far more efficient compared to multiple mouse clicks to enter data. We will use YAML files instead.
-* **JSON first**: Though the request body can be anything, we have some extra conveniences for JSON body in the request as well as response.
-* **Files belong in your repo**: Storage will be on the local file system (ie, not the cloud). Whatever you have typed belongs to you. We expect you to save the YAMLs within your code repository and share with your teammates.
+* **No GUI to enter data**: Developers don't need it. Copy paste within an editor is far more efficient compared to mouse clicks to enter data. We will use YAML files instead.
+* **JSON first**: Though the request body can be anything, we have some extra conveniences for JSON body in the request as well as response body.
+* **You manage your data**: Storage will be on the local file system (ie, not the cloud). Whatever you have typed belongs to you. You can share it among your team in whatever way you think appropriate. We suggest keeping it in your repo alongside your code.
 * **Open source**: If you have an idea that is useful to you and can be to others as well, build it, test it and send us a PR. Or let us know by logging a GitHub issue.
 
 ## Alternatives
@@ -25,11 +25,11 @@ zzAPI is made up of (at least):
 
 1. **Specs**: The YAML description, schema and validators.
 2. **Runners**: The tools that can make the API requests and test the responses. Currently the only runner available is the [VS Code extension](https://marketplace.visualstudio.com/items?itemName=AgroStar.zzapi)
-3. **Doc generators**: These will generate documentation in HTML/Markdown for easy browsing. Currently none, exist, but we are building one.
+3. **Doc generators**: These will generate documentation in HTML/Markdown for easy browsing. Currently none, exist.
 
 ## Storage
 
-All files will be stored locally (ie, not on the cloud, unlike Postman). A directory will hold together files of different kinds. The directory is typically the input to the runner and the doc generator. A directory is like a "Folder" in Postman terminology, but every directory can have it's own variables. If you need hierarchy, use sub-directories.
+All files will be stored locally (ie, not on the cloud, unlike Postman). A directory will hold together files of different kinds. The directory is typically the input to the runner and the doc generator. A directory is like a "Folder" in Postman terminology, but every directory can have its own variables. If you need hierarchy, use sub-directories.
 
 The directory will have the following kinds of files.
 
@@ -37,11 +37,11 @@ The directory will have the following kinds of files.
 * **Variable sets**: Variable definitions (with environment grouping), with a `.zzv` file extension. Also described below
 * **Other files**: All other files (typically `.json`) can be used as requests and response samples. 
 
-The schema for the above (except request and response files) will be discussed in detail below.
+The schema for the above (except request and response files) are detailed below.
 
 ## Request Bundles
 
-These are YAML files containing many requests. This is a "Collection" in Postman terminlogy. The directory can have any number of request bundles. Files ending with `.zzb` will be recognized as request bundles.
+These are YAML files containing HTTP requests. This is a "Collection" in Postman terminology. The directory can have any number of request bundles. Files ending with `.zzb` will be recognized as request bundles.
 
 ### Bundle Types
 

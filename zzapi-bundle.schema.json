@@ -201,15 +201,15 @@
                   }
                 }
               }
-            },
-            "response": {
-              "description": "A sample response. A string starting with < denotes file name"
             }
           },
           "patternProperties": {
             "doc*": {
               "type": "string",
               "description": "Documentation about the request, typically in Markdown. Different sections can be used, for example, doc-Response and doc-Purpose"
+            },
+            "response*": {
+              "description": "A sample response. Using file:// prefix allows you to open the file within vscode."
             }
           }
         }

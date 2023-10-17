@@ -55,12 +55,12 @@ requests:
 * `headers`: an array of `header` elements, in addition to the common set, or overridden if the name is the same
 * `params`: an array of `param` elements, in addition to the common set. Parameters cannot be overridden.
 * `body`: the raw request body. (Use the value `<filename` to read from a file, in a shell), or a JSON object, which will be converted to a JSON string after variable replacements.
-* `response`: a sample response, useful for documentation (doesn't affect the request)
+* `response*`: a set of sample responses, useful for documentation (doesn't affect the request)
   * `headers`: the headers expected in the response
   * `body`: the raw response body, or a JSON object. Use `<filename` to read from a file.
   * `doc`: documentation to describe the response.
 * `options`: options specific to this request, overrides common options
-* `doc`: general documentation, typically in markdown (use `<filename` to read from a file)
+* `doc*`: general documentation, typically in markdown (use `<filename` to read from a file)
 * `tests`: a set of test objects
 * `capture`: a set of values in the response to be captured as variables for use in further requests
 
