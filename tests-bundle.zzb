@@ -1,22 +1,22 @@
+# yaml-language-server: $schema=./zzapi-bundle.schema.json
 # This bundle contains a series of test requests against various endpoints,
 # most of them being the postman echo service. We use this to both serve as
 # an example of how to create test bundles as well as testing zzapi runner itself.
 
 common:
   baseUrl: https://postman-echo.com
-  headers:
-    - { name: Content-type, value: application/json }
+  headers: 
+    Content-type: application/json
   tests:
     status: 200
-    headers:
-      Content-type: application/json; charset=utf-8
+    $h.Content-type: application/json; charset=utf-8
 
 variables:
-  prod:
+  default:
     addressVar:
       streetAddress: 7th street
       city: Nara
-      postalCode: "560001"
+      postalCode: "560001"  # string. This will make a difference when used in the body
     getUrl: /get
     fooVar: bar
     agrostar: https://test-farmerapp.agrostar.in
@@ -30,43 +30,77 @@ requests:
     method: GET
     url: /get
     params:
+      foo1: bar1
+      foo2: bar2
+    tests:  # old way of specifying json tests
+      json:
+        $.args.foo1: bar1
+        $.args.foo2: bar2
+
+  get-with-params-no-value:
+    method: GET
+    url: /get
+    params:
+      foo1: bar1
+      foo2:
+    tests:  # new way of specifying json
+      $.url: "https://postman-echo.com/get?foo1=bar1&foo2"
+
+  get-with-params-as-array:
+    method: GET
+    url: /get
+    params:
       - { name: foo1, value: bar1 }
-      - { name: foo2, value: bar2 }
+      - { name: foo2, value: multi-1 }
+      - { name: foo2, value: multi-2 }
     tests:
-      json: { $.args.foo1: bar1,  $.args.foo2: bar2 }
+      $.args.foo1: bar1
+      $.args.foo2: { $eq: ["multi-1","multi-2"] }
+
+  get-with-params-values-as-array:
+    method: GET
+    url: /get
+    params:
+      foo1: bar1
+      foo2:
+      - multi-1
+      - multi-2
+    tests:
+      $.args.foo1: bar1
+      $.args.foo2: { $eq: ["multi-1","multi-2"] }
 
   post-header-merge:
     url: /post
     method: POST
-    headers: 
-      - { name: X-Custom-Header, value: Custom Value }
+    headers: { X-Custom-Header: Custom Value }
     body:
       foo1: bar1
       foo2: 42
     tests:
-      json: 
-        $.data.foo1: bar1
-        $.data.foo2: { $type: number, $gt: 41, $lt: 43 }
+      $.data.foo1: bar1
+      $.data.foo2: { $type: number, $gt: 41, $lt: 43 }
 
   post-header-override:
     url: /post
     method: POST
     headers: 
-      - { name: Content-Type, value: text/plain }
+      Content-Type: text/plain
     body: { foo: bar }
     tests:
       # if the server didn't parse this as a JSON, then, our content-type override is successful
-      json: { $.data: '{"foo":"bar"}' }
+      $.data: '{"foo":"bar"}'
 
   status-404:
     url: /notfound
     method: GET
-    tests: { status: 404, headers: {content-type: {$exists: false}} }
+    tests: 
+      status: 404
+      $h.content-type: { $exists: false }
 
   status-401:
     url: /status/401
     method: GET
-    tests: { status: 401, { json: { $.status: 401 } } }
+    tests: { status: 401, { $.status: 401 } }
 
   encoding:
     method: GET
@@ -82,7 +116,7 @@ requests:
     method: GET
     url: /get
     params:
-      - { name: foo, value: 30%25+of+200, encode: false }
+      - { name: foo, value: 30%25+of+200, raw: true }
     tests:
       json:
         $.url: https://postman-echo.com/get?foo=30%25+of+200
@@ -116,9 +150,8 @@ requests:
   response-headers:
     method: GET
     url: /response-headers
-    params:
-      - { name: foo, value: bar }
-    tests: { headers: { foo: bar } }
+    params: { foo: bar }
+    tests: { $h.foo: bar }
 
   override-base-url:
     method: GET
@@ -134,12 +167,11 @@ requests:
       - { name: verbatim1, value: $usernameelse }
       - { name: verbatim2, value: \$(username) }
     tests:
-      json:
-        $.args.replaced1: vasan
-        $.args.replaced2: some$username
-        $.args.replaced3: somevasanelse
-        $.args.verbatim1: { $ne: vasanelse, $eq: $usernameelse }
-        $.args.verbatim2: { $ne: vasan.subramanian, $eq: \$(username) }
+      $.args.replaced1: vasan
+      $.args.replaced2: some$username
+      $.args.replaced3: somevasanelse
+      $.args.verbatim1: { $ne: vasanelse, $eq: $usernameelse }
+      $.args.verbatim2: { $ne: vasan.subramanian, $eq: \$(username) }
 
   variables-in-headers:
     method: GET
@@ -196,26 +228,25 @@ requests:
           number: 0123-4567-8910
           available: [18, 22]
     tests:
-      json:
-        $.data.firstName: John
-        $.data.age: { $type: number, $eq: 26, $ne: 30, $gt: 25, $lt: 27 }
-        $.data.address: { $type: object, $size: 3, $exists: true }
-        $.data.address.city: Nara
-        $.data.address.postalCode: { $type: string, $size: 6, $ne: 560034 }
-        $.data.phoneNumbers: { $type: array, $size: 2, $exists: true }
-        $.data.phoneNumbers[0].type: mobile
-        $.data.phoneNumbers.1.type: home
-        $.data.phoneNumbers[?(@.type=="home")].number: 0123-4567-8910
-        $.data.lastName: { $exists: true }
-        $.data.middleName: { $exists: true, $type: "null" }
-        $.data.otherName: { $exists: false, $type: undefined }
-        $.data.phoneNumbers[*].type: mobile
-        $.data.phoneNumbers[*].available: { $eq: [7,22] }
-        $.data.phoneNumbers.0.available: { $eq: [ 7, 22 ], $type: array }
-        $.data.phoneNumbers.1.available: { $eq: "[18,22]", $type: array }
-        # stress: ensure corner cases don't crash
-        $.data.otherName.value: { $exists: false } # don't recurse down undefined
-        $.data.middleName.value: { $exists: false } # don't recurse down null
+      $.data.firstName: John
+      $.data.age: { $type: number, $eq: 26, $ne: 30, $gt: 25, $lt: 27 }
+      $.data.address: { $type: object, $size: 3, $exists: true }
+      $.data.address.city: Nara
+      $.data.address.postalCode: { $type: string, $size: 6, $ne: 560034 }
+      $.data.phoneNumbers: { $type: array, $size: 2, $exists: true }
+      $.data.phoneNumbers[0].type: mobile
+      $.data.phoneNumbers.1.type: home
+      $.data.phoneNumbers[?(@.type=="home")].number: 0123-4567-8910
+      $.data.lastName: { $exists: true }
+      $.data.middleName: { $exists: true, $type: "null" }
+      $.data.otherName: { $exists: false, $type: undefined }
+      $.data.phoneNumbers[*].type: mobile
+      $.data.phoneNumbers[*].available: { $eq: [7,22] }
+      $.data.phoneNumbers.0.available: { $eq: [ 7, 22 ], $type: array }
+      $.data.phoneNumbers.1.available: { $eq: "[18,22]", $type: array }
+      # stress: ensure corner cases don't crash
+      $.data.otherName.value: { $exists: false } # don't recurse down undefined
+      $.data.middleName.value: { $exists: false } # don't recurse down null
 
   # All these tests should fail
   tests-negative-response:
@@ -228,28 +259,26 @@ requests:
       numbers: [ 444, 222 ]
       object: { foo: bar }
     tests:
-      status: {$ne: 200}
-      headers:
-        content-type: {$exists: false}
-      json:
-        # regular things that should fail
-        $.data.name: { $type: array }
-        $.data.missing: { $size: 0, $exists: true } # should report 2 failures
-        $.data.missing.missing.missing: { $exists: true }
-        $.data.numbers.0: "444" # 444 is not same as "444". We use === for $eq and !== for $neq
+      status: { $ne: 200 }
+      $h.content-type: { $exists: false }
+      # regular things that should fail
+      $.data.name: { $type: array }
+      $.data.missing: { $size: 0, $exists: true } # should report 2 failures
+      $.data.missing.missing.missing: { $exists: true }
+      $.data.numbers.0: "444" # 444 is not same as "444". We use === for $eq and !== for $neq
 
-        # stress: ensure corner cases don't crash
-        $.data.age: { $size: 2 }  # .length not supported for type: number
-        $.data.numbers[?(.@)]: 4 # invalid path
-        $.data.age.something: 55  # jsonpath should take care of this.
-        $.data.numbers[5]: 0  # jsonpath should take care of this 
+      # stress: ensure corner cases don't crash
+      $.data.age: { $size: 2 }  # .length not supported for type: number
+      $.data.numbers[?(.@)]: 4 # invalid path
+      $.data.age.something: 55  # jsonpath should take care of this.
+      $.data.numbers[5]: 0  # jsonpath should take care of this 
 
   # This request should not even be processed due to bad tests schema
   tests-negative-schema:
     method: GET
     url: /get
     tests:
-      status: {$ne: 200}
+      status: { $ne: 200 }
       headers:
         content-type: {$exists: false}
       # Uncomment the following to run tests. Schema validation makes these invalid.
@@ -259,7 +288,7 @@ requests:
       #   $.data.address: { $type: invalid } # invalid assertion value, expecting one of number|string|boolean|array|object|null|undefined
       #   $.data.exists: { $exists: 4 } # invalid assertion value, expecitng a boolean
 
-  capture-json:
+  capture-response:
     method: POST
     url: /post
     body:

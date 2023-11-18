@@ -2,11 +2,11 @@
   "$schema": "http://json-schema.org/draft-04/schema#",
   "description": "Schema for zzAPI bundle (collection of HTTP requests for doc/testing) used by the zzAPI toolset and VS Code extension.",
   "$defs": {
-    "header": {
+    "headerArray": {
       "type": "object",
       "required": ["name", "value"],
       "additionalProperties": false,
-      "description": "A header is a map consisting of the keys name*, value* and doc",
+      "description": "A header is a map consisting of the keys name, value and doc*",
       "properties": {
         "name": {
           "type": "string",
@@ -19,19 +19,20 @@
         }
       }
     },
-    "param": {
+    "paramArray": {
       "type": "object",
-      "required": ["name", "value"],
-      "description": "A param is a map consisting of the keys name*, value*, encode and doc",
+      "required": ["name"],
+      "additionalProperties": false,
+      "description": "A param is a map consisting of the keys name, value, and doc*",
       "properties": {
         "name": {
           "type": "string",
           "description": "Name of the parameter."
         },
         "value": { "$ref": "#/$defs/scalar", "description": "Value of the parameter" },
-        "encode": {
+        "raw": {
           "type": "boolean",
-          "description": "Whether to URL-encode the parameter value (names will never be encoded), the default is false"
+          "description": "Whether to treat the value as raw, ie, skip URL-encoding it (names will never be encoded), the default is false"
         },
         "doc": {
           "type": "string",
@@ -39,8 +40,30 @@
         }
       }
     },
+    "paramObject": {
+      "type": "object",
+      "description": "A set of parameters described as key/value pairs. Value can be an array of scalars",
+      "properties": {
+        "": {
+          "anyOf": [
+            { "$ref": "#/$defs/scalar"  },
+            {
+              "type": "array",
+              "items": { "$ref": "#/$defs/scalar" }
+            }
+          ]
+        }
+      }
+    },
+    "headerObject": {
+      "type": "object",
+      "description": "A set ofheaders described as key/value pairs",
+      "properties": {
+        "": { "$ref": "#/$defs/scalar" }
+      }
+    },
     "options": {
-      "description": "Options applicable to requests { follow, verifySSL, formatJSON, showHeaders }",
+      "description": "Options applicable to requests { follow, verifySSL, keepRawJSON, showHeaders }",
       "type": "object",
       "additionalProperties": false,
       "properties": {
@@ -52,7 +75,7 @@
           "description": "Show the headers along with status etc (like -v in curl)",
           "type": "boolean"
         },
-        "formatJSON": {
+        "keepRawJSON": {
           "description": "If the response is JSON, format the response before displaying",
           "type": "boolean"
         },
@@ -63,8 +86,6 @@
       }
     },
     "scalar": { "not": { "type": ["object", "array"] } },
-    "opValue": {
-    },
     "assertion": {
       "description": "An assertion: the value should be equal to the simple value, or match the operator/value as an object",
       "anyOf": [
@@ -105,18 +126,28 @@
           "$ref": "#/$defs/assertion"
         },
         "json": {
-          "description": "A map of assertions against the response, parsed as JSON. The keys are paths into the nested JSON object",
+          "description": "DEPRECATED. A map of assertions against the response, parsed as JSON. The keys are paths into the nested JSON object",
           "type": "object",
           "patternProperties": {
             "": { "$ref": "#/$defs/assertion" }
           }
         },
         "headers": {
-          "description": "A map of assertions against HTTP headers. They keys are names of the headers",
+          "description": "DEPRECATED. A map of assertions against HTTP headers. They keys are names of the headers",
           "type": "object",
           "patternProperties": {
             "": { "$ref": "#/$defs/assertion" }
           }
+        }
+      },
+      "patternProperties": {
+        "^\\$\\.": {
+          "description": "An assertion against an element in the response body parsed as JSON. The key is the jsonpath specification to identify the element",
+          "$ref": "#/$defs/assertion"
+        },
+        "^\\$h.": {
+          "description": "An assertion against an element in the response body parsed as JSON. The key is the jsonpath specification to identify the element",
+          "$ref": "#/$defs/assertion"
         }
       }
     }
@@ -148,8 +179,13 @@
         },
         "headers": {
           "description": "HTTP Headers to be sent as part of any request in this bundle",
-          "type": "array",
-          "items": { "$ref": "#/$defs/header" }
+          "anyOf":[
+            {
+              "type": "array",
+              "items": { "$ref": "#/$defs/headerArray" }
+            },
+            { "$ref": "#/$defs/headerObject" }
+          ]
         },
         "options": { "$ref": "#/$defs/options" },
         "tests": { "$ref": "#/$defs/tests" }
@@ -171,13 +207,23 @@
             },
             "headers": {
               "description": "HTTP Headers to be sent as part of the request. This is in addition to any header defined in common. Headers can be overridden.",
-              "type": "array",
-              "items": { "$ref": "#/$defs/header" }
+              "anyOf":[
+                {
+                  "type": "array",
+                  "items": { "$ref": "#/$defs/headerArray" }
+                },
+                { "$ref": "#/$defs/headerObject" }
+              ]
             },
             "params": {
               "description": "Query string parameters",
-              "type": "array",
-              "items": { "$ref": "#/$defs/param" }
+              "anyOf": [
+                {
+                  "type": "array",
+                  "items": { "$ref": "#/$defs/paramArray" }
+                },
+                { "$ref": "#/$defs/paramObject" }
+              ]
             },
             "body": {
               "description": "The request body",
@@ -204,11 +250,11 @@
             }
           },
           "patternProperties": {
-            "doc*": {
+            "^doc": {
               "type": "string",
               "description": "Documentation about the request, typically in Markdown. Different sections can be used, for example, doc-Response and doc-Purpose"
             },
-            "response*": {
+            "^response": {
               "description": "A sample response. Using file:// prefix allows you to open the file within vscode."
             }
           }

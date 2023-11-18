@@ -55,7 +55,7 @@ Take a look at the [sample doc bundle](docs-bundle.zzb).
 
 ### Test bundles
 
-The purpose is to automate testing. The same endpoint typically appears multiple times with different parameters and test cases. Tests are run against the response to ensure the API is responding as it is supposed to.
+The purpose is to automate testing. The same endpoint typically appears multiple times with different parameters and test cases. Tests (assertions) are run against the response to ensure the API is responding as it is supposed to.
 
 Take a look at the [sample tests bundle](tests-bundle.zzb).
 
