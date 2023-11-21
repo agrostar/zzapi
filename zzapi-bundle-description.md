@@ -22,15 +22,15 @@ requests:
       foo: bar
     tests:
       status: 200
-      $.response.message: OK
+      $.status: OK
   a-simple-post-request:
     method: POST
     url: /login
     body:
       username: $username
       password: $password
-    set-variables:
-      authToken: $.response.authToken
+    setvars:
+      authToken: $.authToken
 ```
 
 ## Top level objects

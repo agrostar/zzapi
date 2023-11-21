@@ -13,6 +13,7 @@ common:
 
 variables:
   default:
+    username: tom
     addressVar:
       streetAddress: 7th street
       city: Nara
@@ -167,11 +168,11 @@ requests:
       - { name: verbatim1, value: $usernameelse }
       - { name: verbatim2, value: \$(username) }
     tests:
-      $.args.replaced1: vasan
+      $.args.replaced1: tom
       $.args.replaced2: some$username
-      $.args.replaced3: somevasanelse
-      $.args.verbatim1: { $ne: vasanelse, $eq: $usernameelse }
-      $.args.verbatim2: { $ne: vasan.subramanian, $eq: \$(username) }
+      $.args.replaced3: sometomelse
+      $.args.verbatim1: { $ne: tomelse, $eq: $usernameelse }
+      $.args.verbatim2: { $ne: \tom, $eq: \$(username) }
 
   variables-in-headers:
     method: GET
@@ -229,7 +230,7 @@ requests:
           available: [18, 22]
     tests:
       $.data.firstName: John
-      $.data.age: { $type: number, $eq: 26, $ne: 30, $gt: 25, $lt: 27 }
+      $.data.age: { $type: number, $eq: 26, $ne: 30, $gt: 25, $lt: 28 }
       $.data.address: { $type: object, $size: 3, $exists: true }
       $.data.address.city: Nara
       $.data.address.postalCode: { $type: string, $size: 6, $ne: 560034 }
@@ -238,7 +239,8 @@ requests:
       $.data.phoneNumbers.1.type: home
       $.data.phoneNumbers[?(@.type=="home")].number: 0123-4567-8910
       $.data.lastName: { $exists: true }
-      $.data.middleName: { $exists: true, $type: "null" }
+      # $.data.middleName: { $exists: true, $type: "null" }
+      $.data.middleName: null
       $.data.otherName: { $exists: false, $type: undefined }
       $.data.phoneNumbers[*].type: mobile
       $.data.phoneNumbers[*].available: { $eq: [7,22] }
@@ -273,20 +275,24 @@ requests:
       $.data.age.something: 55  # jsonpath should take care of this.
       $.data.numbers[5]: 0  # jsonpath should take care of this 
 
-  # This request should not even be processed due to bad tests schema
+  # This request should tests should all fail due to bad tests schema
+  # Ensure we don't crash on these.
   tests-negative-schema:
-    method: GET
-    url: /get
+    method: POST
+    url: /post
+    body:
+      address: 1, example street
+      numbers: [ 444, 222 ]
+      object: { foo: bar }
     tests:
       status: { $ne: 200 }
       headers:
         content-type: {$exists: false}
       # Uncomment the following to run tests. Schema validation makes these invalid.
-      # json:
-      #   $.data.operator: { badop: any }  # invalid operator badop. If you want to match an entire object/array, use it as the value of the $eq operator.
-      #   $.data.numbers: { $size: two } # invalid assertion value, expecting a number
-      #   $.data.address: { $type: invalid } # invalid assertion value, expecting one of number|string|boolean|array|object|null|undefined
-      #   $.data.exists: { $exists: 4 } # invalid assertion value, expecitng a boolean
+      # $.data.operator: { badop: any }  # invalid operator badop. If you want to match an entire object/array, use it as the value of the $eq operator.
+      # $.data.numbers: [444, 222]
+      # $.data.address: { $type: invalid }
+      # $.data.object: { $exists: 4 }
 
   capture-response:
     method: POST

@@ -247,6 +247,14 @@
                   }
                 }
               }
+            },
+            "setvars": {
+              "type": "object",
+              "patternProperties": {
+                "[_a-zA-Z][_a-zA-Z0-9]*": {
+                  "description": "Variables to capture, the key is the name of the variable and the value is what to capture."
+                }
+              }
             }
           },
           "patternProperties": {
