@@ -127,6 +127,7 @@
         },
         "json": {
           "description": "DEPRECATED. A map of assertions against the response, parsed as JSON. The keys are paths into the nested JSON object",
+          "deprecated": true,
           "type": "object",
           "patternProperties": {
             "": { "$ref": "#/$defs/assertion" }
@@ -134,6 +135,7 @@
         },
         "headers": {
           "description": "DEPRECATED. A map of assertions against HTTP headers. They keys are names of the headers",
+          "deprecated": true,
           "type": "object",
           "patternProperties": {
             "": { "$ref": "#/$defs/assertion" }
@@ -162,7 +164,7 @@
           "description": "Name of the environment to which this set of variables is applicable",
           "type": "object",
           "patternProperties": {
-            "[_a-zA-Z][_a-zA-Z0-9]*": {
+            "^[_a-zA-Z][_a-zA-Z0-9]*": {
               "description": "Variable names can only contain _a-zA-Z0-9, and cannot start with a digit"
             }
           }
@@ -233,6 +235,8 @@
             "tests": { "$ref": "#/$defs/tests" },
             "capture": {
               "type": "object",
+              "deprecated": true,
+              "description": "DEPRECATED: Variables to capture, the key is the name of the variable and the value is what to capture.",
               "properties": {
                 "json": {
                   "type": "object",
@@ -251,10 +255,15 @@
             "setvars": {
               "type": "object",
               "patternProperties": {
-                "[_a-zA-Z][_a-zA-Z0-9]*": {
-                  "description": "Variables to capture, the key is the name of the variable and the value is what to capture."
+                "^[_a-zA-Z][_a-zA-Z0-9]*": {
+                  "description": "Variables to capture, the key is the name of the variable and the value is what to capture (status, body, $.jsonpath or $h.header",
+                  "anyOf": [
+                    { "type": "string", "pattern": "^\\$.*" },
+                    { "type": "string", "enum": ["status", "body"] }
+                  ]
                 }
-              }
+              },
+              "additionalProperties": false
             }
           },
           "patternProperties": {

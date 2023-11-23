@@ -109,9 +109,8 @@ requests:
     params:
       - { name: foo, value: 30% of 200 is 60 }
     tests:
-      json:
-        $.url: https://postman-echo.com/get?foo=30%25%20of%20200%20is%2060
-        $.args.foo: 30% of 200 is 60
+      $.url: https://postman-echo.com/get?foo=30%25%20of%20200%20is%2060
+      $.args.foo: 30% of 200 is 60
 
   no-encoding:
     method: GET
@@ -119,9 +118,8 @@ requests:
     params:
       - { name: foo, value: 30%25+of+200, raw: true }
     tests:
-      json:
-        $.url: https://postman-echo.com/get?foo=30%25+of+200
-        $.args.foo: 30% of 200
+      $.url: https://postman-echo.com/get?foo=30%25+of+200
+      $.args.foo: 30% of 200
 
   # The cookies endpoint does a redirect (no clue why), let's use that.
   no-redirects:
@@ -138,7 +136,7 @@ requests:
     url: /cookies/set
     tests:
       # code: 200 - this is inherited from common
-      json: { $.cookies: { $exists: true } } # Header names are case insensitive
+      $.cookies: { $exists: true } # Header names are case insensitive
 
   non-json:
     method: GET
@@ -179,7 +177,8 @@ requests:
     url: $(getUrl)
     headers:
       - { name: foo, value: $(fooVar) }
-    tests: { json: { $.headers.foo: bar } }
+    tests:
+      $.headers.foo: bar
 
   variables-in-body:
     method: POST
@@ -190,7 +189,8 @@ requests:
         "foo2": $pi
       }
     tests:
-      json: { $.data.foo1: bar,  $.data.foo2: { $type: number, $eq: 3.14 } }
+      $.data.foo1: bar
+      $.data.foo2: { $type: number, $eq: 3.14 }
 
   object-variables-in-body:
     method: POST
@@ -199,7 +199,8 @@ requests:
       name: Tom
       address: $addressVar
     tests:
-      json: { $.data.name: Tom,  $.data.address.postalCode: { $type: string, $eq: "560001" } }
+      $.data.name: Tom
+      $.data.address.postalCode: { $type: string, $eq: "560001" }
 
   # This returns headers in capital case. Ensure we match it.
   header-case:
@@ -300,21 +301,19 @@ requests:
     body:
       name: Tom
       address: { city: Bangalore, pincode: 560001 }
-    capture:
-      json:
-        $.data.name: nameVar
-        $.data.address: addressVar
-        $.data.address.city: cityVar
-        $.data.address.pincode: pincodeVar
+    setvars:
+      nameVar: $.data.name
+      addressVar: $.data.address
+      cityVar: $.data.address.city
+      pincodeVar: $.data.address.pincode
 
   capture-header:
     method: GET
     url: /response-headers
     params:
       - { name: X-Custom-Header, value: Custom Header Value }
-    capture:
-      headers:
-        X-Custom-Header: customHeaderVar
+    setvars:
+      customHeaderVar: $h.X-Custom-Header
 
   capture-checks-scalar:
     method: POST
@@ -325,11 +324,10 @@ requests:
       pincode: $pincodeVar
       customHeader: $customHeaderVar
     tests:
-      json:
-        $.data.name: Tom
-        $.data.city: Bangalore
-        $.data.pincode: 560001
-        $.data.customHeader: Custom Header Value
+      $.data.name: Tom
+      $.data.city: Bangalore
+      $.data.pincode: 560001
+      $.data.customHeader: Custom Header Value
 
   capture-checks-object-option-1:
     method: POST
@@ -342,10 +340,9 @@ requests:
         "address": $addressVar
       }
     tests:
-      json:
-        $.data.name: Tom
-        $.data.address.city: Bangalore
-        $.data.address.pincode: 560001  # this time it is NOT a string.
+      $.data.name: Tom
+      $.data.address.city: Bangalore
+      $.data.address.pincode: 560001  # this time it is NOT a string.
 
   capture-checks-object-option-2:
     method: POST
@@ -354,6 +351,5 @@ requests:
       name: Tom
       address: $addressVar
     tests:
-      json:
-        $.data.name: Tom
-        $.data.address: { $eq: { city: Bangalore, pincode: 560001 } }
+      $.data.name: Tom
+      $.data.address: { $eq: { city: Bangalore, pincode: 560001 } }
