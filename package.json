@@ -1,0 +1,44 @@
+{
+  "name": "zzapi",
+  "version": "0.0.0",
+  "description": "zzAPI is a REST API testing and documentation tool set. It is an open-source Postman alternative. ",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "test": "jest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/agrostar/zzapi.git"
+  },
+  "keywords": [
+    "api",
+    "testing",
+    "REST",
+    "postman"
+  ],
+  "author": "agrostar",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/agrostar/zzapi/issues"
+  },
+  "homepage": "https://github.com/agrostar/zzapi#readme",
+  "devDependencies": {
+    "@types/jest": "^29.5.11",
+    "@types/jsonpath": "^0.2.0",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.1.1",
+    "ts-node": "^10.9.2",
+    "tsup": "^8.0.1",
+    "typescript": "^5.3.3"
+  },
+  "dependencies": {
+    "got": "11.8.6",
+    "jsonpath": "^1.1.1"
+  }
+}
