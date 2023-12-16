@@ -113,10 +113,12 @@ requests:
       $.args.foo: 30% of 200 is 60
 
   no-encoding:
+    options:
+      raw: true
     method: GET
     url: /get
     params:
-      - { name: foo, value: 30%25+of+200, raw: true }
+      foo: 30%25+of+200
     tests:
       $.url: https://postman-echo.com/get?foo=30%25+of+200
       $.args.foo: 30% of 200
