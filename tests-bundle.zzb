@@ -31,7 +31,7 @@ requests:
     method: GET
     url: /get
     params:
-      foo1: bar1
+      foo1: file://./content.txt
       foo2: bar2
     tests:  # old way of specifying json tests
       json:
@@ -75,7 +75,7 @@ requests:
     method: POST
     headers: { X-Custom-Header: Custom Value }
     body:
-      foo1: bar1
+      foo1: file://./content.txt
       foo2: 42
     tests:
       $.data.foo1: bar1

@@ -1,44 +1,45 @@
 import * as YAML from "yaml";
 
+import { isDict } from "./utils/typeUtils";
+
 import { RawRequest, RequestSpec, RequestPosition, Common } from "./models";
-import { getMergedData } from "./combineData";
+import { getMergedData } from "./mergeData";
 import { checkCommonType, validateRawRequest } from "./checkTypes";
-import { loadBundleVariables } from "./variables";
 
-const VALID_KEYS = ["requests", "common", "variables"];
+const VALID_KEYS: { [key: string]: boolean } = {
+  requests: true,
+  common: true,
+  variables: true,
+};
 
-// TODO: At first I thought returning multiple values as an array is convenient because
-// the names of the values can be flexible to the caller. But now I realize typechecking fails
-// because TS allows any array to be returned / received (does not check for each element being
-// the right type.) We learn as we code! So let us convert these multiple returns to object returns.
-function getRawRequests(doc: string, env: string): [{ [name: string]: RawRequest }, Common] {
+// returning as an array does not enforce typechecking, so we return as an object
+function getRawRequests(doc: string): {
+  rawRequests: { [name: string]: RawRequest };
+  commonData: Common;
+} {
   let parsedData = YAML.parse(doc);
-  if (typeof parsedData !== "object" || Array.isArray(parsedData) || parsedData === null) {
-    throw new Error("Bundle must be an object with key value pairs");
+  if (!isDict(parsedData)) {
+    throw new Error("Bundle could not be parsed. Is your bundle a valid YAML document?");
   }
 
   for (const key in parsedData) {
-    if (!VALID_KEYS.includes(key)) {
-      throw new Error(`Invalid key: ${key}`);
+    if (!VALID_KEYS[key]) {
+      throw new Error(`Invalid key: ${key} in bundle. Only ${Object.keys(VALID_KEYS)} are allowed.`);
     }
   }
 
-  loadBundleVariables(doc, env); // TODO: return variables from here (least side effects principle)
-
   let commonData = parsedData.common;
   if (commonData !== undefined) {
-    const [valid, error] = checkCommonType(commonData);
-    if (!valid) {
-      throw new Error(`Error in common: ${error}`);
-    }
+    const error = checkCommonType(commonData);
+    if (error !== undefined) throw new Error(`Error in common: ${error}`);
   } else {
     commonData = {};
   }
   const allRequests = parsedData.requests;
-  if (typeof allRequests !== "object" || Array.isArray(allRequests) || allRequests === null) {
-    throw new Error("requests must be an object with keys as request names");
+  if (!isDict(allRequests)) {
+    throw new Error("requests must be a dictionary in the bundle.");
   }
-  return [allRequests, commonData];
+  return { rawRequests: allRequests, commonData: commonData };
 }
 
 function checkAndMergeRequest(
@@ -47,15 +48,12 @@ function checkAndMergeRequest(
   name: string,
 ): RequestSpec {
   let request = allRequests[name];
-  if (request === undefined) {
-    throw new Error("Request must be defined");
-  }
+  if (request === undefined) throw new Error(`Request ${name} is not defined in this bundle`);
 
   request.name = name;
-  const [valid, error] = validateRawRequest(request);
-  if (!valid) {
-    throw new Error(`Error in request '${name}': ${error}`);
-  }
+  const error = validateRawRequest(request);
+  if (error !== undefined) throw new Error(`Error in request '${name}': ${error}`);
+
   return getMergedData(commonData, request);
 }
 
@@ -117,9 +115,10 @@ export function getRequestPositions(document: string): RequestPosition[] {
  * @returns An object of type { [name: string]: RequestSpec } where each value is the data
  *  of a request of the name key
  */
-export function getAllRequestSpecs(document: string, env: string): { [name: string]: RequestSpec } {
+export function getAllRequestSpecs(document: string): { [name: string]: RequestSpec } {
+  const { rawRequests: allRequests, commonData: commonData } = getRawRequests(document);
+
   const requests: { [name: string]: RequestSpec } = {};
-  const [allRequests, commonData] = getRawRequests(document, env);
   for (const name in allRequests) {
     requests[name] = checkAndMergeRequest(commonData, allRequests, name);
   }
@@ -130,7 +129,8 @@ export function getAllRequestSpecs(document: string, env: string): { [name: stri
  * @param document the yaml document to parse to form the requests
  * @returns An object of type RequestSpec
  */
-export function getRequestSpec(document: string, env: string, name: string): RequestSpec {
-  const [allRequests, commonData] = getRawRequests(document, env);
+export function getRequestSpec(document: string, name: string): RequestSpec {
+  const { rawRequests: allRequests, commonData: commonData } = getRawRequests(document);
+
   return checkAndMergeRequest(commonData, allRequests, name);
 }

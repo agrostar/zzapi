@@ -8,7 +8,7 @@ function reformatVariables(text: string): string {
 }
 
 // Recursive function to replace variables in an object in-situ
-function reformatVariablesInObject(object: any) {
+function reformatVariablesInObject(object: any): void {
   for (const key in object) {
     if (typeof object[key] == "string") {
       object[key] = reformatVariables(object[key]);
@@ -19,7 +19,7 @@ function reformatVariablesInObject(object: any) {
   }
 }
 
-function addRequest(prefix: string, element: any, requests: any) {
+function addRequest(prefix: string, element: any, requests: any): void {
   const request: any = {};
   const name = `${prefix}${element.name}`;
   requests[name] = request;
@@ -82,7 +82,7 @@ function addRequest(prefix: string, element: any, requests: any) {
   }
 }
 
-function addRequestsFromFolder(prefix: string, item: any, requests: any) {
+function addRequestsFromFolder(prefix: string, item: any, requests: any): void {
   item.forEach((element: any) => {
     if (element.item) {
       const subPrefix = prefix ? `${prefix}${element.name}/` : `${element.name}/`;
@@ -93,15 +93,11 @@ function addRequestsFromFolder(prefix: string, item: any, requests: any) {
   });
 }
 
-
-// TODO: rename this to convertCollection - consistent with convertEnvironment.
-// Both are in the file convertPostman, and that makes sense.
-export default function convertPostman(filePath: string): string {
+export default function convertCollection(filePath: string): string {
   const contents = fs.readFileSync(filePath, "utf-8");
   const collection = JSON.parse(contents);
   if (
-    collection?.info?.schema !=
-    "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    collection?.info?.schema != "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   ) {
     throw Error("Not a Postman v2.1.0 collection. Cannot import");
   }
@@ -155,15 +151,15 @@ export function convertEnvironment(filePath: string): string {
     variables[name][item.key] = item.value;
   });
 
-  let varset: string = "";
-  varset +=
+  let env: string = "";
+  env +=
     "# The variable set corresponding to the environment is below.\n" +
     "# Save it as a .zzv file, or copy-paste it into an existing .zzv file,\n" +
     "# or paste it into your bundle under the top level 'variables' object.\n";
   if (environment._postman_variable_scope === "globals") {
-    varset += "# If these variables are intended to be global, add them to each varset\n";
+    env += "# If these variables are intended to be global, add them to each env\n";
   }
-  varset += "\n" + YAML.stringify(variables);
+  env += "\n" + YAML.stringify(variables);
 
-  return varset;
+  return env;
 }

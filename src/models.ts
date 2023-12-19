@@ -7,8 +7,7 @@ export interface Header {
 
 export interface Param {
   name: string;
-  value?: string;
-  raw?: boolean;
+  value?: any;
 }
 
 export interface Options {
@@ -16,6 +15,7 @@ export interface Options {
   verifySSL: boolean;
   keepRawJSON: boolean;
   showHeaders: boolean;
+  raw: boolean;
 }
 
 export type Assertion = number | boolean | string | null | { [op: string]: any };
@@ -41,14 +41,15 @@ export interface Captures {
   headers?: { [key: string]: string };
 }
 
-export type RawHeaders = Array<Header> | { [name: string]: string } | undefined;
-export type RawParams = Array<Param> | { [name: string]: any } | undefined;
+export type RawHeaders = Header[] | { [name: string]: string } | undefined;
+export type RawParams = Param[] | { [name: string]: any } | undefined;
 
 export interface RawOptions {
   follow?: boolean;
   verifySSL?: boolean;
   keepRawJSON?: boolean;
   showHeaders?: boolean;
+  raw?: boolean;
 }
 
 export interface RawTests {
@@ -95,7 +96,7 @@ export interface RequestSpec {
     baseUrl?: string;
     url: string;
     method: Method;
-    params: Array<Param>;
+    params: Param[];
     headers: { [key: string]: string };
     body?: any;
   };
