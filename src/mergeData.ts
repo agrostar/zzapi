@@ -51,7 +51,7 @@ function getMergedParams(commonParams: RawParams, requestParams: RawParams): Par
 
 function getMergedHeaders(
   commonHeaders: RawHeaders,
-  requestHeaders: RawHeaders,
+  requestHeaders: RawHeaders
 ): { [name: string]: string } {
   if (Array.isArray(commonHeaders)) {
     commonHeaders = getArrayHeadersAsObject(commonHeaders);
@@ -79,7 +79,7 @@ function getMergedOptions(cOptions: RawOptions = {}, rOptions: RawOptions = {}):
 
 function getMergedSetVars(
   setvars: RawSetVars = {},
-  captures: Captures = {},
+  captures: Captures = {}
 ): { mergedVars: SetVar[]; hasJsonVars: boolean } {
   const mergedVars: SetVar[] = [];
   let hasJsonVars = false;
@@ -152,7 +152,7 @@ function mergePrefixBasedTests(tests: RawTests) {
 
 function getMergedTests(
   cTests: RawTests = {},
-  rTests: RawTests = {},
+  rTests: RawTests = {}
 ): { mergedTests: Tests; hasJsonTests: boolean } {
   // Convert $. and h. at root level into headers and json keys
   mergePrefixBasedTests(cTests);
@@ -173,9 +173,7 @@ function getMergedTests(
 }
 
 function getArrayHeadersAsObject(objectSet: Header[] | undefined): { [key: string]: string } {
-  if (objectSet === undefined) {
-    return {};
-  }
+  if (!objectSet) return {};
 
   let finalObject: { [key: string]: string } = {};
 
@@ -190,9 +188,7 @@ function getArrayHeadersAsObject(objectSet: Header[] | undefined): { [key: strin
 }
 
 function withLowerCaseKeys(obj: { [key: string]: any } | undefined): { [key: string]: any } {
-  if (obj === undefined) {
-    return {};
-  }
+  if (!obj) return {};
 
   let newObj: { [key: string]: any } = {};
   for (const key in obj) {
@@ -213,11 +209,11 @@ export function getMergedData(commonData: Common, requestData: RawRequest): Requ
 
   const { mergedTests: tests, hasJsonTests: hasJsonTests } = getMergedTests(
     commonData?.tests,
-    requestData.tests,
+    requestData.tests
   );
   const { mergedVars: setvars, hasJsonVars: hasJsonVars } = getMergedSetVars(
     requestData.setvars,
-    requestData.capture,
+    requestData.capture
   );
 
   const mergedData: RequestSpec = {

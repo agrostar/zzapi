@@ -8,7 +8,7 @@ export function constructGotRequest(allData: RequestSpec): GotRequest {
   const completeUrl = getURL(
     allData.httpRequest.baseUrl,
     allData.httpRequest.url,
-    getParamsForUrl(allData.httpRequest.params, allData.options.raw),
+    getParamsForUrl(allData.httpRequest.params, allData.options.raw)
   );
 
   const options = {
@@ -27,13 +27,7 @@ export function constructGotRequest(allData: RequestSpec): GotRequest {
 }
 
 export function getBody(body: any): string | undefined {
-  if (body === undefined) {
-    return undefined;
-  } else if (typeof body === "object") {
-    return JSON.stringify(body);
-  } else {
-    return body.toString();
-  }
+  return getStringValueIfDefined(body);
 }
 
 export async function executeGotRequest(httpRequest: GotRequest): Promise<{
@@ -75,9 +69,7 @@ export async function executeGotRequest(httpRequest: GotRequest): Promise<{
 }
 
 export function getParamsForUrl(paramsArray: Param[] | undefined, raw: boolean): string {
-  if (paramsArray === undefined) {
-    return "";
-  }
+  if (!paramsArray) return "";
 
   let params: Param[] = paramsArray;
   let paramArray: string[] = [];
@@ -99,19 +91,8 @@ export function getParamsForUrl(paramsArray: Param[] | undefined, raw: boolean):
 }
 
 export function getURL(baseUrl: string | undefined, url: string, paramsForUrl: string): string {
-  if (paramsForUrl === undefined) {
-    paramsForUrl = "";
-  }
-
-  let completeUrl = "";
-  if (baseUrl !== undefined) {
-    completeUrl += baseUrl;
-  }
-  if (url !== "" && url[0] !== "/") {
-    return url + paramsForUrl;
-  } else {
-    completeUrl += url;
-  }
-
-  return completeUrl + paramsForUrl;
+  // base url not defined, or url does not start with /, then ignore base url
+  if (!baseUrl || !url.startsWith("/")) return url + paramsForUrl;
+  // otherwise, incorporate base url
+  return baseUrl + url + paramsForUrl;
 }

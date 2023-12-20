@@ -5,13 +5,13 @@ function checkKey(
   item: string,
   key: string,
   expectedTypes: string[],
-  optional: boolean,
+  optional: boolean
 ): string | undefined {
   if (!optional && !obj.hasOwnProperty(key)) {
     return `${key} key must be present in each ${item} item`;
   } else if (obj.hasOwnProperty(key)) {
     if (
-      !expectedTypes.some((type) => (type === "null" && obj[key] === type) || typeof obj[key] === type)
+      !expectedTypes.some((type) => (type === "null" && obj[key] === null) || typeof obj[key] === type)
     ) {
       return `${key} of ${item} must have one of ${expectedTypes} value, found ${typeof obj[key]}`;
     }
@@ -204,11 +204,16 @@ export function validateRawRequest(obj: any): string | undefined {
   ret = checkKey(obj, "request", "url", ["string"], false);
   if (ret !== undefined) return ret;
 
-  const methodToPass = (obj.method as string).toLowerCase();
   if (!obj.hasOwnProperty("method")) {
     return `method key must be present in each request item`;
-  } else if (!VALID_METHODS[methodToPass]) {
-    return `method key must have value among ${Object.keys(VALID_METHODS)}: found ${methodToPass}`;
+  } else {
+    if (typeof obj.method !== "string") {
+      return `value of method key must be a string`;
+    } else {
+      const methodToPass = obj.method.toLowerCase();
+      if (!VALID_METHODS[methodToPass])
+        return `method key must have value among ${Object.keys(VALID_METHODS)}: found ${methodToPass}`;
+    }
   }
 
   return undefined;

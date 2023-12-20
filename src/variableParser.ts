@@ -5,6 +5,7 @@ import { isDict } from "./utils/typeUtils";
 import { checkVariables } from "./checkTypes";
 import { Variables } from "./variables";
 
+// we may pass an empty string if the document is not actually a bundle
 export function getBundleVariables(doc: string): { [key: string]: any } {
   let parsedData = YAML.parse(doc);
   // an empty string is parsed to null. If we are not in a bundle then doc is empty string.
@@ -42,7 +43,7 @@ export function getEnvironments(bundleContent: string, varFileContents: string[]
 export function loadVariables(
   envName: string,
   bundleContent: string,
-  varFileContents: string[],
+  varFileContents: string[]
 ): Variables {
   const allBundleVariables = getBundleVariables(bundleContent);
   const bundleVars = allBundleVariables.hasOwnProperty(envName) ? allBundleVariables[envName] : {};

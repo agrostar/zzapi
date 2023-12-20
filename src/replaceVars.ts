@@ -15,7 +15,7 @@ function replaceVariables(data: any, variables: Variables): { data: any; undefin
 
 function replaceVariablesInNonScalar(
   data: { [key: string]: any } | any[],
-  variables: Variables,
+  variables: Variables
 ): { data: any; undefinedVars: string[] } {
   if (Array.isArray(data)) {
     return replaceVariablesInArray(data, variables);
@@ -26,7 +26,7 @@ function replaceVariablesInNonScalar(
 
 function replaceVariablesInArray(
   data: any[],
-  variables: Variables,
+  variables: Variables
 ): { data: any[]; undefinedVars: string[] } {
   let newData: any[] = [];
   const undefs: string[] = [];
@@ -61,7 +61,7 @@ function replaceVariablesInArray(
 
 function replaceVariablesInObject(
   obj: { [key: string]: any },
-  variables: Variables,
+  variables: Variables
 ): { data: { [key: string]: any }; undefinedVars: string[] } {
   const undefs: string[] = [];
   for (const key in obj) {
@@ -116,7 +116,7 @@ const VAR_REGEX_WITHOUT_BRACES = /(?<!\\)\$([_a-zA-Z]\w*)(?=\W|$)/g;
 
 function replaceVariablesInString(
   text: string,
-  variables: Variables,
+  variables: Variables
 ): { data: any; undefinedVars: string[] } {
   let valueInNativeType: any;
   let variableIsFullText: boolean = false;
@@ -162,11 +162,11 @@ export function replaceVariablesInRequest(request: RequestSpec, variables: Varia
 
   type keyOfHttp = Exclude<keyof typeof request.httpRequest, "method">;
   const httpPropertiesToReplace: string[] = ["baseUrl", "url", "params", "headers", "body"];
-  for (const key of httpPropertiesToReplace) {
+  httpPropertiesToReplace.forEach((key) => {
     const replacedData = replaceVariables(request.httpRequest[key as keyOfHttp], variables);
     request.httpRequest[key as keyOfHttp] = replacedData.data;
     undefs.push(...replacedData.undefinedVars);
-  }
+  });
 
   const replacedData = replaceVariables(request.tests, variables);
   request.tests = replacedData.data;

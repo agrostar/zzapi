@@ -21,6 +21,6 @@ export function getDescriptiveObjType(obj: any): string {
 
 export function getStringValueIfDefined(value: any): string | undefined {
   if (value === undefined) return undefined;
-  if (isArrayOrDict(value)) return JSON.stringify(value); // handles dicts and arrays
-  return value.toString(); // handles dates, null, arrays and scalars
+  if (typeof value === "object") return JSON.stringify(value); // handles dicts, arrays, null, date (all obj)
+  return value.toString(); // handles scalars
 }

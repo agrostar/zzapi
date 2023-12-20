@@ -1,9 +1,11 @@
 # This is an invalid bundle. It is not as per the schema
 
-commomn:  # there is a typo here
+common:  # there is a typo here
   a: b
 requests:
 
   request1:
     name: the request  # name is invalid, also url and method are not defined
+    url: https://postman-echo.com/get
+    method: GET
   
