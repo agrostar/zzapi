@@ -29,6 +29,6 @@ export function getStringValueIfDefined<
 }
 
 export function getStrictStringValue(value: any): string {
-  if (!value) return "undefined";
+  if (typeof value === "undefined") return "undefined";
   return getStringValueIfDefined(value);
 }
