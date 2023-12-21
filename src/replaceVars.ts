@@ -1,4 +1,4 @@
-import { getStringValueIfDefined } from "./utils/typeUtils";
+import { getStrictStringValue } from "./utils/typeUtils";
 
 import { Variables } from "./variables";
 import { RequestSpec } from "./models";
@@ -118,36 +118,38 @@ function replaceVariablesInString(
   text: string,
   variables: Variables
 ): { data: any; undefinedVars: string[] } {
+  // maintaining a separate boolean instead of initially setting valueInNativeType to, say, undefined,
+  //  because valueInNativeType may actually end up being undefined.
   let valueInNativeType: any;
   let variableIsFullText: boolean = false;
   const undefs: string[] = [];
 
-  // todo: make a complete match regex and return native type immediately.
-  const outputText = text
-    .replace(VAR_REGEX_WITH_BRACES, (match, varName) => {
+  function replaceVariable(match: string, varName: any): string {
+    if (typeof varName === "string") {
       if (variables.hasOwnProperty(varName)) {
         const varVal = variables[varName];
         if (text === match) {
           variableIsFullText = true;
           valueInNativeType = varVal;
         }
-        return varVal ? (getStringValueIfDefined(varVal) as string) : "undefined";
+        return getStrictStringValue(varVal);
+      } else {
+        undefs.push(varName);
       }
-      undefs.push(varName);
-      return match;
+    }
+    return match; // if varName is undefined (not string), or is not a valid variable
+  }
+
+  // todo: make a complete match regex and return native type immediately.
+  const outputText = text
+    .replace(VAR_REGEX_WITH_BRACES, (match, varName) => {
+      return replaceVariable(match, varName);
     })
     .replace(VAR_REGEX_WITHOUT_BRACES, (match) => {
-      const variable = match.slice(1);
-      if (typeof variable === "string" && variables.hasOwnProperty(variable)) {
-        const varVal = variables[variable];
-        if (text === match) {
-          variableIsFullText = true;
-          valueInNativeType = varVal;
-        }
-        return varVal ? (getStringValueIfDefined(varVal) as string) : "undefined";
-      }
-      undefs.push(variable);
-      return match;
+      if (match.length <= 1) return match; // this would lead to an invalid slice
+      const varName = match.slice(1);
+
+      return replaceVariable(match, varName);
     });
 
   if (variableIsFullText) {

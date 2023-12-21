@@ -19,8 +19,16 @@ export function getDescriptiveObjType(obj: any): string {
   return typeof obj;
 }
 
-export function getStringValueIfDefined(value: any): string | undefined {
-  if (value === undefined) return undefined;
-  if (typeof value === "object") return JSON.stringify(value); // handles dicts, arrays, null, date (all obj)
-  return value.toString(); // handles scalars
+export function getStringValueIfDefined<
+  T extends undefined | Exclude<any, undefined>,
+  R = T extends undefined ? undefined : string
+>(value: T): R {
+  if (typeof value === "undefined") return undefined as R;
+  if (typeof value === "object") return JSON.stringify(value) as R; // handles dicts, arrays, null, date (all obj)
+  return value.toString() as R; // handles scalars
+}
+
+export function getStrictStringValue(value: any): string {
+  if (!value) return "undefined";
+  return getStringValueIfDefined(value);
 }

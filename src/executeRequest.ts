@@ -75,14 +75,14 @@ export function getParamsForUrl(paramsArray: Param[] | undefined, raw: boolean):
   let paramArray: string[] = [];
 
   params.forEach((param) => {
-    const key = param.name as string;
+    const key = param.name;
     let value = param.value;
     if (value == undefined) {
       paramArray.push(key);
     } else if (raw === true) {
-      paramArray.push(`${key}=${getStringValueIfDefined(value) as string}`);
+      paramArray.push(`${key}=${getStringValueIfDefined(value)}`);
     } else {
-      paramArray.push(`${key}=${encodeURIComponent(getStringValueIfDefined(value) as string)}`);
+      paramArray.push(`${key}=${encodeURIComponent(getStringValueIfDefined(value))}`);
     }
   });
 
