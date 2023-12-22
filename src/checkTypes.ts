@@ -1,4 +1,4 @@
-import { getStringIfNotScalar, isArrayOrDict, isDict, getDescriptiveObjType } from "./utils/typeUtils";
+import { isArrayOrDict, isDict, getDescriptiveType, getStrictStringValue } from "./utils/typeUtils";
 
 function checkKey(
   obj: any,
@@ -21,7 +21,7 @@ function checkKey(
 
 function checkObjIsDict(obj: any, item: string): string | undefined {
   if (!isDict(obj)) {
-    return `${item} item must be a dict: found ${getDescriptiveObjType(obj)}`;
+    return `${item} item must be a dict: found ${getDescriptiveType(obj)}`;
   } else {
     return undefined;
   }
@@ -60,7 +60,7 @@ function checkHeadersParamsOptionsTestsCaptures(obj: any): string | undefined {
       for (const header of headers) {
         const headerError = checkHeaderItem(header);
         if (headerError !== undefined) {
-          return `Error in header item ${getStringIfNotScalar(header)}: ${headerError}`;
+          return `Error in header item ${getStrictStringValue(header)}: ${headerError}`;
         }
       }
     } else {
@@ -68,7 +68,7 @@ function checkHeadersParamsOptionsTestsCaptures(obj: any): string | undefined {
       for (const header in headers) {
         const headerError = checkHeaderItem({ name: header, value: headers[header] });
         if (headerError !== undefined) {
-          return `Error in header item ${getStringIfNotScalar(header)}: ${headerError}`;
+          return `Error in header item ${getStrictStringValue(header)}: ${headerError}`;
         }
       }
     }
@@ -82,7 +82,7 @@ function checkHeadersParamsOptionsTestsCaptures(obj: any): string | undefined {
       for (const param of params) {
         const paramError = checkParamItem(param);
         if (paramError !== undefined) {
-          return `Error in param item ${getStringIfNotScalar(param)}: ${paramError}`;
+          return `Error in param item ${getStrictStringValue(param)}: ${paramError}`;
         }
       }
     }
@@ -112,10 +112,10 @@ function checkTests(obj: any): string | undefined {
     if (ret !== undefined) return ret;
   }
   if (obj.hasOwnProperty("body") && !(isDict(obj.body) || typeof obj.body === "string")) {
-    return `body tests item must be a dict or string: found ${getDescriptiveObjType(obj.body)}`;
+    return `body tests item must be a dict or string: found ${getDescriptiveType(obj.body)}`;
   }
   if (obj.hasOwnProperty("status") && !(isDict(obj.status) || typeof obj.status === "number")) {
-    return `status tests item must be a dict or number: found ${getDescriptiveObjType(obj.status)}`;
+    return `status tests item must be a dict or number: found ${getDescriptiveType(obj.status)}`;
   }
   if (obj.hasOwnProperty("headers")) {
     ret = checkObjIsDict(obj.headers, "header tests");
