@@ -1,4 +1,4 @@
-# yaml-language-server: $schema=./zzapi-bundle.schema.json
+# yaml-language-server: $schema=../schemas/zzapi-bundle.schema.json
 
 common:
   baseUrl: https://example.com
@@ -42,8 +42,9 @@ requests:
       - { name: employeeId, value: "34567", doc: Required. Identifies the employee }
       - name: state
         value: Madhya%20Pradesh
-        raw: true
         doc: Optional. If specified, will restrict the details to that state's information.
+    options:
+      rawParams: true
     response: <employee_resp.json
     doc: |-
       # Purpose:

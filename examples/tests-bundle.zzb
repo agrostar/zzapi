@@ -1,4 +1,4 @@
-# yaml-language-server: $schema=./zzapi-bundle.schema.json
+# yaml-language-server: $schema=../schemas/zzapi-bundle.schema.json
 # This bundle contains a series of test requests against various endpoints,
 # most of them being the postman echo service. We use this to both serve as
 # an example of how to create test bundles as well as testing zzapi runner itself.
@@ -113,12 +113,12 @@ requests:
       $.args.foo: 30% of 200 is 60
 
   no-encoding:
-    options:
-      raw: true
     method: GET
     url: /get
     params:
       foo: 30%25+of+200
+    options:
+      rawParams: true
     tests:
       $.url: https://postman-echo.com/get?foo=30%25+of+200
       $.args.foo: 30% of 200

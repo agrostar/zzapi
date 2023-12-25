@@ -30,10 +30,6 @@
           "description": "Name of the parameter."
         },
         "value": { "$ref": "#/$defs/scalar", "description": "Value of the parameter" },
-        "raw": {
-          "type": "boolean",
-          "description": "Whether to treat the value as raw, ie, skip URL-encoding it (names will never be encoded), the default is false"
-        },
         "doc": {
           "type": "string",
           "description": "Documentation, typically in Markdown"
@@ -68,7 +64,7 @@
       "additionalProperties": false,
       "properties": {
         "follow": {
-          "description": "If set, will automatically follow redirects (default: false)",
+          "description": "If set, will automatically follow redirects",
           "type": "boolean"
         },
         "showHeaders": {
@@ -78,6 +74,10 @@
         "keepRawJSON": {
           "description": "If the response is JSON, format the response before displaying",
           "type": "boolean"
+        },
+        "rawParams": {
+          "type": "boolean",
+          "description": "Whether to treat parameter values as raw, ie, skip URL-encoding them"
         },
         "verifySSL": {
           "description": "If set, will verify the SSL certificate (default: false)",
