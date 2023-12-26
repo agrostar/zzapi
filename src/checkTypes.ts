@@ -60,7 +60,7 @@ function checkHeadersParamsOptionsTestsCaptures(obj: any): string | undefined {
       for (const header of headers) {
         const headerError = checkHeaderItem(header);
         if (headerError !== undefined) {
-          return `Error in header item ${getStrictStringValue(header)}: ${headerError}`;
+          return `error in header item ${getStrictStringValue(header)}: ${headerError}`;
         }
       }
     } else {
@@ -68,7 +68,7 @@ function checkHeadersParamsOptionsTestsCaptures(obj: any): string | undefined {
       for (const header in headers) {
         const headerError = checkHeaderItem({ name: header, value: headers[header] });
         if (headerError !== undefined) {
-          return `Error in header item ${getStrictStringValue(header)}: ${headerError}`;
+          return `error in header item ${getStrictStringValue(header)}: ${headerError}`;
         }
       }
     }
@@ -82,22 +82,22 @@ function checkHeadersParamsOptionsTestsCaptures(obj: any): string | undefined {
       for (const param of params) {
         const paramError = checkParamItem(param);
         if (paramError !== undefined) {
-          return `Error in param item ${getStrictStringValue(param)}: ${paramError}`;
+          return `error in param item ${getStrictStringValue(param)}: ${paramError}`;
         }
       }
     }
   }
   if (obj.hasOwnProperty("options")) {
     const optionsError = checkOptions(obj.options);
-    if (optionsError !== undefined) return `Error in options: ${optionsError}`;
+    if (optionsError !== undefined) return `error in options: ${optionsError}`;
   }
   if (obj.hasOwnProperty("tests")) {
     const testsError = checkTests(obj.tests);
-    if (testsError !== undefined) return `Error in tests: ${testsError}`;
+    if (testsError !== undefined) return `error in tests: ${testsError}`;
   }
   if (obj.hasOwnProperty("capture")) {
     const capturesError = checkCaptures(obj.capture);
-    if (capturesError !== undefined) return `Error in captures: ${capturesError}`;
+    if (capturesError !== undefined) return `error in captures: ${capturesError}`;
   }
 
   return undefined;

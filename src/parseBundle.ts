@@ -31,7 +31,7 @@ function getRawRequests(doc: string): {
   let commonData = parsedData.common;
   if (commonData !== undefined) {
     const error = checkCommonType(commonData);
-    if (error !== undefined) throw new Error(`Error in common: ${error}`);
+    if (error !== undefined) throw new Error(`error in common: ${error}`);
   } else {
     commonData = {};
   }
@@ -45,14 +45,14 @@ function getRawRequests(doc: string): {
 function checkAndMergeRequest(
   commonData: Common,
   allRequests: { [name: string]: RawRequest },
-  name: string,
+  name: string
 ): RequestSpec {
   let request = allRequests[name];
   if (request === undefined) throw new Error(`Request ${name} is not defined in this bundle`);
 
   request.name = name;
   const error = validateRawRequest(request);
-  if (error !== undefined) throw new Error(`Error in request '${name}': ${error}`);
+  if (error !== undefined) throw new Error(`error in request '${name}': ${error}`);
 
   return getMergedData(commonData, request);
 }

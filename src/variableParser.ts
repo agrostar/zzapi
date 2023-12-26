@@ -6,10 +6,8 @@ import { checkVariables } from "./checkTypes";
 import { Variables } from "./variables";
 
 // we may pass an empty string if the document is not actually a bundle
-export function getBundleVariables(doc: string): { [key: string]: any } {
-  let parsedData = YAML.parse(doc);
-  // an empty string is parsed to null. If we are not in a bundle then doc is empty string.
-  if (parsedData === null) parsedData = {};
+export function getBundleVariables(doc: string | undefined): Variables {
+  let parsedData = doc ? YAML.parse(doc) : {};
   if (!isDict(parsedData)) {
     throw new Error("Bundle could not be parsed. Is your bundle a valid YAML document?");
   }
@@ -17,7 +15,7 @@ export function getBundleVariables(doc: string): { [key: string]: any } {
   const variables = parsedData.variables;
   if (variables !== undefined) {
     const error = checkVariables(variables);
-    if (error !== undefined) throw new Error(`Error in variables: ${error}`);
+    if (error !== undefined) throw new Error(`error in variables: ${error}`);
 
     return variables;
   } else {
@@ -25,7 +23,7 @@ export function getBundleVariables(doc: string): { [key: string]: any } {
   }
 }
 
-export function getEnvironments(bundleContent: string, varFileContents: string[]): string[] {
+export function getEnvironments(bundleContent: string | undefined, varFileContents: string[]): string[] {
   const bundleEnvNames = Object.keys(getBundleVariables(bundleContent));
 
   const fileEnvNames: string[] = [];
@@ -41,10 +39,12 @@ export function getEnvironments(bundleContent: string, varFileContents: string[]
 }
 
 export function loadVariables(
-  envName: string,
-  bundleContent: string,
+  envName: string | undefined,
+  bundleContent: string | undefined,
   varFileContents: string[]
 ): Variables {
+  if (!envName) return {};
+
   const allBundleVariables = getBundleVariables(bundleContent);
   const bundleVars = allBundleVariables.hasOwnProperty(envName) ? allBundleVariables[envName] : {};
 

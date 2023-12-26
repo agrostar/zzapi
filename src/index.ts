@@ -2,7 +2,7 @@ export { RequestPosition, ResponseData, RequestSpec, GotRequest, TestResult } fr
 
 export { getRequestPositions, getAllRequestSpecs, getRequestSpec } from "./parseBundle";
 
-export { VarStore } from "./variables";
+export { VarStore, Variables } from "./variables";
 export { loadVariables, getEnvironments } from "./variableParser";
 export { replaceVariablesInRequest } from "./replaceVars";
 
