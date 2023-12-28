@@ -31,7 +31,7 @@ requests:
     method: GET
     url: /get
     params:
-      foo1: file://./content.txt
+      foo1: bar1
       foo2: bar2
     tests:  # old way of specifying json tests
       json:
@@ -75,7 +75,7 @@ requests:
     method: POST
     headers: { X-Custom-Header: Custom Value }
     body:
-      foo1: file://./content.txt
+      foo1: bar1
       foo2: 42
     tests:
       $.data.foo1: bar1
@@ -118,7 +118,7 @@ requests:
     params:
       foo: 30%25+of+200
     options:
-      rawParams: true
+      raw: true
     tests:
       $.url: https://postman-echo.com/get?foo=30%25+of+200
       $.args.foo: 30% of 200
@@ -355,3 +355,4 @@ requests:
     tests:
       $.data.name: Tom
       $.data.address: { $eq: { city: Bangalore, pincode: 560001 } }
+
