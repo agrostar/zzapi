@@ -8,7 +8,7 @@ export function constructGotRequest(allData: RequestSpec): GotRequest {
   const completeUrl = getURL(
     allData.httpRequest.baseUrl,
     allData.httpRequest.url,
-    getParamsForUrl(allData.httpRequest.params, allData.options.raw)
+    getParamsForUrl(allData.httpRequest.params, allData.options.rawParams)
   );
 
   const options = {
@@ -68,7 +68,7 @@ export async function executeGotRequest(httpRequest: GotRequest): Promise<{
   return { response: responseObject, executionTime: executionTime, byteLength: size, error: error };
 }
 
-export function getParamsForUrl(paramsArray: Param[] | undefined, raw: boolean): string {
+export function getParamsForUrl(paramsArray: Param[] | undefined, rawParams: boolean): string {
   if (!paramsArray) return "";
 
   let params: Param[] = paramsArray;
@@ -79,7 +79,7 @@ export function getParamsForUrl(paramsArray: Param[] | undefined, raw: boolean):
     let value = param.value;
     if (value == undefined) {
       paramArray.push(key);
-    } else if (raw === true) {
+    } else if (rawParams) {
       paramArray.push(`${key}=${getStringValueIfDefined(value)}`);
     } else {
       paramArray.push(`${key}=${encodeURIComponent(getStringValueIfDefined(value))}`);

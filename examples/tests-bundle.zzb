@@ -118,7 +118,7 @@ requests:
     params:
       foo: 30%25+of+200
     options:
-      raw: true
+      rawParams: true
     tests:
       $.url: https://postman-echo.com/get?foo=30%25+of+200
       $.args.foo: 30% of 200

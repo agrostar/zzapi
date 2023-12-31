@@ -15,7 +15,7 @@ export interface Options {
   verifySSL: boolean;
   keepRawJSON: boolean;
   showHeaders: boolean;
-  raw: boolean;
+  rawParams: boolean;
 }
 
 export type Assertion = number | boolean | string | null | { [op: string]: any };
@@ -49,7 +49,7 @@ export interface RawOptions {
   verifySSL?: boolean;
   keepRawJSON?: boolean;
   showHeaders?: boolean;
-  raw?: boolean;
+  rawParams?: boolean;
 }
 
 export interface RawTests {
