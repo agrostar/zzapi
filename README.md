@@ -5,7 +5,10 @@ This package is a library that powers the following REST API testing and documen
   * [VS Code extension](https://marketplace.visualstudio.com/items?itemName=AgroStar.zzapi) 
   * [CLI](https://github.com/agrostar/zzapi-cli)
 
-Both these tools take as input YAML files specifiying REST API requests and run a request or all requests in that API *bundle*. Also are supported tests on each request (no coding required) and variables for usin requests as well as capturing after each request is run.
+These tools work with YAML files specifiying REST API requests. You can a request or all requests in that API *bundle*. Also supported are:
+  * Tests on each request (no coding required)
+  * Use of environments and variables that can be used in the requests
+  * Capturing values into variables for subsequent requests
 
 You are more likely to be interested in the above tools than this library itself. You may be interested in this library if you wish to build your own tool (eg, a web-based tool) using this library. In which case, you can proceed to the API documentation: [Work in progress]()
 
