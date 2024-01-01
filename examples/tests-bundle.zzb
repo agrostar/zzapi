@@ -5,7 +5,7 @@
 
 common:
   baseUrl: https://postman-echo.com
-  headers: 
+  headers:
     Content-type: application/json
   tests:
     status: 200
@@ -17,14 +17,13 @@ variables:
     addressVar:
       streetAddress: 7th street
       city: Nara
-      postalCode: "560001"  # string. This will make a difference when used in the body
+      postalCode: "560001" # string. This will make a difference when used in the body
     getUrl: /get
     fooVar: bar
     agrostar: https://test-farmerapp.agrostar.in
     pi: 3.14
 
 requests:
-
   simple-get: { method: GET, url: /get }
 
   get-with-params:
@@ -33,7 +32,7 @@ requests:
     params:
       foo1: bar1
       foo2: bar2
-    tests:  # old way of specifying json tests
+    tests: # old way of specifying json tests
       json:
         $.args.foo1: bar1
         $.args.foo2: bar2
@@ -44,7 +43,7 @@ requests:
     params:
       foo1: bar1
       foo2:
-    tests:  # new way of specifying json
+    tests: # new way of specifying json
       $.url: "https://postman-echo.com/get?foo1=bar1&foo2"
 
   get-with-params-as-array:
@@ -56,7 +55,7 @@ requests:
       - { name: foo2, value: multi-2 }
     tests:
       $.args.foo1: bar1
-      $.args.foo2: { $eq: ["multi-1","multi-2"] }
+      $.args.foo2: { $eq: ["multi-1", "multi-2"] }
 
   get-with-params-values-as-array:
     method: GET
@@ -64,11 +63,11 @@ requests:
     params:
       foo1: bar1
       foo2:
-      - multi-1
-      - multi-2
+        - multi-1
+        - multi-2
     tests:
       $.args.foo1: bar1
-      $.args.foo2: { $eq: ["multi-1","multi-2"] }
+      $.args.foo2: { $eq: ["multi-1", "multi-2"] }
 
   post-header-merge:
     url: /post
@@ -84,7 +83,7 @@ requests:
   post-header-override:
     url: /post
     method: POST
-    headers: 
+    headers:
       Content-Type: text/plain
     body: { foo: bar }
     tests:
@@ -94,14 +93,14 @@ requests:
   status-404:
     url: /notfound
     method: GET
-    tests: 
+    tests:
       status: 404
       $h.content-type: { $exists: false }
 
   status-401:
     url: /status/401
     method: GET
-    tests: { status: 401, { $.status: 401 } }
+    tests: { status: 401, $.status: 401 }
 
   encoding:
     method: GET
@@ -129,7 +128,7 @@ requests:
     url: /cookies/set
     tests:
       status: 302
-      headers: { Location: /cookies,  Content-Type: { $ne: application/json } }
+      headers: { Location: /cookies, Content-Type: { $ne: application/json } }
 
   redirects:
     options:
@@ -145,7 +144,7 @@ requests:
     url: /encoding/utf8
     tests:
       body: { $regex: unicode demo, $options: i }
-      headers: 
+      headers:
         content-type: text/html; charset=utf-8
 
   response-headers:
@@ -185,7 +184,7 @@ requests:
   variables-in-body:
     method: POST
     url: /post
-    body: |   # Alternate way of supplying the JSON string or any raw content
+    body: | # Alternate way of supplying the JSON string or any raw content
       {
         "foo1": "$(fooVar)",
         "foo2": $pi
@@ -208,7 +207,7 @@ requests:
   header-case:
     method: GET
     url: $agrostar/userservice/ping/
-    tests: 
+    tests:
       headers:
         content-type: application/json
 
@@ -227,7 +226,7 @@ requests:
       phoneNumbers:
         - type: mobile
           number: 0123-4567-8888
-          available: [ 7, 22 ]
+          available: [7, 22]
         - type: home
           number: 0123-4567-8910
           available: [18, 22]
@@ -246,8 +245,8 @@ requests:
       $.data.middleName: null
       $.data.otherName: { $exists: false, $type: undefined }
       $.data.phoneNumbers[*].type: mobile
-      $.data.phoneNumbers[*].available: { $eq: [7,22] }
-      $.data.phoneNumbers.0.available: { $eq: [ 7, 22 ], $type: array }
+      $.data.phoneNumbers[*].available: { $eq: [7, 22] }
+      $.data.phoneNumbers.0.available: { $eq: [7, 22], $type: array }
       $.data.phoneNumbers.1.available: { $eq: "[18,22]", $type: array }
       # stress: ensure corner cases don't crash
       $.data.otherName.value: { $exists: false } # don't recurse down undefined
@@ -261,7 +260,7 @@ requests:
       age: 26
       name: John
       address: 1, example street
-      numbers: [ 444, 222 ]
+      numbers: [444, 222]
       object: { foo: bar }
     tests:
       status: { $ne: 200 }
@@ -273,10 +272,10 @@ requests:
       $.data.numbers.0: "444" # 444 is not same as "444". We use === for $eq and !== for $neq
 
       # stress: ensure corner cases don't crash
-      $.data.age: { $size: 2 }  # .length not supported for type: number
+      $.data.age: { $size: 2 } # .length not supported for type: number
       $.data.numbers[?(.@)]: 4 # invalid path
-      $.data.age.something: 55  # jsonpath should take care of this.
-      $.data.numbers[5]: 0  # jsonpath should take care of this 
+      $.data.age.something: 55 # jsonpath should take care of this.
+      $.data.numbers[5]: 0 # jsonpath should take care of this
 
   # This request should tests should all fail due to bad tests schema
   # Ensure we don't crash on these.
@@ -285,12 +284,12 @@ requests:
     url: /post
     body:
       address: 1, example street
-      numbers: [ 444, 222 ]
+      numbers: [444, 222]
       object: { foo: bar }
     tests:
       status: { $ne: 200 }
       headers:
-        content-type: {$exists: false}
+        content-type: { $exists: false }
       # Uncomment the following to run tests. Schema validation makes these invalid.
       # $.data.operator: { badop: any }  # invalid operator badop. If you want to match an entire object/array, use it as the value of the $eq operator.
       # $.data.numbers: [444, 222]
@@ -344,7 +343,7 @@ requests:
     tests:
       $.data.name: Tom
       $.data.address.city: Bangalore
-      $.data.address.pincode: 560001  # this time it is NOT a string.
+      $.data.address.pincode: 560001 # this time it is NOT a string.
 
   capture-checks-object-option-2:
     method: POST
@@ -355,4 +354,3 @@ requests:
     tests:
       $.data.name: Tom
       $.data.address: { $eq: { city: Bangalore, pincode: 560001 } }
-
