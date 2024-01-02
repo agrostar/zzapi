@@ -51,7 +51,7 @@ export function loadVariables(
   let envVars = {};
   varFileContents.forEach((fileContents) => {
     const parsedData = YAML.parse(fileContents);
-    if (parsedData && parsedData.hasOwnProperty(envName)) {
+    if (parsedData && isDict(parsedData[envName])) {
       Object.assign(envVars, parsedData[envName]);
     }
   });

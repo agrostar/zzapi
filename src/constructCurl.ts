@@ -1,4 +1,6 @@
-import { getBody, getParamsForUrl, getURL } from "./executeRequest";
+import { getStringValueIfDefined } from "./utils/typeUtils";
+
+import { getParamsForUrl, getURL } from "./executeRequest";
 import { RequestSpec } from "./models";
 
 export function getCurlRequest(request: RequestSpec): string {
@@ -12,7 +14,8 @@ export function getCurlRequest(request: RequestSpec): string {
   }
 
   let bodyFlag = "";
-  if (request.httpRequest.body !== undefined) bodyFlag += ` -d '${getBody(request.httpRequest.body)}'`;
+  if (request.httpRequest.body !== undefined)
+    bodyFlag += ` -d '${getStringValueIfDefined(request.httpRequest.body)}'`;
 
   let followRedirectFlag = "";
   if (request.options.follow) followRedirectFlag = " -L";

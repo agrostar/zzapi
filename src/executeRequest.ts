@@ -1,33 +1,26 @@
-import got, { Method } from "got";
+import got, { Method, OptionsOfTextResponseBody } from "got";
 
 import { getStringValueIfDefined } from "./utils/typeUtils";
 
 import { GotRequest, Param, RequestSpec } from "./models";
 
 export function constructGotRequest(allData: RequestSpec): GotRequest {
-  const completeUrl = getURL(
+  const completeUrl: string = getURL(
     allData.httpRequest.baseUrl,
     allData.httpRequest.url,
     getParamsForUrl(allData.httpRequest.params, allData.options.rawParams)
   );
 
-  const options = {
+  const options: OptionsOfTextResponseBody = {
     method: allData.httpRequest.method.toLowerCase() as Method,
-    body: getBody(allData.httpRequest.body),
+    body: getStringValueIfDefined(allData.httpRequest.body),
     headers: allData.httpRequest.headers,
-    followRedirect: allData.options?.follow,
+    followRedirect: allData.options.follow,
+    https: { rejectUnauthorized: allData.options.verifySSL },
     retry: { limit: 0 },
-
-    https: {
-      rejectUnauthorized: allData.options?.verifySSL,
-    },
   };
 
   return got(completeUrl, options);
-}
-
-export function getBody(body: any): string | undefined {
-  return getStringValueIfDefined(body);
 }
 
 export async function executeGotRequest(httpRequest: GotRequest): Promise<{
@@ -48,11 +41,7 @@ export async function executeGotRequest(httpRequest: GotRequest): Promise<{
     const res = e.response;
     if (res) {
       responseObject = res;
-      if (res.body) {
-        size = Buffer.byteLength(res.body);
-      } else {
-        size = 0;
-      }
+      size = res.body ? Buffer.byteLength(res.body) : 0;
     } else {
       responseObject = {};
       if (e.code === "ERR_INVALID_URL") {
@@ -68,12 +57,10 @@ export async function executeGotRequest(httpRequest: GotRequest): Promise<{
   return { response: responseObject, executionTime: executionTime, byteLength: size, error: error };
 }
 
-export function getParamsForUrl(paramsArray: Param[] | undefined, rawParams: boolean): string {
-  if (!paramsArray) return "";
+export function getParamsForUrl(params: Param[] | undefined, rawParams: boolean): string {
+  if (!params) return "";
 
-  let params: Param[] = paramsArray;
   let paramArray: string[] = [];
-
   params.forEach((param) => {
     const key = param.name;
     let value = param.value;
