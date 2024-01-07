@@ -152,7 +152,7 @@ const VALID_OPTIONS: { [type: string]: boolean } = {
   verifySSL: true,
   keepRawJSON: true,
   showHeaders: true,
-  raw: true,
+  rawParams: true,
 };
 function checkOptions(obj: any): string | undefined {
   let ret = checkObjIsDict(obj, "options");

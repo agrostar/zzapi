@@ -1,56 +1,17 @@
-import { getStrictStringValue } from "./utils/typeUtils";
+import { getStrictStringValue, isArrayOrDict } from "./utils/typeUtils";
 
 import { Variables } from "./variables";
 import { RequestSpec } from "./models";
-
-function replaceVariables(data: any, variables: Variables): { data: any; undefinedVars: string[] } {
-  if (typeof data === "object" && data !== null) {
-    return replaceVariablesInNonScalar(data, variables);
-  }
-  if (typeof data === "string") {
-    return replaceVariablesInString(data, variables);
-  }
-  return { data: data, undefinedVars: [] };
-}
-
-function replaceVariablesInNonScalar(
-  data: { [key: string]: any } | any[],
-  variables: Variables
-): { data: any; undefinedVars: string[] } {
-  if (Array.isArray(data)) {
-    return replaceVariablesInArray(data, variables);
-  } else {
-    return replaceVariablesInObject(data, variables);
-  }
-}
 
 function replaceVariablesInArray(
   data: any[],
   variables: Variables
 ): { data: any[]; undefinedVars: string[] } {
   let newData: any[] = [];
-  const undefs: string[] = [];
+  let undefs: string[] = [];
 
   data.forEach((item) => {
-    let newItem: any | any[];
-    let newUndefs: string[] = [];
-    if (typeof item === "object") {
-      if (Array.isArray(item)) {
-        const replacedData = replaceVariablesInArray(item, variables);
-        newItem = replacedData.data;
-        newUndefs = replacedData.undefinedVars;
-      } else {
-        const replacedData = replaceVariablesInObject(item, variables);
-        newItem = replacedData.data;
-        newUndefs = replacedData.undefinedVars;
-      }
-    } else if (typeof item === "string") {
-      const replacedData = replaceVariablesInString(item, variables);
-      newItem = replacedData.data;
-      newUndefs = replacedData.undefinedVars;
-    } else {
-      newItem = item;
-    }
+    const { data: newItem, undefinedVars: newUndefs } = replaceVariables(item, variables);
 
     newData.push(newItem);
     undefs.push(...newUndefs);
@@ -59,30 +20,32 @@ function replaceVariablesInArray(
   return { data: newData, undefinedVars: undefs };
 }
 
-function replaceVariablesInObject(
+function replaceVariablesInDict(
   obj: { [key: string]: any },
   variables: Variables
 ): { data: { [key: string]: any }; undefinedVars: string[] } {
-  const undefs: string[] = [];
-  for (const key in obj) {
-    let replacedData = undefined;
-    if (typeof obj[key] === "object") {
-      if (Array.isArray(obj[key])) {
-        replacedData = replaceVariablesInArray(obj[key], variables);
-      } else {
-        replacedData = replaceVariablesInObject(obj[key], variables);
-      }
-    } else if (typeof obj[key] === "string") {
-      replacedData = replaceVariablesInString(obj[key], variables);
-    }
+  let newData: { [key: string]: any } = {};
+  let undefs: string[] = [];
 
-    if (replacedData !== undefined) {
-      obj[key] = replacedData.data;
-      const newUndefs = replacedData.undefinedVars;
-      undefs.push(...newUndefs);
-    }
+  for (const key in obj) {
+    const { data: newItem, undefinedVars: newUndefs } = replaceVariables(obj[key], variables);
+
+    newData[key] = newItem;
+    undefs.push(...newUndefs);
   }
-  return { data: obj, undefinedVars: undefs };
+
+  return { data: newData, undefinedVars: undefs };
+}
+
+function replaceVariablesInObject(
+  data: { [key: string]: any } | any[],
+  variables: Variables
+): { data: any; undefinedVars: string[] } {
+  if (Array.isArray(data)) {
+    return replaceVariablesInArray(data, variables);
+  } else {
+    return replaceVariablesInDict(data, variables);
+  }
 }
 
 /**
@@ -124,7 +87,7 @@ function replaceVariablesInString(
   let variableIsFullText: boolean = false;
   const undefs: string[] = [];
 
-  function replaceVariable(match: string, varName: any): string {
+  function replaceVar(match: string, varName: any): string {
     if (typeof varName === "string") {
       if (variables.hasOwnProperty(varName)) {
         const varVal = variables[varName];
@@ -137,25 +100,35 @@ function replaceVariablesInString(
         undefs.push(varName);
       }
     }
-    return match; // if varName is undefined (not string), or is not a valid variable
+    return match; // if varName is not defined well (not string), or is not a valid variable
   }
 
   // todo: make a complete match regex and return native type immediately.
   const outputText = text
     .replace(VAR_REGEX_WITH_BRACES, (match, varName) => {
-      return replaceVariable(match, varName);
+      return replaceVar(match, varName);
     })
     .replace(VAR_REGEX_WITHOUT_BRACES, (match) => {
       if (match.length <= 1) return match; // this would lead to an invalid slice
       const varName = match.slice(1);
 
-      return replaceVariable(match, varName);
+      return replaceVar(match, varName);
     });
 
   if (variableIsFullText) {
     return { data: valueInNativeType, undefinedVars: undefs };
   } else {
     return { data: outputText, undefinedVars: undefs };
+  }
+}
+
+function replaceVariables(data: any, variables: Variables): { data: any; undefinedVars: string[] } {
+  if (isArrayOrDict(data)) {
+    return replaceVariablesInObject(data, variables);
+  } else if (typeof data === "string") {
+    return replaceVariablesInString(data, variables);
+  } else {
+    return { data: data, undefinedVars: [] };
   }
 }
 

@@ -1,4 +1,4 @@
-import { CancelableRequest, Response, Method } from "got";
+import { CancelableRequest, Response, Method, OptionsOfTextResponseBody } from "got";
 
 export interface Header {
   name: string;
@@ -15,7 +15,7 @@ export interface Options {
   verifySSL: boolean;
   keepRawJSON: boolean;
   showHeaders: boolean;
-  raw: boolean;
+  rawParams: boolean;
 }
 
 export type Assertion = number | boolean | string | null | { [op: string]: any };
@@ -49,7 +49,7 @@ export interface RawOptions {
   verifySSL?: boolean;
   keepRawJSON?: boolean;
   showHeaders?: boolean;
-  raw?: boolean;
+  rawParams?: boolean;
 }
 
 export interface RawTests {
@@ -121,8 +121,6 @@ export interface RequestPosition {
   end: { line: number; col: number };
 }
 
-export type GotRequest = CancelableRequest<Response<string>>;
-
 export interface TestResult {
   pass: boolean;
   spec: string;
@@ -131,3 +129,5 @@ export interface TestResult {
   received: any;
   message?: string;
 }
+
+export type GotRequest = CancelableRequest<Response<string>>;
