@@ -17,7 +17,7 @@ variables:
     addressVar:
       streetAddress: 7th street
       city: Nara
-      postalCode: "560001" # string. This will make a difference when used in the body
+      postalCode: "560002" # string. This will make a difference when used in the body
     getUrl: /get
     fooVar: bar
     agrostar: https://test-farmerapp.agrostar.in
@@ -222,7 +222,7 @@ requests:
       address:
         streetAddress: naist street
         city: Nara
-        postalCode: "560001" #string
+        postalCode: "560002" #string
       phoneNumbers:
         - type: mobile
           number: 0123-4567-8888
@@ -304,7 +304,7 @@ requests:
       address: { city: Bangalore, pincode: 560001 }
     setvars:
       nameVar: $.data.name
-      addressVar: $.data.address
+      addressVarNum: $.data.address
       cityVar: $.data.address.city
       pincodeVar: $.data.address.pincode
 
@@ -338,7 +338,7 @@ requests:
     body: |
       {
         "name": "Tom",
-        "address": $addressVar
+        "address": $addressVarNum
       }
     tests:
       $.data.name: Tom
@@ -350,7 +350,7 @@ requests:
     url: /post
     body:
       name: Tom
-      address: $addressVar
+      address: $addressVarNum
     tests:
       $.data.name: Tom
       $.data.address: { $eq: { city: Bangalore, pincode: 560001 } }
