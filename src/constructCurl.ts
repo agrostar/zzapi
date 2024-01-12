@@ -4,33 +4,36 @@ import { getParamsForUrl, getURL } from "./executeRequest";
 import { RequestSpec } from "./models";
 
 export function getCurlRequest(request: RequestSpec): string {
-  const methodFlag = ` -X ${request.httpRequest.method.toUpperCase()}`;
+  let curl: string = "curl";
 
-  let headersFlag = "";
+  // method
+  curl += ` -X ${request.httpRequest.method.toUpperCase()}`;
+
+  // headers
   if (request.httpRequest.headers !== undefined) {
-    for (const header in request.httpRequest.headers) {
-      headersFlag += ` -H '${header}: ${request.httpRequest.headers[header]}'`;
-    }
+    for (const header in request.httpRequest.headers)
+      curl += ` -H '${header}: ${request.httpRequest.headers[header]}'`;
   }
 
-  let bodyFlag = "";
+  // body
   if (request.httpRequest.body !== undefined)
-    bodyFlag += ` -d '${getStringValueIfDefined(request.httpRequest.body)}'`;
+    curl += ` -d '${getStringValueIfDefined(request.httpRequest.body)}'`;
 
-  let followRedirectFlag = "";
-  if (request.options.follow) followRedirectFlag = " -L";
+  // options.follow
+  if (request.options.follow) curl += " -L";
 
-  let verifySSLFlag = "";
-  if (!request.options.verifySSL) verifySSLFlag = " -k";
+  // options.verifySSL
+  if (!request.options.verifySSL) curl += " -k";
 
-  const url = ` '${getURL(
+  // options.showHeaders
+  if (request.options.showHeaders) curl += " -i";
+
+  // url w/ params
+  curl += ` '${getURL(
     request.httpRequest.baseUrl,
     request.httpRequest.url,
     getParamsForUrl(request.httpRequest.params, request.options.rawParams)
   )}'`;
 
-  const finalCurl =
-    "curl" + methodFlag + headersFlag + bodyFlag + followRedirectFlag + verifySSLFlag + url;
-
-  return finalCurl;
+  return curl;
 }
