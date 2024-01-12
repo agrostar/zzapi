@@ -58,7 +58,7 @@ export async function executeGotRequest(httpRequest: GotRequest): Promise<{
 }
 
 export function getParamsForUrl(params: Param[] | undefined, rawParams: boolean): string {
-  if (!params) return "";
+  if (!params || params.length < 1) return "";
 
   let paramArray: string[] = [];
   params.forEach((param) => {
