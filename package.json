@@ -10,6 +10,7 @@
   ],
   "scripts": {
     "build": "tsup",
+    "prepack": "tsup",
     "test": "jest"
   },
   "repository": {
