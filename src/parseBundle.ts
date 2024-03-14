@@ -45,7 +45,7 @@ function getRawRequests(doc: string): {
 function checkAndMergeRequest(
   commonData: Common,
   allRequests: { [name: string]: RawRequest },
-  name: string
+  name: string,
 ): RequestSpec {
   let request = allRequests[name];
   if (request === undefined) throw new Error(`Request ${name} is not defined in this bundle`);
