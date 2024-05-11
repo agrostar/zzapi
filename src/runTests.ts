@@ -8,11 +8,11 @@ export function runAllTests(tests: Tests, responseData: ResponseData): TestResul
   const results: TestResult[] = [];
   if (!tests) return results;
 
-  for (const spec in tests.json) {
-    const expected = tests.json[spec];
-    const received = getValueForJSONTests(responseData.json, spec);
-    const jsonResults = runTest(spec, expected, received);
-    results.push(...jsonResults);
+  if (tests.status) {
+    const expected = tests.status;
+    const received = responseData.status;
+    const statusResults = runTest("status", expected, received);
+    results.push(...statusResults);
   }
 
   for (const spec in tests.headers) {
@@ -22,18 +22,18 @@ export function runAllTests(tests: Tests, responseData: ResponseData): TestResul
     results.push(...headerResults);
   }
 
+  for (const spec in tests.json) {
+    const expected = tests.json[spec];
+    const received = getValueForJSONTests(responseData.json, spec);
+    const jsonResults = runTest(spec, expected, received);
+    results.push(...jsonResults);
+  }
+
   if (tests.body) {
     const expected = tests.body;
     const received = responseData.body;
     const bodyResults = runTest("body", expected, received);
     results.push(...bodyResults);
-  }
-
-  if (tests.status) {
-    const expected = tests.status;
-    const received = responseData.status;
-    const statusResults = runTest("status", expected, received);
-    results.push(...statusResults);
   }
 
   return results;
@@ -67,7 +67,7 @@ function getValueForJSONTests(responseContent: object, key: string): any {
 function runObjectTests(
   opVals: { [key: string]: any },
   receivedObject: any,
-  spec: string,
+  spec: string
 ): TestResult[] {
   let results: TestResult[] = [];
 
