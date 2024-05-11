@@ -67,7 +67,7 @@ function getValueForJSONTests(responseContent: object, key: string): any {
 function runObjectTests(
   opVals: { [key: string]: any },
   receivedObject: any,
-  spec: string,
+  spec: string
 ): TestResult[] {
   let results: TestResult[] = [];
 
@@ -107,13 +107,18 @@ function runObjectTests(
       const options = opVals["$options"];
       const regex = new RegExp(expected, options);
       try {
-        pass = regex.test(received as string);
+        pass = typeof received === "string" && regex.test(received);
       } catch (err: any) {
         message = err.message;
       }
+    } else if (op === "$sw") {
+      pass = typeof received === "string" && received.startsWith(expected);
+    } else if (op === "$ew") {
+      pass = typeof received === "string" && received.endsWith(expected);
+    } else if (op === "$co") {
+      pass = typeof received === "string" && received.includes(expected);
     } else if (op == "$options") {
-      // Do nothing. $regex will address it.
-      continue;
+      continue; // do nothing. $regex will address it.
     } else {
       results.push({
         pass: false,
