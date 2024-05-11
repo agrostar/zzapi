@@ -4,7 +4,11 @@ import { getStringIfNotScalar } from "./utils/typeUtils";
 
 import { Tests, ResponseData, TestResult, Assertion } from "./models";
 
-export function runAllTests(tests: Tests, responseData: ResponseData): TestResult[] {
+export function runAllTests(
+  tests: Tests,
+  responseData: ResponseData,
+  stopOnFailure: boolean
+): TestResult[] {
   const results: TestResult[] = [];
   if (!tests) return results;
 

@@ -73,8 +73,9 @@ function getMergedOptions(cOptions: RawOptions = {}, rOptions: RawOptions = {}):
   const keepRawJSON = options.keepRawJSON == true;
   const showHeaders = options.showHeaders == true;
   const rawParams = options.rawParams == true;
+  const stopOnFailure = options.stopOnFailure == true;
 
-  return { follow, verifySSL, keepRawJSON, showHeaders, rawParams };
+  return { follow, verifySSL, keepRawJSON, showHeaders, rawParams, stopOnFailure };
 }
 
 function getMergedSetVars(
