@@ -67,7 +67,7 @@ function getValueForJSONTests(responseContent: object, key: string): any {
 function runObjectTests(
   opVals: { [key: string]: any },
   receivedObject: any,
-  spec: string,
+  spec: string
 ): TestResult[] {
   let results: TestResult[] = [];
 
@@ -100,11 +100,12 @@ function runObjectTests(
       } else {
         try {
           expected = JSON.parse(expected);
+          results.push(...runObjectTests(expected, receivedLen, spec));
+          continue;
         } catch (err: any) {
+          pass = false;
           message = `$size val is not num or valid JSON`;
         }
-        results.push(...runObjectTests(expected, receivedLen, spec));
-        continue;
       }
     } else if (op === "$exists") {
       const exists = received != undefined;
