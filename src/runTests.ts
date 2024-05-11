@@ -7,7 +7,7 @@ import { Tests, ResponseData, TestResult, Assertion } from "./models";
 export function runAllTests(
   tests: Tests,
   responseData: ResponseData,
-  stopOnFailure: boolean
+  stopOnFailure: boolean,
 ): TestResult[] {
   const results: TestResult[] = [];
   if (!tests) return results;
@@ -74,7 +74,7 @@ function getValueForJSONTests(responseContent: object, key: string): any {
 function runObjectTests(
   opVals: { [key: string]: any },
   receivedObject: any,
-  spec: string
+  spec: string,
 ): TestResult[] {
   let results: TestResult[] = [];
 
