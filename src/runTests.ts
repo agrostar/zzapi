@@ -4,16 +4,23 @@ import { getStringIfNotScalar } from "./utils/typeUtils";
 
 import { Tests, ResponseData, TestResult, Assertion } from "./models";
 
-export function runAllTests(tests: Tests, responseData: ResponseData): TestResult[] {
+export function runAllTests(
+  tests: Tests,
+  responseData: ResponseData,
+  stopOnFailure: boolean,
+): TestResult[] {
   const results: TestResult[] = [];
   if (!tests) return results;
 
-  for (const spec in tests.json) {
-    const expected = tests.json[spec];
-    const received = getValueForJSONTests(responseData.json, spec);
-    const jsonResults = runTest(spec, expected, received);
-    results.push(...jsonResults);
+  let statusFail = false;
+  if (tests.status) {
+    const expected = tests.status;
+    const received = responseData.status;
+    const statusResults = runTest("status", expected, received);
+    results.push(...statusResults);
+    statusFail = statusResults.some((r) => !r.pass);
   }
+  if (stopOnFailure && statusFail) return results;
 
   for (const spec in tests.headers) {
     const expected = tests.headers[spec];
@@ -22,18 +29,18 @@ export function runAllTests(tests: Tests, responseData: ResponseData): TestResul
     results.push(...headerResults);
   }
 
+  for (const spec in tests.json) {
+    const expected = tests.json[spec];
+    const received = getValueForJSONTests(responseData.json, spec);
+    const jsonResults = runTest(spec, expected, received);
+    results.push(...jsonResults);
+  }
+
   if (tests.body) {
     const expected = tests.body;
     const received = responseData.body;
     const bodyResults = runTest("body", expected, received);
     results.push(...bodyResults);
-  }
-
-  if (tests.status) {
-    const expected = tests.status;
-    const received = responseData.status;
-    const statusResults = runTest("status", expected, received);
-    results.push(...statusResults);
   }
 
   return results;
@@ -107,13 +114,18 @@ function runObjectTests(
       const options = opVals["$options"];
       const regex = new RegExp(expected, options);
       try {
-        pass = regex.test(received as string);
+        pass = typeof received === "string" && regex.test(received);
       } catch (err: any) {
         message = err.message;
       }
+    } else if (op === "$sw") {
+      pass = typeof received === "string" && received.startsWith(expected);
+    } else if (op === "$ew") {
+      pass = typeof received === "string" && received.endsWith(expected);
+    } else if (op === "$co") {
+      pass = typeof received === "string" && received.includes(expected);
     } else if (op == "$options") {
-      // Do nothing. $regex will address it.
-      continue;
+      continue; // do nothing. $regex will address it.
     } else {
       results.push({
         pass: false,

@@ -32,7 +32,7 @@ export function getCurlRequest(request: RequestSpec): string {
   curl += ` '${getURL(
     request.httpRequest.baseUrl,
     request.httpRequest.url,
-    getParamsForUrl(request.httpRequest.params, request.options.rawParams)
+    getParamsForUrl(request.httpRequest.params, request.options.rawParams),
   )}'`;
 
   return curl;

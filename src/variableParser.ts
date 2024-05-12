@@ -41,7 +41,7 @@ export function getEnvironments(bundleContent: string | undefined, varFileConten
 export function loadVariables(
   envName: string | undefined,
   bundleContent: string | undefined,
-  varFileContents: string[]
+  varFileContents: string[],
 ): Variables {
   if (!envName) return {};
 

@@ -5,7 +5,7 @@ import { RequestSpec } from "./models";
 
 function replaceVariablesInArray(
   data: any[],
-  variables: Variables
+  variables: Variables,
 ): { data: any[]; undefinedVars: string[] } {
   let newData: any[] = [];
   let undefs: string[] = [];
@@ -22,7 +22,7 @@ function replaceVariablesInArray(
 
 function replaceVariablesInDict(
   obj: { [key: string]: any },
-  variables: Variables
+  variables: Variables,
 ): { data: { [key: string]: any }; undefinedVars: string[] } {
   let newData: { [key: string]: any } = {};
   let undefs: string[] = [];
@@ -39,7 +39,7 @@ function replaceVariablesInDict(
 
 function replaceVariablesInObject(
   data: { [key: string]: any } | any[],
-  variables: Variables
+  variables: Variables,
 ): { data: any; undefinedVars: string[] } {
   if (Array.isArray(data)) {
     return replaceVariablesInArray(data, variables);
@@ -79,7 +79,7 @@ const VAR_REGEX_WITHOUT_BRACES = /(?<!\\)\$([_a-zA-Z]\w*)(?=\W|$)/g;
 
 function replaceVariablesInString(
   text: string,
-  variables: Variables
+  variables: Variables,
 ): { data: any; undefinedVars: string[] } {
   // maintaining a separate boolean instead of initially setting valueInNativeType to, say, undefined,
   //  because valueInNativeType may actually end up being undefined.
