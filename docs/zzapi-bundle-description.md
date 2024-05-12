@@ -165,6 +165,7 @@ Note that an assertion value can be a non-scalar, especially when matching a non
 Operators supported in the RHS are:
 * `$eq`, `$ne`, `$lt`, `$gt`, `$lte`, `$gte`: against the value
 * `$regex`: against the value, with `$options` like ignore-case
+* `$sw`, `$ew`, `$co`: to check if the target starts with, ends with or contains a string
 * `$size`: for length of arrays and objects, or the length of the string if it is not an array
 * `$exists`: true|false, to check existance of a field
 * `$type`: string|number|object|array|null: to check the type of the field
