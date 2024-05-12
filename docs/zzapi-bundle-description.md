@@ -91,6 +91,7 @@ These are options that can be switches on/off, both at the common level as well 
 * `verifySSL`: whether to enfoce SSL certificate validation (default is false)
 * `showHeaders`: whether to show the response headers for each request (default is false)
 * `keepRawJSON`: whether to keep the original response JSON without formatting it. (default is false)
+* `stopOnFailure`: whether to skip other tests when any of the status tests fail.
 
 ### headers
 
@@ -166,7 +167,7 @@ Operators supported in the RHS are:
 * `$eq`, `$ne`, `$lt`, `$gt`, `$lte`, `$gte`: against the value
 * `$regex`: against the value, with `$options` like ignore-case
 * `$sw`, `$ew`, `$co`: to check if the target starts with, ends with or contains a string
-* `$size`: for length of arrays and objects, or the length of the string if it is not an array
+* `$size`: for length of arrays and objects, or the length of the string if it is not an array. The value can be an object for `$ne`, `$lt` etc. comparisons.
 * `$exists`: true|false, to check existance of a field
 * `$type`: string|number|object|array|null: to check the type of the field
 
@@ -184,18 +185,9 @@ Object | Path | Result
 
 If the result is a non-scalar (eg, the entire array) it will be used as is when matching against the operators `$size`, `$exists` and `$type`, otherwise will be converted to a string using `JSON.stringify(value)`.
 
-### capture
+### setvars
 
 Values from the response (headers and JSON body) can be captured and set as variables. We allow variables which are not scalars also (eg, objects and arrays), when capturing values from the response JSON.
 
-### capture.json
+`setvars` is an object with many ke-value pairs, where the key is the name of the variable to set and the value is similar to tests: one of status, entire body, a JSONPATH spec or  a header spec.
 
-Similar to tests, the key is a JSONPATH specification of the path of the field. The value is a string, the name of the variable to which the value will be set to. Eg:
-
-* `address.city: citiyVar`
-
-### capture.headers
-
-Similar to tests, each header is a key-value pair where the key is the name of the header and the value is the variable to capture the value into.
-
-* `Content-type: contentTypeVar`
