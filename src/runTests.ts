@@ -102,7 +102,18 @@ function runObjectTests(
       } else if (typeof receivedObject === "string" || Array.isArray(receivedObject)) {
         receivedLen = receivedObject.length;
       }
-      pass = receivedLen === expected;
+      if (typeof expected === "number") {
+        pass = receivedLen === expected;
+      } else {
+        try {
+          expected = JSON.parse(expected);
+          results.push(...runObjectTests(expected, receivedLen, spec));
+          continue;
+        } catch (err: any) {
+          pass = false;
+          message = `$size val is not num or valid JSON`;
+        }
+      }
     } else if (op === "$exists") {
       const exists = received != undefined;
       pass = exists === expected;
