@@ -5,7 +5,7 @@ function checkKey(
   item: string,
   key: string,
   expectedTypes: string[],
-  optional: boolean,
+  optional: boolean
 ): string | undefined {
   if (!optional && !obj.hasOwnProperty(key)) {
     return `${key} key must be present in each ${item} item`;
@@ -153,6 +153,7 @@ const VALID_OPTIONS: { [type: string]: boolean } = {
   keepRawJSON: true,
   showHeaders: true,
   rawParams: true,
+  stopOnFailure: true,
 };
 function checkOptions(obj: any): string | undefined {
   let ret = checkObjIsDict(obj, "options");
