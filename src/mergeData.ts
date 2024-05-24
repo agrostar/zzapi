@@ -68,12 +68,12 @@ function getMergedHeaders(
 function getMergedOptions(cOptions: RawOptions = {}, rOptions: RawOptions = {}): Options {
   const options = Object.assign(cOptions, rOptions);
 
-  const follow = options.follow == true;
-  const verifySSL = options.verifySSL == true;
-  const keepRawJSON = options.keepRawJSON == true;
-  const showHeaders = options.showHeaders == true;
-  const rawParams = options.rawParams == true;
-  const stopOnFailure = options.stopOnFailure == true;
+  const follow = options.follow === true;
+  const verifySSL = options.verifySSL === true;
+  const keepRawJSON = options.keepRawJSON === true;
+  const showHeaders = options.showHeaders === true;
+  const rawParams = options.rawParams === true;
+  const stopOnFailure = options.stopOnFailure === true;
 
   return { follow, verifySSL, keepRawJSON, showHeaders, rawParams, stopOnFailure };
 }
@@ -122,7 +122,7 @@ function getMergedSetVars(
     } else if (spec.startsWith("$h.")) {
       type = "header";
       spec = spec.replace(/^\$h\./, "");
-    } else if (spec == "status" || spec == "body") {
+    } else if (spec === "status" || spec === "body") {
       type = spec;
     } else {
       continue;
