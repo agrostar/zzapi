@@ -138,7 +138,7 @@ function runObjectTests(
       pass = typeof received === "string" && received.includes(expected);
     } else if (op === "$options") {
       continue; // do nothing. $regex will address it.
-    } else if (op === "$test") {
+    } else if (op === "$tests") {
       const originalExpected = opVals[op],
         originalReceived = receivedObject;
       if (!isDict(originalExpected)) {
