@@ -3,7 +3,7 @@ import jp from "jsonpath";
 import { getStringIfNotScalar, isDict } from "./utils/typeUtils";
 
 import { Tests, ResponseData, TestResult, Assertion } from "./models";
-import { getMergedTests, mergePrefixBasedTests } from "./mergeData";
+import { mergePrefixBasedTests } from "./mergeData";
 
 export function runAllTests(
   tests: Tests,
@@ -81,6 +81,7 @@ function runObjectTests(
   for (const op in opVals) {
     let expected = getStringIfNotScalar(opVals[op]);
     let received = getStringIfNotScalar(receivedObject);
+
     let pass = false;
     let message = "";
     if (op === "$eq") {
@@ -138,12 +139,14 @@ function runObjectTests(
     } else if (op === "$options") {
       continue; // do nothing. $regex will address it.
     } else if (op === "$test") {
-      if (!isDict(expected)) {
+      const originalExpected = opVals[op],
+        originalReceived = receivedObject;
+      if (!isDict(originalExpected)) {
         pass = false;
         message = "recursive tests must be dicts";
       } else {
-        mergePrefixBasedTests(expected);
-        const res = runAllTests(expected, received, false);
+        mergePrefixBasedTests(originalExpected);
+        const res = runAllTests(originalExpected, originalReceived, false);
         results.push(...res);
         continue;
       }
