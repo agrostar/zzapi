@@ -138,7 +138,7 @@ function getMergedSetVars(
  * $. and $h. prefixes, as this is more convenient when specifying them.
  * We merge these into tests.json and tests.headers respectively.
  */
-function mergePrefixBasedTests(tests: RawTests) {
+export function mergePrefixBasedTests(tests: RawTests) {
   if (!tests.json) tests.json = {};
   if (!tests.headers) tests.headers = {};
   for (const key of Object.keys(tests)) {

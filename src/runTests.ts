@@ -1,13 +1,14 @@
 import jp from "jsonpath";
 
-import { getStringIfNotScalar } from "./utils/typeUtils";
+import { getStringIfNotScalar, isDict } from "./utils/typeUtils";
 
 import { Tests, ResponseData, TestResult, Assertion } from "./models";
+import { getMergedTests, mergePrefixBasedTests } from "./mergeData";
 
 export function runAllTests(
   tests: Tests,
   responseData: ResponseData,
-  stopOnFailure: boolean,
+  stopOnFailure: boolean
 ): TestResult[] {
   const results: TestResult[] = [];
   if (!tests) return results;
@@ -47,8 +48,8 @@ export function runAllTests(
 
 function runTest(spec: string, expected: Assertion, received: any): TestResult[] {
   let results: TestResult[] = [];
+  // typeof null is also 'object'
   if (typeof expected !== "object" || expected == null) {
-    // typeof null is 'object', so we include it here
     expected = getStringIfNotScalar(expected);
     received = getStringIfNotScalar(received);
     const pass = expected === received;
@@ -73,7 +74,7 @@ function getValueForJSONTests(responseContent: object, key: string): any {
 function runObjectTests(
   opVals: { [key: string]: any },
   receivedObject: any,
-  spec: string,
+  spec: string
 ): TestResult[] {
   let results: TestResult[] = [];
 
@@ -134,8 +135,18 @@ function runObjectTests(
       pass = typeof received === "string" && received.endsWith(expected);
     } else if (op === "$co") {
       pass = typeof received === "string" && received.includes(expected);
-    } else if (op == "$options") {
+    } else if (op === "$options") {
       continue; // do nothing. $regex will address it.
+    } else if (op === "$test") {
+      if (!isDict(expected)) {
+        pass = false;
+        message = "recursive tests must be dicts";
+      } else {
+        mergePrefixBasedTests(expected);
+        const res = runAllTests(expected, received, false);
+        results.push(...res);
+        continue;
+      }
     } else {
       results.push({
         pass: false,
