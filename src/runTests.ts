@@ -12,15 +12,14 @@ export function runAllTests(
   const results: TestResult[] = [];
   if (!tests) return results;
 
-  let statusFail = false;
   if (tests.status) {
     const expected = tests.status;
     const received = responseData.status;
     const statusResults = runTest("status", expected, received);
     results.push(...statusResults);
-    statusFail = statusResults.some((r) => !r.pass);
+
+    if (stopOnFailure && statusResults.some((r) => !r.pass)) return results;
   }
-  if (stopOnFailure && statusFail) return results;
 
   for (const spec in tests.headers) {
     const expected = tests.headers[spec];
