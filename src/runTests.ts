@@ -139,14 +139,22 @@ function runObjectTests(
     } else if (op === "$options") {
       continue; // do nothing. $regex will address it.
     } else if (op === "$tests") {
-      const originalExpected = opVals[op],
-        originalReceived = receivedObject;
-      if (!isDict(originalExpected)) {
+      const recursiveTests = opVals[op];
+
+      if (!isDict(recursiveTests)) {
         pass = false;
         message = "recursive tests must be dicts";
       } else {
-        mergePrefixBasedTests(originalExpected);
-        const res = runAllTests(originalExpected, originalReceived, false);
+        mergePrefixBasedTests(recursiveTests);
+        const receivedObj: ResponseData = {
+          executionTime: 0,
+          body: "",
+          rawHeaders: "",
+          headers: {},
+          json: receivedObject,
+        };
+
+        const res = runAllTests(recursiveTests, receivedObj, false);
         results.push(...res);
         continue;
       }
