@@ -86,7 +86,7 @@ function runObjectTests(
     let message = "";
     if (op === "$eq") {
       pass = received === expected;
-    } else if (op == "$ne") {
+    } else if (op === "$ne") {
       pass = received !== expected;
     } else if (op === "$lt") {
       pass = received < expected;
@@ -116,7 +116,7 @@ function runObjectTests(
         }
       }
     } else if (op === "$exists") {
-      const exists = received != undefined;
+      const exists = received !== undefined;
       pass = exists === expected;
     } else if (op === "$type") {
       const receivedType = getType(receivedObject);

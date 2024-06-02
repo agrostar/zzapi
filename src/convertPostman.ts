@@ -10,9 +10,9 @@ function reformatVariables(text: string): string {
 // Recursive function to replace variables in an object in-situ
 function reformatVariablesInObject(object: any): void {
   for (const key in object) {
-    if (typeof object[key] == "string") {
+    if (typeof object[key] === "string") {
       object[key] = reformatVariables(object[key]);
-    } else if (typeof object[key] == "object") {
+    } else if (typeof object[key] === "object") {
       reformatVariablesInObject(object[key]);
     }
     // else: boolean, null etc: these can't hold variable strings
@@ -43,7 +43,7 @@ function addRequest(prefix: string, element: any, requests: any): void {
     request.headers = {};
     for (const h of r.header) {
       request.headers[h.key] = reformatVariables(h.value);
-      if (h.key.toLowerCase() == "content-type") {
+      if (h.key.toLowerCase() === "content-type") {
         contentType = h.value;
       }
     }
@@ -65,8 +65,8 @@ function addRequest(prefix: string, element: any, requests: any): void {
     }
   }
 
-  if (r.body && r.body.mode == "raw") {
-    if (r.body?.options?.raw?.language == "json" || contentType == "application/json") {
+  if (r.body && r.body.mode === "raw") {
+    if (r.body?.options?.raw?.language === "json" || contentType === "application/json") {
       try {
         request.body = JSON.parse(r.body.raw);
         reformatVariablesInObject(request.body);
@@ -97,7 +97,7 @@ export default function convertCollection(filePath: string): string {
   const contents = fs.readFileSync(filePath, "utf-8");
   const collection = JSON.parse(contents);
   if (
-    collection?.info?.schema != "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    collection?.info?.schema !== "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   ) {
     throw Error("Not a Postman v2.1.0 collection. Cannot import");
   }
@@ -113,13 +113,13 @@ export default function convertCollection(filePath: string): string {
   const yamlDoc = new YAML.Document(bundle);
   YAML.visit(yamlDoc, {
     Pair(_, node: any) {
-      if (node?.key?.value == "requests") {
+      if (node?.key?.value === "requests") {
         node.key.spaceBefore = true;
         node.value.items.forEach((i: any) => {
           i.key.spaceBefore = true;
         });
       }
-      if (node?.key?.value == "headers" || node?.key?.value == "params") {
+      if (node?.key?.value === "headers" || node?.key?.value === "params") {
         node.value.items.forEach((i: any) => {
           i.flow = true;
         });
