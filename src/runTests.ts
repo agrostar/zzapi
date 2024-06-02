@@ -2,14 +2,14 @@ import jp from "jsonpath";
 
 import { getStringIfNotScalar, isDict } from "./utils/typeUtils";
 
-import { Tests, ResponseData, TestResult, Assertion, SpecResult } from "./models";
+import { Tests, ResponseData, Assertion, SpecResult } from "./models";
 import { mergePrefixBasedTests } from "./mergeData";
 
 export function runAllTests(
   tests: Tests,
   responseData: ResponseData,
   stopOnFailure: boolean,
-  rootSpec: string | null = null
+  rootSpec: string | null = null,
 ): SpecResult {
   const res: SpecResult = { spec: rootSpec, results: [], subResults: [] };
   if (!tests) return res;
@@ -61,7 +61,7 @@ export function runAllTests(
 
 function runTest(spec: string, expected: Assertion, received: any): SpecResult {
   // typeof null is also 'object'
-  if (expected != null && typeof expected === "object") return runObjectTests(expected, received, spec);
+  if (expected !== null && typeof expected === "object") return runObjectTests(expected, received, spec);
 
   expected = getStringIfNotScalar(expected);
   received = getStringIfNotScalar(received);
