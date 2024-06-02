@@ -144,9 +144,11 @@ function mergePrefixBasedTests(tests: RawTests) {
   for (const key of Object.keys(tests)) {
     if (key.startsWith("$.")) {
       tests.json[key] = tests[key];
+      delete tests[key];
     } else if (key.startsWith("$h.")) {
       const headerName = key.replace(/^\$h\./, "");
       tests.headers[headerName] = tests[key];
+      delete tests[key];
     }
   }
 }
