@@ -155,6 +155,7 @@ function runObjectTests(
         };
 
         const res = runAllTests(recursiveTests, receivedObj, false);
+
         results.push(...res);
         continue;
       }
