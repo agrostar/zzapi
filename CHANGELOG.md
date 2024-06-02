@@ -1,7 +1,10 @@
 # Change Log
 
-## [1.2.0]
-- Bug fix: stopOnFailue not working
+## 1.3.0
+- Support for `$tests` to recursively run tests on a sub-object
+
+## [1.2.1]
+- Bug fix: stopOnFailure not working
 
 ## [1.2.0]
 - Support `$sw`, `$ew`, `$co` for startsWith, endsWith and contains

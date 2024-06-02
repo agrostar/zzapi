@@ -170,6 +170,7 @@ Operators supported in the RHS are:
 * `$size`: for length of arrays and objects, or the length of the string if it is not an array. The value can be an object for `$ne`, `$lt` etc. comparisons.
 * `$exists`: true|false, to check existance of a field
 * `$type`: string|number|object|array|null: to check the type of the field
+* `$tests`: perform assertions (recursively) on the value, as if it were the `$.` root
 
 ### jsonpath tests
 
@@ -183,11 +184,10 @@ Object | Path | Result
 `{ field: [ { value: 10 }, { value: 20 } ]}` | `$.field.1.value` | 20
 `{ field: [ { name: x, value: 10 }, { name: y, value: 20 } ]}` | `$.field[?(@.name=="x")].value` | 10
 
-If the result is a non-scalar (eg, the entire array) it will be used as is when matching against the operators `$size`, `$exists` and `$type`, otherwise will be converted to a string using `JSON.stringify(value)`.
+If the result is a non-scalar (eg, the entire array) it will be used as is when matching against the operators `$tests`, `$size`, `$exists` and `$type`, otherwise will be converted to a string using `JSON.stringify(value)`.
 
 ### setvars
 
 Values from the response (headers and JSON body) can be captured and set as variables. We allow variables which are not scalars also (eg, objects and arrays), when capturing values from the response JSON.
 
 `setvars` is an object with many ke-value pairs, where the key is the name of the variable to set and the value is similar to tests: one of status, entire body, a JSONPATH spec or  a header spec.
-

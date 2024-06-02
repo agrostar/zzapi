@@ -1,7 +1,8 @@
 # yaml-language-server: $schema=../schemas/zzapi-bundle.schema.json
+
 # This bundle contains a series of test requests against various endpoints,
 # most of them being the postman echo service. We use this to both serve as
-# an example of how to create test bundles as well as testing zzapi runner itself.
+# an example of how to create test bundles as well as testing zzapi itself.
 
 common:
   baseUrl: https://postman-echo.com
@@ -240,14 +241,19 @@ requests:
       $.data.phoneNumbers[0].type: mobile
       $.data.phoneNumbers.1.type: home
       $.data.phoneNumbers[?(@.type=="home")].number: 0123-4567-8910
-      $.data.lastName: { $exists: true }
-      # $.data.middleName: { $exists: true, $type: "null" }
-      $.data.middleName: null
-      $.data.otherName: { $exists: false, $type: undefined }
       $.data.phoneNumbers[*].type: mobile
       $.data.phoneNumbers[*].available: { $eq: [7, 22] }
       $.data.phoneNumbers.0.available: { $eq: [7, 22], $type: array }
       $.data.phoneNumbers.1.available: { $eq: "[18,22]", $type: array }
+      $.data.phoneNumbers.0:
+        $tests:
+          $.type: mobiles
+          $.number: { $ne: 0123-4567-8910 }
+          $.available: { $eq: [7, 22] }
+      $.data.lastName: { $exists: true }
+      # $.data.middleName: { $exists: true, $type: "null" }
+      $.data.middleName: null
+      $.data.otherName: { $exists: false, $type: undefined }
       # stress: ensure corner cases don't crash
       $.data.otherName.value: { $exists: false } # don't recurse down undefined
       $.data.middleName.value: { $exists: false } # don't recurse down null
