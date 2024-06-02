@@ -132,7 +132,7 @@ export interface TestResult {
 }
 
 export interface SpecResult {
-  spec: string;
+  spec: string | null;
   results: TestResult[];
   subResults: SpecResult[];
 }
