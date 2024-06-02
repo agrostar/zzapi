@@ -1,8 +1,9 @@
 import jp from "jsonpath";
 
-import { getStringIfNotScalar } from "./utils/typeUtils";
+import { getStringIfNotScalar, isDict } from "./utils/typeUtils";
 
 import { Tests, ResponseData, TestResult, Assertion } from "./models";
+import { mergePrefixBasedTests } from "./mergeData";
 
 export function runAllTests(
   tests: Tests,
@@ -47,8 +48,8 @@ export function runAllTests(
 
 function runTest(spec: string, expected: Assertion, received: any): TestResult[] {
   let results: TestResult[] = [];
+  // typeof null is also 'object'
   if (typeof expected !== "object" || expected == null) {
-    // typeof null is 'object', so we include it here
     expected = getStringIfNotScalar(expected);
     received = getStringIfNotScalar(received);
     const pass = expected === received;
@@ -80,6 +81,7 @@ function runObjectTests(
   for (const op in opVals) {
     let expected = getStringIfNotScalar(opVals[op]);
     let received = getStringIfNotScalar(receivedObject);
+
     let pass = false;
     let message = "";
     if (op === "$eq") {
@@ -134,8 +136,28 @@ function runObjectTests(
       pass = typeof received === "string" && received.endsWith(expected);
     } else if (op === "$co") {
       pass = typeof received === "string" && received.includes(expected);
-    } else if (op == "$options") {
+    } else if (op === "$options") {
       continue; // do nothing. $regex will address it.
+    } else if (op === "$tests") {
+      const recursiveTests = opVals[op];
+
+      if (!isDict(recursiveTests)) {
+        pass = false;
+        message = "recursive tests must be dicts";
+      } else {
+        mergePrefixBasedTests(recursiveTests);
+        const receivedObj: ResponseData = {
+          executionTime: 0,
+          body: "",
+          rawHeaders: "",
+          headers: {},
+          json: receivedObject,
+        };
+
+        const res = runAllTests(recursiveTests, receivedObj, false);
+        results.push(...res);
+        continue;
+      }
     } else {
       results.push({
         pass: false,
