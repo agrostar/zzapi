@@ -112,7 +112,7 @@ function runObjectTests(opVals: { [key: string]: any }, receivedObject: any, spe
         try {
           expected = JSON.parse(expected);
 
-          // the spec remains the same
+          // the spec remains the same, so we add it to the current layer
           const res = runObjectTests(expected, receivedLen, spec);
           objRes.results.push(...res.results);
           objRes.subResults.push(...res.subResults);
@@ -161,6 +161,7 @@ function runObjectTests(opVals: { [key: string]: any }, receivedObject: any, spe
           json: receivedObject,
         };
 
+        // the spec remains the same, so we add it to the current layer
         const res = runAllTests(recursiveTests, receivedObj, false, spec);
         objRes.results.push(...res.results);
         objRes.subResults.push(...res.subResults);
