@@ -134,7 +134,7 @@ export interface TestResult {
 export interface SpecResult {
   spec: string;
   results: TestResult[];
-  subResults?: SpecResult[];
+  subResults: SpecResult[];
 }
 
 export type GotRequest = CancelableRequest<Response<string>>;
