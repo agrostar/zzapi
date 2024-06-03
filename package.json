@@ -1,6 +1,6 @@
 {
   "name": "zzapi",
-  "version": "1.3.0",
+  "version": "1.4.0",
   "description": "zzAPI is a REST API testing and documentation tool set. It is an open-source Postman alternative. ",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",

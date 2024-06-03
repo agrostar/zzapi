@@ -1,7 +1,10 @@
 # Change Log
 
-## 1.3.0
+## 1.4.0
 - Support for `$tests` to recursively run tests on a sub-object
+
+## 1.3.0
+- Deprecated
 
 ## [1.2.1]
 - Bug fix: stopOnFailure not working
