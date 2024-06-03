@@ -2,81 +2,84 @@ import jp from "jsonpath";
 
 import { getStringIfNotScalar, isDict } from "./utils/typeUtils";
 
-import { Tests, ResponseData, TestResult, Assertion } from "./models";
+import { Tests, ResponseData, Assertion, SpecResult } from "./models";
 import { mergePrefixBasedTests } from "./mergeData";
 
 export function runAllTests(
   tests: Tests,
   responseData: ResponseData,
   stopOnFailure: boolean,
-): TestResult[] {
-  const results: TestResult[] = [];
-  if (!tests) return results;
+  rootSpec: string | null = null,
+): SpecResult {
+  const res: SpecResult = { spec: rootSpec, results: [], subResults: [] };
+  if (!tests) return res;
 
   if (tests.status) {
     const expected = tests.status;
     const received = responseData.status;
     const statusResults = runTest("status", expected, received);
-    results.push(...statusResults);
 
-    if (stopOnFailure && statusResults.some((r) => !r.pass)) return results;
+    if (stopOnFailure && statusResults.results.some((r) => !r.pass)) return res;
   }
 
   for (const spec in tests.headers) {
     const expected = tests.headers[spec];
     const received = responseData.headers ? responseData.headers[spec] : "";
     const headerResults = runTest(spec, expected, received);
-    results.push(...headerResults);
+
+    res.subResults.push(headerResults);
   }
 
   for (const spec in tests.json) {
-    const expected = tests.json[spec];
-    const received = getValueForJSONTests(responseData.json, spec);
+    let expected = tests.json[spec],
+      received;
+    try {
+      received = getValueForJSONTests(responseData.json, spec);
+    } catch (err: any) {
+      res.subResults.push({
+        spec,
+        results: [{ pass: false, expected, received: "", op: spec, message: err }],
+        subResults: [],
+      });
+      continue;
+    }
+
     const jsonResults = runTest(spec, expected, received);
-    results.push(...jsonResults);
+    res.subResults.push(jsonResults);
   }
 
   if (tests.body) {
     const expected = tests.body;
     const received = responseData.body;
     const bodyResults = runTest("body", expected, received);
-    results.push(...bodyResults);
+
+    res.subResults.push(bodyResults);
   }
 
-  return results;
+  return res;
 }
 
-function runTest(spec: string, expected: Assertion, received: any): TestResult[] {
-  let results: TestResult[] = [];
+function runTest(spec: string, expected: Assertion, received: any): SpecResult {
   // typeof null is also 'object'
-  if (typeof expected !== "object" || expected == null) {
-    expected = getStringIfNotScalar(expected);
-    received = getStringIfNotScalar(received);
-    const pass = expected === received;
-    results.push({ pass, expected, received, spec, op: ":" });
-  } else {
-    results = runObjectTests(expected, received, spec);
-  }
-  return results;
+  if (expected !== null && typeof expected === "object") return runObjectTests(expected, received, spec);
+
+  expected = getStringIfNotScalar(expected);
+  received = getStringIfNotScalar(received);
+  const pass = expected === received;
+
+  return { spec, results: [{ pass, expected, received, op: ":" }], subResults: [] };
 }
 
 function getValueForJSONTests(responseContent: object, key: string): any {
   try {
     return jp.value(responseContent, key);
   } catch (err: any) {
-    if (err !== undefined && err.description !== undefined) {
-      return err.description;
-    }
-    return undefined;
+    throw new Error(`Error while evaluating JSONPath ${key}: ${err.description || err.message || err}`);
   }
 }
 
-function runObjectTests(
-  opVals: { [key: string]: any },
-  receivedObject: any,
-  spec: string,
-): TestResult[] {
-  let results: TestResult[] = [];
+function runObjectTests(opVals: { [key: string]: any }, receivedObject: any, spec: string): SpecResult {
+  let objRes: SpecResult = { spec, results: [], subResults: [] };
 
   for (const op in opVals) {
     let expected = getStringIfNotScalar(opVals[op]);
@@ -108,7 +111,11 @@ function runObjectTests(
       } else {
         try {
           expected = JSON.parse(expected);
-          results.push(...runObjectTests(expected, receivedLen, spec));
+
+          // the spec remains the same, so we add it to the current layer
+          const res = runObjectTests(expected, receivedLen, spec);
+          objRes.results.push(...res.results);
+          objRes.subResults.push(...res.subResults);
           continue;
         } catch (err: any) {
           pass = false;
@@ -154,25 +161,26 @@ function runObjectTests(
           json: receivedObject,
         };
 
-        const res = runAllTests(recursiveTests, receivedObj, false);
-        results.push(...res);
+        // the spec remains the same, so we add it to the current layer
+        const res = runAllTests(recursiveTests, receivedObj, false, spec);
+        objRes.results.push(...res.results);
+        objRes.subResults.push(...res.subResults);
         continue;
       }
     } else {
-      results.push({
+      objRes.results.push({
         pass: false,
         expected: "one of $eq, $ne etc.",
         received: op,
         op: "",
-        spec,
         message: "To compare objects, use $eq",
       });
       continue;
     }
-    results.push({ pass, expected, received, spec, op, message });
+    objRes.results.push({ pass, expected, received, op, message });
   }
 
-  return results;
+  return objRes;
 }
 
 function getType(data: any): string {

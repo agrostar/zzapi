@@ -1,4 +1,11 @@
-export { RequestPosition, ResponseData, RequestSpec, GotRequest, TestResult } from "./models";
+export {
+  RequestPosition,
+  ResponseData,
+  RequestSpec,
+  GotRequest,
+  TestResult,
+  SpecResult,
+} from "./models";
 
 export { getRequestPositions, getAllRequestSpecs, getRequestSpec } from "./parseBundle";
 

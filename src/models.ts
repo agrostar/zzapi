@@ -125,11 +125,16 @@ export interface RequestPosition {
 
 export interface TestResult {
   pass: boolean;
-  spec: string;
   op: string;
   expected: any;
   received: any;
   message?: string;
+}
+
+export interface SpecResult {
+  spec: string | null;
+  results: TestResult[];
+  subResults: SpecResult[];
 }
 
 export type GotRequest = CancelableRequest<Response<string>>;
