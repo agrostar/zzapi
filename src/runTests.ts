@@ -9,7 +9,7 @@ export function runAllTests(
   tests: Tests,
   responseData: ResponseData,
   stopOnFailure: boolean,
-  rootSpec: string | null = null
+  rootSpec: string | null = null,
 ): SpecResult {
   const res: SpecResult = { spec: rootSpec, results: [], subResults: [] };
   if (!tests) return res;
