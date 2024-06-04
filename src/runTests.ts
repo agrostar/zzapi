@@ -9,7 +9,7 @@ export function runAllTests(
   tests: Tests,
   responseData: ResponseData,
   stopOnFailure: boolean,
-  rootSpec: string | null = null,
+  rootSpec: string | null = null
 ): SpecResult {
   const res: SpecResult = { spec: rootSpec, results: [], subResults: [] };
   if (!tests) return res;
@@ -80,10 +80,7 @@ function getValueForJSONTests(responseContent: object, key: string): any {
 
 function runObjectTests(opVals: { [key: string]: any }, receivedObject: any, spec: string): SpecResult {
   let objRes: SpecResult = { spec, results: [], subResults: [] };
-  if (opVals["$skip"]) {
-    objRes.skipped = true;
-    return objRes;
-  }
+  if (opVals["$skip"]) objRes.skipped = true;
 
   for (const op in opVals) {
     let expected = getStringIfNotScalar(opVals[op]);
