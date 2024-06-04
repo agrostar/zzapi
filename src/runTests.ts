@@ -10,7 +10,7 @@ export function runAllTests(
   responseData: ResponseData,
   stopOnFailure: boolean,
   rootSpec: string | null = null,
-  skip?: boolean
+  skip?: boolean,
 ): SpecResult {
   const res: SpecResult = { spec: rootSpec, results: [], subResults: [] };
   if (!tests) return res;
@@ -85,7 +85,7 @@ function runObjectTests(
   opVals: { [key: string]: any },
   receivedObject: any,
   spec: string,
-  skip?: boolean
+  skip?: boolean,
 ): SpecResult {
   let objRes: SpecResult = { spec, results: [], subResults: [] };
   if (skip || opVals["$skip"]) objRes.skipped = true;
