@@ -133,6 +133,7 @@ export interface TestResult {
 
 export interface SpecResult {
   spec: string | null;
+  skipped?: boolean;
   results: TestResult[];
   subResults: SpecResult[];
 }
