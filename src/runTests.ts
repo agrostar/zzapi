@@ -170,7 +170,7 @@ function runObjectTests(
         };
 
         // the spec remains the same, so we add it to the current layer
-        const res = runAllTests(recursiveTests, receivedObj, false, spec);
+        const res = runAllTests(recursiveTests, receivedObj, false, spec, objRes.skipped);
         objRes.results.push(...res.results);
         objRes.subResults.push(...res.subResults);
         continue;
