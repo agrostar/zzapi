@@ -1,5 +1,8 @@
 # Change Log
 
+## 1.5.0
+- Support for `$skip` to skip a test, output can have the test shown as skipped
+
 ## 1.4.0
 - Support for `$tests` to recursively run tests on a sub-object
 
