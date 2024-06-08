@@ -131,7 +131,8 @@
                 }                        
               ]
             },
-            "$tests": { "$ref": "#/$defs/tests" }
+            "$tests": { "$ref": "#/$defs/tests" },
+            "$skip": { "type": "boolean" }
           }
         }
       ]
