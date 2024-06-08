@@ -90,6 +90,7 @@ These are options that can be switches on/off, both at the common level as well 
 * `follow`: whether to follow redirects (default is false)
 * `verifySSL`: whether to enfoce SSL certificate validation (default is false)
 * `showHeaders`: whether to show the response headers for each request (default is false)
+* `rawParams`: whether to consider the params as is (default is false, ie use URL encoding)
 * `keepRawJSON`: whether to keep the original response JSON without formatting it. (default is false)
 * `stopOnFailure`: whether to skip other tests when any of the status tests fail.
 
@@ -171,6 +172,7 @@ Operators supported in the RHS are:
 * `$exists`: true|false, to check existance of a field
 * `$type`: string|number|object|array|null: to check the type of the field
 * `$tests`: perform assertions (recursively) on the value, as if it were the `$.` root
+* `$skip`: skip the assertions under this test. Useful in case some tests are failing, but we want the output to keep reminding us of this fact.
 
 ### jsonpath tests
 
