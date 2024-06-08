@@ -57,7 +57,7 @@ function replaceEnvironmentVariables(vars: Variables): Variables {
 export function loadVariables(
   envName: string | undefined,
   bundleContent: string | undefined,
-  varFileContents: string[]
+  varFileContents: string[],
 ): Variables {
   if (!envName) return {};
 
