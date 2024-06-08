@@ -10,6 +10,7 @@ export function runAllTests(
   responseData: ResponseData,
   stopOnFailure: boolean,
   rootSpec: string | null = null,
+  skip?: boolean,
 ): SpecResult {
   const res: SpecResult = { spec: rootSpec, results: [], subResults: [] };
   if (!tests) return res;
@@ -17,7 +18,7 @@ export function runAllTests(
   if (tests.status) {
     const expected = tests.status;
     const received = responseData.status;
-    const statusResults = runTest("status", expected, received);
+    const statusResults = runTest("status", expected, received, skip);
 
     if (stopOnFailure && statusResults.results.some((r) => !r.pass)) return res;
   }
@@ -25,7 +26,7 @@ export function runAllTests(
   for (const spec in tests.headers) {
     const expected = tests.headers[spec];
     const received = responseData.headers ? responseData.headers[spec] : "";
-    const headerResults = runTest(spec, expected, received);
+    const headerResults = runTest(spec, expected, received, skip);
 
     res.subResults.push(headerResults);
   }
@@ -38,20 +39,21 @@ export function runAllTests(
     } catch (err: any) {
       res.subResults.push({
         spec,
+        skipped: skip || (typeof expected === "object" && expected !== null && expected["$skip"]),
         results: [{ pass: false, expected, received: "", op: spec, message: err }],
         subResults: [],
       });
       continue;
     }
 
-    const jsonResults = runTest(spec, expected, received);
+    const jsonResults = runTest(spec, expected, received, skip);
     res.subResults.push(jsonResults);
   }
 
   if (tests.body) {
     const expected = tests.body;
     const received = responseData.body;
-    const bodyResults = runTest("body", expected, received);
+    const bodyResults = runTest("body", expected, received, skip);
 
     res.subResults.push(bodyResults);
   }
@@ -59,15 +61,16 @@ export function runAllTests(
   return res;
 }
 
-function runTest(spec: string, expected: Assertion, received: any): SpecResult {
+function runTest(spec: string, expected: Assertion, received: any, skip?: boolean): SpecResult {
   // typeof null is also 'object'
-  if (expected !== null && typeof expected === "object") return runObjectTests(expected, received, spec);
+  if (expected !== null && typeof expected === "object")
+    return runObjectTests(expected, received, spec, skip);
 
   expected = getStringIfNotScalar(expected);
   received = getStringIfNotScalar(received);
   const pass = expected === received;
 
-  return { spec, results: [{ pass, expected, received, op: ":" }], subResults: [] };
+  return { spec, skipped: skip, results: [{ pass, expected, received, op: ":" }], subResults: [] };
 }
 
 function getValueForJSONTests(responseContent: object, key: string): any {
@@ -78,8 +81,14 @@ function getValueForJSONTests(responseContent: object, key: string): any {
   }
 }
 
-function runObjectTests(opVals: { [key: string]: any }, receivedObject: any, spec: string): SpecResult {
+function runObjectTests(
+  opVals: { [key: string]: any },
+  receivedObject: any,
+  spec: string,
+  skip?: boolean,
+): SpecResult {
   let objRes: SpecResult = { spec, results: [], subResults: [] };
+  if (skip || opVals["$skip"]) objRes.skipped = true;
 
   for (const op in opVals) {
     let expected = getStringIfNotScalar(opVals[op]);
@@ -162,11 +171,13 @@ function runObjectTests(opVals: { [key: string]: any }, receivedObject: any, spe
         };
 
         // the spec remains the same, so we add it to the current layer
-        const res = runAllTests(recursiveTests, receivedObj, false, spec);
+        const res = runAllTests(recursiveTests, receivedObj, false, spec, objRes.skipped);
         objRes.results.push(...res.results);
         objRes.subResults.push(...res.subResults);
         continue;
       }
+    } else if (op === "$skip") {
+      continue; // do nothing. If it wasn't already addressed, that means the test is not to be skipped.
     } else {
       objRes.results.push({
         pass: false,

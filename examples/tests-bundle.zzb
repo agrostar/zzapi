@@ -67,8 +67,8 @@ requests:
         - multi-1
         - multi-2
     tests:
-      $.args.foo1: bar1
-      $.args.foo2: { $eq: ["multi-1", "multi-2"] }
+      $.args.foo1: bar
+      $.args.foo2: { $eq: ["multi-1", "multi-2"], $skip: true }
 
   post-header-merge:
     url: /post
@@ -232,7 +232,7 @@ requests:
           number: 0123-4567-8910
           available: [18, 22]
     tests:
-      $.data.firstName: John
+      $.data.firstName: Joh
       $.data.age: { $type: number, $eq: 26, $ne: 30, $gt: 25, $lt: 28 }
       $.data.address: { $type: object, $size: 3, $exists: true }
       $.data.address.city: Nara
@@ -246,8 +246,9 @@ requests:
       $.data.phoneNumbers.0.available: { $eq: [7, 22], $type: array }
       $.data.phoneNumbers.1.available: { $eq: "[18,22]", $type: array }
       $.data.phoneNumbers.0:
+        $skip: true
         $tests:
-          $.type: mobiles
+          $.type: mobile
           $.number: { $ne: 0123-4567-8910 }
           $.available: { $eq: [7, 22] }
       $.data.lastName: { $exists: true }
