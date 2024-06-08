@@ -50,12 +50,14 @@ function replaceEnvironmentVariables(vars: Variables): Variables {
 
   const replacedVars: Variables = {};
   for (const key in vars) replacedVars[key] = getVal(vars[key]);
+
+  return replacedVars;
 }
 
 export function loadVariables(
   envName: string | undefined,
   bundleContent: string | undefined,
-  varFileContents: string[],
+  varFileContents: string[]
 ): Variables {
   if (!envName) return {};
 
