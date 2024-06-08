@@ -62,16 +62,12 @@ export function loadVariables(
   if (!envName) return {};
 
   const allBundleVariables = getBundleVariables(bundleContent);
-  const bundleVars: Variables = allBundleVariables.hasOwnProperty(envName)
-    ? allBundleVariables[envName]
-    : {};
+  const bundleVars: Variables = allBundleVariables[envName] ?? {};
 
-  let envVars: Variables = {};
+  const envVars: Variables = {};
   varFileContents.forEach((fileContents) => {
     const parsedData = YAML.parse(fileContents);
-    if (parsedData && isDict(parsedData[envName])) {
-      Object.assign(envVars, parsedData[envName]);
-    }
+    if (parsedData && isDict(parsedData[envName])) Object.assign(envVars, parsedData[envName]);
   });
 
   const basicVars = Object.assign({}, envVars, bundleVars);
