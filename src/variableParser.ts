@@ -51,7 +51,7 @@ function replaceEnvironmentVariables(vars: Variables): {
     const envVarName = val.slice(PREFIX.length);
     if (envVarName in process.env) return process.env[envVarName];
 
-    undefinedVars.push(envVarName);
+    undefinedVars.push(val);
     return val;
   };
 
