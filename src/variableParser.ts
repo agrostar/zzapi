@@ -52,6 +52,7 @@ function replaceEnvironmentVariables(vars: Variables): {
     if (envVarName in process.env) return process.env[envVarName];
 
     undefinedVars.push(envVarName);
+    return val;
   };
 
   const replacedVars: Variables = {};
@@ -63,7 +64,7 @@ function replaceEnvironmentVariables(vars: Variables): {
 export function loadVariables(
   envName: string | undefined,
   bundleContent: string | undefined,
-  varFileContents: string[],
+  varFileContents: string[]
 ): { vars: Variables; undefinedVars: string[] } {
   if (!envName) return { vars: {}, undefinedVars: [] };
 
