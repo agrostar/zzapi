@@ -38,28 +38,34 @@ export function getEnvironments(bundleContent: string | undefined, varFileConten
   return [...uniqueNames];
 }
 
-function replaceEnvironmentVariables(vars: Variables): Variables {
+function replaceEnvironmentVariables(vars: Variables): {
+  replacedVars: Variables;
+  undefinedVars: string[];
+} {
   const PREFIX = "$env.";
 
+  const undefinedVars: string[] = [];
   const getVal = (val: any): any => {
     if (typeof val !== "string" || !val.startsWith(PREFIX)) return val;
 
     const envVarName = val.slice(PREFIX.length);
-    return envVarName in process.env ? process.env[envVarName] : val;
+    if (envVarName in process.env) return process.env[envVarName];
+
+    undefinedVars.push(envVarName);
   };
 
   const replacedVars: Variables = {};
   for (const key in vars) replacedVars[key] = getVal(vars[key]);
 
-  return replacedVars;
+  return { replacedVars, undefinedVars };
 }
 
 export function loadVariables(
   envName: string | undefined,
   bundleContent: string | undefined,
   varFileContents: string[],
-): Variables {
-  if (!envName) return {};
+): { vars: Variables; undefinedVars: string[] } {
+  if (!envName) return { vars: {}, undefinedVars: [] };
 
   const allBundleVariables = getBundleVariables(bundleContent);
   const bundleVars: Variables = allBundleVariables[envName] ?? {};
@@ -71,6 +77,7 @@ export function loadVariables(
   });
 
   const basicVars = Object.assign({}, envVars, bundleVars);
-  const envReplaced = replaceEnvironmentVariables(basicVars);
-  return envReplaced;
+  const { replacedVars: vars, undefinedVars } = replaceEnvironmentVariables(basicVars);
+
+  return { vars, undefinedVars };
 }
