@@ -20,6 +20,7 @@ export function runAllTests(
     const received = responseData.status;
     const statusResults = runTest("status", expected, received, skip);
 
+    res.subResults.push(statusResults);
     if (stopOnFailure && statusResults.results.some((r) => !r.pass)) return res;
   }
 
