@@ -5,6 +5,10 @@ import { getStringIfNotScalar, isDict } from "./utils/typeUtils";
 import { Tests, ResponseData, Assertion, SpecResult } from "./models";
 import { mergePrefixBasedTests } from "./mergeData";
 
+function hasFailure(res: SpecResult): boolean {
+  return res.results.some((r) => !r.pass) || res.subResults.some(hasFailure);
+}
+
 export function runAllTests(
   tests: Tests,
   responseData: ResponseData,
@@ -21,8 +25,8 @@ export function runAllTests(
     const statusResults = runTest("status", expected, received, skip);
 
     res.subResults.push(statusResults);
-    if (stopOnFailure && statusResults.results.some((r) => !r.pass)) return res;
   }
+  if (stopOnFailure && hasFailure(res)) return res;
 
   for (const spec in tests.headers) {
     const expected = tests.headers[spec];
