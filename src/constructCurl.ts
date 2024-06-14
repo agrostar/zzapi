@@ -11,8 +11,10 @@ export function getCurlRequest(request: RequestSpec): string {
 
   // headers
   if (request.httpRequest.headers !== undefined) {
-    for (const header in request.httpRequest.headers)
-      curl += ` -H '${header}: ${request.httpRequest.headers[header]}'`;
+    for (const header in request.httpRequest.headers) {
+      if (header === "user-agent") continue;
+      curl += ` -H \"${header}: ${request.httpRequest.headers[header]}\"`;
+    }
   }
 
   // body
