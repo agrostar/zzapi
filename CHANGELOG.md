@@ -1,5 +1,8 @@
 # Change Log
 
+## 1.5.1
+- Fixed regression (status check failures were not detected)
+
 ## 1.5.0
 - Support for `$skip` to skip a test, output can have the test shown as skipped
 
