@@ -17,7 +17,6 @@ export function getCurlRequest(request: RequestSpec): string {
   // headers
   if (request.httpRequest.headers !== undefined) {
     for (const header in request.httpRequest.headers) {
-      if (header === "user-agent") continue;
       curl += ` -H '${replaceSingleQuotes(`${header}: ${request.httpRequest.headers[header]}`)}'`;
     }
   }
