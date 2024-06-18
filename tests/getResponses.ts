@@ -13,6 +13,7 @@ import {
 import { RawRequest } from "./utils/requestUtils";
 import { replaceFileContents } from "./utils/fileContents";
 import { getStatusCode } from "./utils/errors";
+import { compareReqAndResp } from "./runTests";
 
 function parseBody(response: ResponseData, expectJson?: boolean): string | undefined {
   if (!expectJson || !response.status) return undefined;
@@ -48,6 +49,8 @@ function getHeadersAsString(rawHeaders: string[] | undefined): string {
   return `\n  ${formattedString.trim()}`;
 }
 
+const BULLET = "-->";
+
 export async function runRequestTests(
   requests: { [name: string]: RequestSpec },
   rawReq: RawRequest,
@@ -58,6 +61,8 @@ export async function runRequestTests(
   console.log(`running ${bundleName}`);
 
   for (const name in requests) {
+    let message = `${name}: `;
+
     const req: RequestSpec = requests[name];
     req.httpRequest.body = replaceFileContents(req.httpRequest.body, bundlePath);
 
@@ -72,7 +77,8 @@ export async function runRequestTests(
     } = await executeGotRequest(httpRequest);
 
     if (error) {
-      // fail
+      message += `FAIL\n${BULLET} error executing request: ${error}`;
+      console.log(message + "\n");
       process.exitCode = getStatusCode() + 1;
       continue;
     }
@@ -88,22 +94,31 @@ export async function runRequestTests(
 
     const parseError = parseBody(response, req.expectJson);
     if (parseError) {
-      // fail
+      message += `FAIL\n${BULLET} unable to parse body: ${parseError}`;
+      console.log(message + "\n");
       process.exitCode = getStatusCode() + 1;
       continue;
     }
 
     const results = runAllTests(req.tests, response, req.options.stopOnFailure);
-    // compare the given tests with the results
+    const errors = compareReqAndResp(req, results);
+    if (errors.length > 0) {
+      message += " FAIL";
+      process.exitCode = getStatusCode() + errors.length;
+
+      message = [message, ...errors].join(`\n${BULLET}`);
+    } else {
+      message += " SUCCESS";
+    }
 
     const { capturedVars, captureErrors } = captureVariables(req, response);
-    if (captureErrors) {
-      // warn
-    }
-    if (undefs.length > 0) {
-      // warn
-    }
+    rawReq.variables.mergeCapturedVariables(capturedVars);
+    if (captureErrors) 
+      message = message + "\nWARNING: " + captureErrors;
 
-    // write final message
+    if (undefs.length > 0) 
+      message = message + "\nWARNING: undefined vars - " + undefs.join(","); 
+
+    console.log(message + "\n");
   }
 }
