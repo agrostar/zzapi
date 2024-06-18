@@ -1,17 +1,25 @@
 import { RequestSpec, SpecResult, TestResult } from "../src/index";
 import { Tests } from "../src/index";
 
-function formatTestResult(res: TestResult, spec: string, skip?: boolean): string {
+function convertToString(item: any): string {
+    if (item === null) return "null";
+    if (item === undefined) return "undefined";
+    if (typeof item === "object") return JSON.stringify(item);
+    return item.toString();
+
+}
+
+function formatTestResult(res: TestResult, spec: string | null, skip?: boolean): string {
   const status =
     (skip || res.pass ? "✓ " : "✗ ") +
-    ("test " + spec + " ") +
+    ("test " + (spec ?? "") + " ") +
     (res.op === ":" ? "$eq" : res.op) +
     " " +
-    res.expected;
+    convertToString(res.expected);
     if (res.pass) return status;
     if (skip) return status + " (skipped)";
     
-    return status + " | actual " + res.received;
+    return status + " | actual " + res.received + (res.message ? `[${res.message}]` : "");
 }
 
 function getResultData(res: SpecResult): [number, number] {
@@ -64,14 +72,14 @@ function allPositive(res: SpecResult, numTests: number): string[] {
 
   if (passed === all) return errors;
 
-  function getFailingTests(res: SpecResult, spec: string): string[] {
+  function getFailingTests(res: SpecResult, spec: string | null): string[] {
     const failingTests: string[] = [];
     if (res.skipped) return failingTests;
 
     const rootFailing = res.results.filter((r) => !r.pass);
     failingTests.push(...rootFailing.map((r) => formatTestResult(r, spec, false)));
 
-    spec += " > " + res.spec ?? "";
+    spec = (spec ? spec + " > " : "") + (res.spec ?? "");
     for (const s of res.subResults) 
       failingTests.push(...getFailingTests(s, spec));
 
@@ -82,13 +90,39 @@ function allPositive(res: SpecResult, numTests: number): string[] {
   return errors;
 }
 
+const SKIP_CLAUSE = "$skip";
+const TEST_CLAUSE = "$tests";
+const NON_TEST_KEYS = ["$options", TEST_CLAUSE, SKIP_CLAUSE];
+
 function getNumTests(tests: Tests) {
     let numTests = 0;
     if (tests.body) numTests += 1;
-    if(tests.status) numTests += 1;
+    if (tests.status) numTests += 1;
     if (tests.headers) 
         numTests += Object.keys(tests.headers).length;
-    if (tests.json) numTests += Object.keys(tests.json).length;
+
+    function getJSONTests(json: { [key: string]: any }): number {
+        let count = 0;
+        for (const key in json) {
+            const assertion = json[key];
+            if (assertion === null || typeof assertion !== "object") {
+                count += 1;
+                continue;
+            }
+
+            if (assertion[SKIP_CLAUSE]) continue;
+            const testKeys = Object.keys(assertion);
+
+            count += testKeys.filter((k) => !(NON_TEST_KEYS.includes(k))).length;
+            if (testKeys.includes(TEST_CLAUSE)) 
+                count += getNumTests(assertion[TEST_CLAUSE]);
+        }
+
+        return count;
+    }
+
+    if (tests.json) 
+        numTests += getJSONTests(tests.json);
 
     return numTests;
     

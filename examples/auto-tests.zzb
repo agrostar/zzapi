@@ -55,7 +55,7 @@ requests:
       - { name: foo2, value: multi-1 }
       - { name: foo2, value: multi-2 }
     tests:
-      $.args.foo1: bar1
+      $.args.foo1: { $eq: bar1, $skip: true }
       $.args.foo2: { $eq: ["multi-1", "multi-2"] }
 
   get-with-params-values-as-array-positive:
@@ -67,7 +67,7 @@ requests:
         - multi-1
         - multi-2
     tests:
-      $.args.foo1: bar
+      $.args.foo1: bar1
       $.args.foo2: { $eq: ["multi-1", "multi-2"] }
 
   post-header-merge-positive:
@@ -232,7 +232,7 @@ requests:
           number: 0123-4567-8910
           available: [18, 22]
     tests:
-      $.data.firstName: Joh
+      $.data.firstName: John
       $.data.age: { $type: number, $eq: 26, $ne: 30, $gt: 25, $lt: 28 }
       $.data.address: { $type: object, $size: 3, $exists: true }
       $.data.address.city: Nara
@@ -253,7 +253,9 @@ requests:
       $.data.lastName: { $exists: true }
       # $.data.middleName: { $exists: true, $type: "null" }
       $.data.middleName: null
-      $.data.otherName: { $exists: false, $type: undefined }
+      $.data.otherName:
+        $tests: 
+          $.: { $exists: true, $type: undefined, $skip: true }
       # stress: ensure corner cases don't crash
       $.data.otherName.value: { $exists: false } # don't recurse down undefined
       $.data.middleName.value: { $exists: false } # don't recurse down null
