@@ -1,4 +1,4 @@
-# yaml-language-server: $schema=../schemas/zzapi-bundle.schema.json
+# yaml-language-server: $schema=../../schemas/zzapi-bundle.schema.json
 
 # This bundle contains a series of test requests against various endpoints,
 # most of them being the postman echo service. We use this to both serve as
