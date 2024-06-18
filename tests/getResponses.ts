@@ -12,12 +12,9 @@ import {
 
 import { RawRequest } from "./utils/requestUtils";
 import { replaceFileContents } from "./utils/fileContents";
+import { getStatusCode } from "./utils/errors";
 
-function getStatusCode(): number {
-  return process.exitCode ?? 0;
-}
-
-function attemptParse(response: ResponseData, expectJson?: boolean): string | undefined {
+function parseBody(response: ResponseData, expectJson?: boolean): string | undefined {
   if (!expectJson || !response.status) return undefined;
   if (!response.body) return "No response body";
 
@@ -89,7 +86,7 @@ export async function runRequestTests(
       json: null,
     };
 
-    const parseError = attemptParse(response, req.expectJson);
+    const parseError = parseBody(response, req.expectJson);
     if (parseError) {
       // fail
       process.exitCode = getStatusCode() + 1;

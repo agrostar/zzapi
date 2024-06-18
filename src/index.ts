@@ -5,6 +5,7 @@ export {
   GotRequest,
   TestResult,
   SpecResult,
+  Tests,
 } from "./models";
 
 export { getRequestPositions, getAllRequestSpecs, getRequestSpec } from "./parseBundle";
