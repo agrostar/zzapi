@@ -56,10 +56,6 @@ export async function runRequestTests(
   rawReq: RawRequest,
 ): Promise<void> {
   const bundlePath = rawReq.bundle.bundlePath;
-  const bundleName = bundlePath.substring(bundlePath.lastIndexOf(path.sep) + 1);
-
-  console.log(`running ${bundleName}`);
-
   for (const name in requests) {
     let fail: boolean = true;
     let message = `${name}: FAIL`;

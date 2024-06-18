@@ -12,7 +12,7 @@ import { getStatusCode } from "./utils/errors";
 //   expect(response.error.length).toBeLessThan(1);
 // });
 
-test("execute tests-bundle.zzb run", async () => {
+test("execute auto-tests.zzb in default env", async () => {
   const rawReq = new RawRequest("./examples/auto-tests.zzb", "default");
   await callRequests(rawReq);
   expect(getStatusCode()).toBe(0);
