@@ -1,0 +1,363 @@
+# yaml-language-server: $schema=../schemas/zzapi-bundle.schema.json
+
+# This bundle contains a series of test requests against various endpoints,
+# most of them being the postman echo service. We use this to both serve as
+# an example of how to create test bundles as well as testing zzapi itself.
+
+common:
+  baseUrl: https://postman-echo.com
+  headers:
+    Content-type: application/json
+  tests:
+    status: 200
+    $h.Content-type: application/json; charset=utf-8
+
+variables:
+  default:
+    username: tom
+    addressVar:
+      streetAddress: 7th street
+      city: Nara
+      postalCode: "560001" # string. This will make a difference when used in the body
+    getUrl: /get
+    fooVar: bar
+    agrostar: https://test-farmerapp.agrostar.in
+    pi: 3.14
+
+requests:
+  simple-get-positive: { method: GET, url: /get }
+
+  get-with-params-positive:
+    method: GET
+    url: /get
+    params:
+      foo1: bar1
+      foo2: bar2
+    tests: # old way of specifying json tests
+      json:
+        $.args.foo1: bar1
+        $.args.foo2: bar2
+
+  get-with-params-no-value-positive:
+    method: GET
+    url: /get
+    params:
+      foo1: bar1
+      foo2:
+    tests: # new way of specifying json
+      $.url: "https://postman-echo.com/get?foo1=bar1&foo2"
+
+  get-with-params-as-array-positive:
+    method: GET
+    url: /get
+    params:
+      - { name: foo1, value: bar1 }
+      - { name: foo2, value: multi-1 }
+      - { name: foo2, value: multi-2 }
+    tests:
+      $.args.foo1: bar1
+      $.args.foo2: { $eq: ["multi-1", "multi-2"] }
+
+  get-with-params-values-as-array-positive:
+    method: GET
+    url: /get
+    params:
+      foo1: bar1
+      foo2:
+        - multi-1
+        - multi-2
+    tests:
+      $.args.foo1: bar
+      $.args.foo2: { $eq: ["multi-1", "multi-2"], $skip: true }
+
+  post-header-merge-positive:
+    url: /post
+    method: POST
+    headers: { X-Custom-Header: Custom Value }
+    body:
+      foo1: bar1
+      foo2: 42
+    tests:
+      $.data.foo1: bar1
+      $.data.foo2: { $type: number, $gt: 41, $lt: 43 }
+
+  post-header-override-positive:
+    url: /post
+    method: POST
+    headers:
+      Content-Type: text/plain
+    body: { foo: bar }
+    tests:
+      # if the server didn't parse this as a JSON, then, our content-type override is successful
+      $.data: '{"foo":"bar"}'
+
+  status-404-positive:
+    url: /notfound
+    method: GET
+    tests:
+      status: 404
+      $h.content-type: { $exists: false }
+
+  status-401-positive:
+    url: /status/401
+    method: GET
+    tests: { status: 401, $.status: 401 }
+
+  encoding-positive:
+    method: GET
+    url: /get
+    params:
+      - { name: foo, value: 30% of 200 is 60 }
+    tests:
+      $.url: https://postman-echo.com/get?foo=30%25%20of%20200%20is%2060
+      $.args.foo: 30% of 200 is 60
+
+  no-encoding-positive:
+    method: GET
+    url: /get
+    params:
+      foo: 30%25+of+200
+    options:
+      rawParams: true
+    tests:
+      $.url: https://postman-echo.com/get?foo=30%25+of+200
+      $.args.foo: 30% of 200
+
+  # The cookies endpoint does a redirect (no clue why), let's use that.
+  no-redirects-positive:
+    method: GET
+    url: /cookies/set
+    tests:
+      status: 302
+      headers: { Location: /cookies, Content-Type: { $ne: application/json } }
+
+  redirects-positive:
+    options:
+      follow: true
+    method: GET
+    url: /cookies/set
+    tests:
+      # code: 200 - this is inherited from common
+      $.cookies: { $exists: true } # Header names are case insensitive
+
+  non-json-positive:
+    method: GET
+    url: /encoding/utf8
+    tests:
+      body: { $regex: unicode demo, $options: i }
+      headers:
+        content-type: text/html; charset=utf-8
+
+  response-headers-positive:
+    method: GET
+    url: /response-headers
+    params: { foo: bar }
+    tests: { $h.foo: bar }
+
+  override-base-url-positive:
+    method: GET
+    url: https://postman-echo.com/get
+
+  variables-in-params-positive:
+    method: GET
+    url: $(getUrl)
+    params:
+      - { name: replaced1, value: $username }
+      - { name: replaced2, value: some$username }
+      - { name: replaced3, value: some$(username)else }
+      - { name: verbatim1, value: $usernameelse }
+      - { name: verbatim2, value: \$(username) }
+    tests:
+      $.args.replaced1: tom
+      $.args.replaced2: some$username
+      $.args.replaced3: sometomelse
+      $.args.verbatim1: { $ne: tomelse, $eq: $usernameelse }
+      $.args.verbatim2: { $ne: \tom, $eq: \$(username) }
+
+  variables-in-headers-positive:
+    method: GET
+    url: $(getUrl)
+    headers:
+      - { name: foo, value: $(fooVar) }
+    tests:
+      $.headers.foo: bar
+
+  variables-in-body-positive:
+    method: POST
+    url: /post
+    body: | # Alternate way of supplying the JSON string or any raw content
+      {
+        "foo1": "$(fooVar)",
+        "foo2": $pi
+      }
+    tests:
+      $.data.foo1: bar
+      $.data.foo2: { $type: number, $eq: 3.14 }
+
+  object-variables-in-body-positive:
+    method: POST
+    url: /post
+    body:
+      name: Tom
+      address: $addressVar
+    tests:
+      $.data.name: Tom
+      $.data.address.postalCode: { $type: string, $eq: "560001" }
+
+  # This returns headers in capital case. Ensure we match it.
+  header-case-positive:
+    method: GET
+    url: $agrostar/userservice/ping/
+    tests:
+      headers:
+        content-type: application/json
+
+  tests-positive:
+    method: POST
+    url: /post
+    body:
+      firstName: John
+      lastName: Doe
+      middleName: null
+      age: 26
+      address:
+        streetAddress: naist street
+        city: Nara
+        postalCode: "560002" #string
+      phoneNumbers:
+        - type: mobile
+          number: 0123-4567-8888
+          available: [7, 22]
+        - type: home
+          number: 0123-4567-8910
+          available: [18, 22]
+    tests:
+      $.data.firstName: Joh
+      $.data.age: { $type: number, $eq: 26, $ne: 30, $gt: 25, $lt: 28 }
+      $.data.address: { $type: object, $size: 3, $exists: true }
+      $.data.address.city: Nara
+      $.data.address.postalCode: { $type: string, $size: 6, $ne: 560034 }
+      $.data.phoneNumbers: { $type: array, $size: 2, $exists: true }
+      $.data.phoneNumbers[0].type: mobile
+      $.data.phoneNumbers.1.type: home
+      $.data.phoneNumbers[?(@.type=="home")].number: 0123-4567-8910
+      $.data.phoneNumbers[*].type: mobile
+      $.data.phoneNumbers[*].available: { $eq: [7, 22] }
+      $.data.phoneNumbers.0.available: { $eq: [7, 22], $type: array }
+      $.data.phoneNumbers.1.available: { $eq: "[18,22]", $type: array }
+      $.data.phoneNumbers.0:
+        $skip: true
+        $tests:
+          $.type: mobile
+          $.number: { $ne: 0123-4567-8910 }
+          $.available: { $eq: [7, 22] }
+      $.data.lastName: { $exists: true }
+      # $.data.middleName: { $exists: true, $type: "null" }
+      $.data.middleName: null
+      $.data.otherName: { $exists: false, $type: undefined }
+      # stress: ensure corner cases don't crash
+      $.data.otherName.value: { $exists: false } # don't recurse down undefined
+      $.data.middleName.value: { $exists: false } # don't recurse down null
+
+  # All these tests should fail
+  tests-negative-response:
+    method: POST
+    url: /post
+    body:
+      age: 26
+      name: John
+      address: 1, example street
+      numbers: [444, 222]
+      object: { foo: bar }
+    tests:
+      status: { $ne: 200 }
+      $h.content-type: { $exists: false }
+      # regular things that should fail
+      $.data.name: { $type: array }
+      $.data.missing: { $size: 0, $exists: true } # should report 2 failures
+      $.data.missing.missing.missing: { $exists: true }
+      $.data.numbers.0: "444" # 444 is not same as "444". We use === for $eq and !== for $neq
+
+      # stress: ensure corner cases don't crash
+      $.data.age: { $size: 2 } # .length not supported for type: number
+      $.data.numbers[?(.@)]: 4 # invalid path
+      $.data.age.something: 55 # jsonpath should take care of this.
+      $.data.numbers[5]: 0 # jsonpath should take care of this
+
+  # This request tests should all fail due to bad tests schema
+  # Ensure we don't crash on these.
+  tests-negative-schema:
+    method: POST
+    url: /post
+    body:
+      address: 1, example street
+      numbers: [444, 222]
+      object: { foo: bar }
+    tests:
+      status: { $ne: 200 }
+      headers:
+        content-type: { $exists: false }
+      # Uncomment the following to run tests. Schema validation makes these invalid.
+      # $.data.operator: { badop: any }  # invalid operator badop. If you want to match an entire object/array, use it as the value of the $eq operator.
+      # $.data.numbers: [444, 222]
+      # $.data.address: { $type: invalid }
+      # $.data.object: { $exists: 4 }
+
+  capture-response-positive:
+    method: POST
+    url: /post
+    body:
+      name: Tom
+      address: { city: Bangalore, pincode: 560002 }
+    setvars:
+      nameVar: $.data.name
+      addressVarNum: $.data.address
+      cityVar: $.data.address.city
+      pincodeVar: $.data.address.pincode
+
+  capture-header-positive:
+    method: GET
+    url: /response-headers
+    params:
+      - { name: X-Custom-Header, value: Custom Header Value }
+    setvars:
+      customHeaderVar: $h.X-Custom-Header
+
+  capture-checks-scalar-positive:
+    method: POST
+    url: /post
+    body:
+      name: $nameVar
+      city: $cityVar
+      pincode: $pincodeVar
+      customHeader: $customHeaderVar
+    tests:
+      $.data.name: Tom
+      $.data.city: Bangalore
+      $.data.pincode: 560002
+      $.data.customHeader: Custom Header Value
+
+  capture-checks-object-option-1-positive:
+    method: POST
+    url: /post
+    # The body is a string, so that we can use the JSON as is in the replacement
+    # Therefore, it is NOT "$addressVar"
+    body: |
+      {
+        "name": "Tom",
+        "address": $addressVarNum
+      }
+    tests:
+      $.data.name: Tom
+      $.data.address.city: Bangalore
+      $.data.address.pincode: 560002 # this time it is NOT a string.
+
+  capture-checks-object-option-2-positive:
+    method: POST
+    url: /post
+    body:
+      name: Tom
+      address: $addressVarNum
+    tests:
+      $.data.name: Tom
+      $.data.address: { $eq: { city: Bangalore, pincode: 560002 } }
