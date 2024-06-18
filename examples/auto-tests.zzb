@@ -68,7 +68,7 @@ requests:
         - multi-2
     tests:
       $.args.foo1: bar
-      $.args.foo2: { $eq: ["multi-1", "multi-2"], $skip: true }
+      $.args.foo2: { $eq: ["multi-1", "multi-2"] }
 
   post-header-merge-positive:
     url: /post
@@ -246,7 +246,6 @@ requests:
       $.data.phoneNumbers.0.available: { $eq: [7, 22], $type: array }
       $.data.phoneNumbers.1.available: { $eq: "[18,22]", $type: array }
       $.data.phoneNumbers.0:
-        $skip: true
         $tests:
           $.type: mobile
           $.number: { $ne: 0123-4567-8910 }
