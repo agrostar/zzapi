@@ -1,5 +1,3 @@
-import path from "path";
-
 import {
   RequestSpec,
   ResponseData,
@@ -13,6 +11,7 @@ import {
 import { RawRequest } from "./utils/requestUtils";
 import { replaceFileContents } from "./utils/fileContents";
 import { getStatusCode } from "./utils/errors";
+
 import { compareReqAndResp } from "./runTests";
 
 function parseBody(response: ResponseData, expectJson?: boolean): string | undefined {
