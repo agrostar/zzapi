@@ -97,7 +97,7 @@ function getNumTests(tests: Tests) {
   if (tests.status) numTests += 1;
   if (tests.headers) numTests += Object.keys(tests.headers).length;
 
-  function getJSONTests(json: { [key: string]: any }): number {
+  function getNumJSON(json: { [key: string]: any }): number {
     let count = 0;
     for (const key in json) {
       const assertion = json[key];
@@ -115,7 +115,7 @@ function getNumTests(tests: Tests) {
     return count;
   }
 
-  if (tests.json) numTests += getJSONTests(tests.json);
+  if (tests.json) numTests += getNumJSON(tests.json);
 
   return numTests;
 }
