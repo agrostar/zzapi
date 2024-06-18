@@ -1,0 +1,9 @@
+# to ensure that the module is reading from varfiles, we put some essential
+# variables in the varfiles
+
+default: 
+  getUrl: /get
+  fooVar: bar
+random:
+  getUrl: /random
+  fooVar: random 

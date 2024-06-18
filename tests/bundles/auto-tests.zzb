@@ -19,8 +19,6 @@ variables:
       streetAddress: 7th street
       city: Nara
       postalCode: "560001" # string. This will make a difference when used in the body
-    getUrl: /get
-    fooVar: bar
     agrostar: https://test-farmerapp.agrostar.in
     pi: 3.14
 
