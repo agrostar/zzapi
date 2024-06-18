@@ -3,7 +3,7 @@ import { Tests } from "../src/index";
 
 function formatTestResult(res: TestResult, spec: string, skip?: boolean): string {
   const status =
-    (skip || res.pass ? " ✓ " : " ✗ ") +
+    (skip || res.pass ? "✓ " : "✗ ") +
     ("test " + spec + " ") +
     (res.op === ":" ? "$eq" : res.op) +
     " " +
@@ -60,7 +60,7 @@ function allPositive(res: SpecResult, numTests: number): string[] {
   const errors: string[] = [];
 
   const [passed, all] = getResultData(res);
-  if (all !== numTests) errors.push(`expected ${numTests} tests, got ${all}\n`);
+  if (all !== numTests) errors.push(`expected ${numTests} tests, got ${all}`);
 
   if (passed === all) return errors;
 

@@ -16,7 +16,7 @@ async function runRequestSpecs(
   for (const name in requests) {
     const request = requests[name];
 
-    const autoHeaders: { [key: string]: string } = { "user-agent": "zzAPI-cli/" + CLI_VERSION };
+    const autoHeaders: { [key: string]: string } = { "user-agent": "zzAPI-test" };
     if (request.httpRequest.body && typeof request.httpRequest.body == "object")
       autoHeaders["content-type"] = "application/json";
 

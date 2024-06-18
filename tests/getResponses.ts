@@ -61,7 +61,8 @@ export async function runRequestTests(
   console.log(`running ${bundleName}`);
 
   for (const name in requests) {
-    let message = `${name}: `;
+    let fail: boolean = true;
+    let message = `${name}: FAIL`;
 
     const req: RequestSpec = requests[name];
     req.httpRequest.body = replaceFileContents(req.httpRequest.body, bundlePath);
@@ -77,7 +78,7 @@ export async function runRequestTests(
     } = await executeGotRequest(httpRequest);
 
     if (error) {
-      message += `FAIL\n${BULLET} error executing request: ${error}`;
+      message += `\n${BULLET} error executing request: ${error}`;
       console.log(message + "\n");
       process.exitCode = getStatusCode() + 1;
       continue;
@@ -94,7 +95,7 @@ export async function runRequestTests(
 
     const parseError = parseBody(response, req.expectJson);
     if (parseError) {
-      message += `FAIL\n${BULLET} unable to parse body: ${parseError}`;
+      message += `\n${BULLET} unable to parse body: ${parseError}`;
       console.log(message + "\n");
       process.exitCode = getStatusCode() + 1;
       continue;
@@ -103,12 +104,11 @@ export async function runRequestTests(
     const results = runAllTests(req.tests, response, req.options.stopOnFailure);
     const errors = compareReqAndResp(req, results);
     if (errors.length > 0) {
-      message += " FAIL";
       process.exitCode = getStatusCode() + errors.length;
 
-      message = [message, ...errors].join(`\n${BULLET}`);
+      message = [message, ...errors].join(`\n${BULLET} `);
     } else {
-      message += " SUCCESS";
+      fail = false;
     }
 
     const { capturedVars, captureErrors } = captureVariables(req, response);
@@ -118,7 +118,8 @@ export async function runRequestTests(
 
     if (undefs.length > 0) 
       message = message + "\nWARNING: undefined vars - " + undefs.join(","); 
-
-    console.log(message + "\n");
+    
+    if (fail)
+      console.log(message + "\n");
   }
 }
