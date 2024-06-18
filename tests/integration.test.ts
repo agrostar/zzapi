@@ -13,7 +13,7 @@ import { getStatusCode } from "./utils/errors";
 // });
 
 test("execute tests-bundle.zzb run", async () => {
-    const rawReq = new RawRequest("./examples/auto-tests.zzb", "default");
-    await callRequests(rawReq);
-    expect(getStatusCode()).toBe(0);
+  const rawReq = new RawRequest("./examples/auto-tests.zzb", "default");
+  await callRequests(rawReq);
+  expect(getStatusCode()).toBe(0);
 });

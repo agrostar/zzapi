@@ -2,11 +2,10 @@ import { RequestSpec, SpecResult, TestResult } from "../src/index";
 import { Tests } from "../src/index";
 
 function convertToString(item: any): string {
-    if (item === null) return "null";
-    if (item === undefined) return "undefined";
-    if (typeof item === "object") return JSON.stringify(item);
-    return item.toString();
-
+  if (item === null) return "null";
+  if (item === undefined) return "undefined";
+  if (typeof item === "object") return JSON.stringify(item);
+  return item.toString();
 }
 
 function formatTestResult(res: TestResult, spec: string | null, skip?: boolean): string {
@@ -16,10 +15,10 @@ function formatTestResult(res: TestResult, spec: string | null, skip?: boolean):
     (res.op === ":" ? "$eq" : res.op) +
     " " +
     convertToString(res.expected);
-    if (res.pass) return status;
-    if (skip) return status + " (skipped)";
-    
-    return status + " | actual " + res.received + (res.message ? `[${res.message}]` : "");
+  if (res.pass) return status;
+  if (skip) return status + " (skipped)";
+
+  return status + " | actual " + res.received + (res.message ? `[${res.message}]` : "");
 }
 
 function getResultData(res: SpecResult): [number, number] {
@@ -39,29 +38,28 @@ function getResultData(res: SpecResult): [number, number] {
 }
 
 function allNegative(res: SpecResult, numTests: number): string[] {
-    const errors: string[] = [];
-    
-    const [passed, all] = getResultData(res);
-    if (all !== numTests) errors.push(`expected ${numTests} tests, got ${all}\n`);
-    
-    if (passed === 0) return errors;
-    
-    function getPassingTests(res: SpecResult, spec: string): string[] {
-        const passingTests: string[] = [];
-        if (res.skipped) return passingTests;
-    
-        const rootPassing = res.results.filter((r) => r.pass);
-        passingTests.push(...rootPassing.map((r) => formatTestResult(r, spec, false)));
-    
-        spec += " > " + res.spec ?? "";
-        for (const s of res.subResults) 
-        passingTests.push(...getPassingTests(s, spec));
-    
-        return passingTests;    
-    }
-    
-    errors.push(...getPassingTests(res, res.spec ?? ""));
-    return errors;
+  const errors: string[] = [];
+
+  const [passed, all] = getResultData(res);
+  if (all !== numTests) errors.push(`expected ${numTests} tests, got ${all}\n`);
+
+  if (passed === 0) return errors;
+
+  function getPassingTests(res: SpecResult, spec: string): string[] {
+    const passingTests: string[] = [];
+    if (res.skipped) return passingTests;
+
+    const rootPassing = res.results.filter((r) => r.pass);
+    passingTests.push(...rootPassing.map((r) => formatTestResult(r, spec, false)));
+
+    spec += " > " + res.spec ?? "";
+    for (const s of res.subResults) passingTests.push(...getPassingTests(s, spec));
+
+    return passingTests;
+  }
+
+  errors.push(...getPassingTests(res, res.spec ?? ""));
+  return errors;
 }
 
 function allPositive(res: SpecResult, numTests: number): string[] {
@@ -80,10 +78,9 @@ function allPositive(res: SpecResult, numTests: number): string[] {
     failingTests.push(...rootFailing.map((r) => formatTestResult(r, spec, false)));
 
     spec = (spec ? spec + " > " : "") + (res.spec ?? "");
-    for (const s of res.subResults) 
-      failingTests.push(...getFailingTests(s, spec));
+    for (const s of res.subResults) failingTests.push(...getFailingTests(s, spec));
 
-    return failingTests;    
+    return failingTests;
   }
 
   errors.push(...getFailingTests(res, res.spec ?? ""));
@@ -95,45 +92,38 @@ const TEST_CLAUSE = "$tests";
 const NON_TEST_KEYS = ["$options", TEST_CLAUSE, SKIP_CLAUSE];
 
 function getNumTests(tests: Tests) {
-    let numTests = 0;
-    if (tests.body) numTests += 1;
-    if (tests.status) numTests += 1;
-    if (tests.headers) 
-        numTests += Object.keys(tests.headers).length;
+  let numTests = 0;
+  if (tests.body) numTests += 1;
+  if (tests.status) numTests += 1;
+  if (tests.headers) numTests += Object.keys(tests.headers).length;
 
-    function getJSONTests(json: { [key: string]: any }): number {
-        let count = 0;
-        for (const key in json) {
-            const assertion = json[key];
-            if (assertion === null || typeof assertion !== "object") {
-                count += 1;
-                continue;
-            }
+  function getJSONTests(json: { [key: string]: any }): number {
+    let count = 0;
+    for (const key in json) {
+      const assertion = json[key];
+      if (assertion === null || typeof assertion !== "object") {
+        count += 1;
+        continue;
+      }
+      if (assertion[SKIP_CLAUSE]) continue;
 
-            if (assertion[SKIP_CLAUSE]) continue;
-            const testKeys = Object.keys(assertion);
-
-            count += testKeys.filter((k) => !(NON_TEST_KEYS.includes(k))).length;
-            if (testKeys.includes(TEST_CLAUSE)) 
-                count += getNumTests(assertion[TEST_CLAUSE]);
-        }
-
-        return count;
+      const testKeys = Object.keys(assertion);
+      if (testKeys.includes(TEST_CLAUSE)) count += getNumTests(assertion[TEST_CLAUSE]);
+      count += testKeys.filter((k) => !NON_TEST_KEYS.includes(k)).length;
     }
 
-    if (tests.json) 
-        numTests += getJSONTests(tests.json);
+    return count;
+  }
 
-    return numTests;
-    
+  if (tests.json) numTests += getJSONTests(tests.json);
+
+  return numTests;
 }
 
 export function compareReqAndResp(req: RequestSpec, res: SpecResult) {
-    const numTests = getNumTests(req.tests);
-    if (req.name.includes("positive"))
-        return allPositive(res, numTests);
-    else if (req.name.includes("negative"))
-        return allNegative(res, numTests);
+  const numTests = getNumTests(req.tests);
+  if (req.name.includes("positive")) return allPositive(res, numTests);
+  else if (req.name.includes("negative")) return allNegative(res, numTests);
 
-    return ["not a valid test type for automated tests"];
+  return ["not a valid test type for automated tests"];
 }

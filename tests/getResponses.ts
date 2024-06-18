@@ -113,13 +113,10 @@ export async function runRequestTests(
 
     const { capturedVars, captureErrors } = captureVariables(req, response);
     rawReq.variables.mergeCapturedVariables(capturedVars);
-    if (captureErrors) 
-      message = message + "\nWARNING: " + captureErrors;
+    if (captureErrors) message = message + "\nWARNING: " + captureErrors;
 
-    if (undefs.length > 0) 
-      message = message + "\nWARNING: undefined vars - " + undefs.join(","); 
-    
-    if (fail)
-      console.log(message + "\n");
+    if (undefs.length > 0) message = message + "\nWARNING: undefined vars - " + undefs.join(",");
+
+    if (fail) console.log(message + "\n");
   }
 }
