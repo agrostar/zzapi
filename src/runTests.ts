@@ -255,11 +255,7 @@ function testRecursiveTests(
 }
 
 function getType(data: any): string {
-  if (data === null) {
-    return "null";
-  } else if (Array.isArray(data)) {
-    return "array";
-  } else {
-    return typeof data;
-  }
+  if (data === null) return "null";
+  if (Array.isArray(data)) return "array";
+  return typeof data;
 }
