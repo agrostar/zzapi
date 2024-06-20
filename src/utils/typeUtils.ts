@@ -21,7 +21,7 @@ export function getStringIfNotScalar(data: any): Exclude<any, object> {
 
 export function getStringValueIfDefined<
   T extends undefined | Exclude<any, undefined>,
-  R = T extends undefined ? undefined : string
+  R = T extends undefined ? undefined : string,
 >(value: T): R {
   if (typeof value === "undefined") return undefined as R;
   if (typeof value === "object") return JSON.stringify(value) as R; // handles dicts, arrays, null, date (all obj)

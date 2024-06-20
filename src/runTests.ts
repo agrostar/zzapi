@@ -14,7 +14,7 @@ export function runAllTests(
   responseData: ResponseData,
   stopOnFailure: boolean,
   rootSpec: string | null = null,
-  skip?: boolean
+  skip?: boolean,
 ): SpecResult {
   const res: SpecResult = { spec: rootSpec, results: [], subResults: [] };
   if (!tests) return res;
@@ -93,7 +93,7 @@ function runObjectTests(
   opVals: { [key: string]: any },
   receivedObject: any,
   spec: string,
-  skip?: boolean
+  skip?: boolean,
 ): SpecResult {
   let objRes: SpecResult = { spec, results: [], subResults: [] };
   if (skip || opVals[SKIP_CLAUSE]) objRes.skipped = true;
@@ -150,7 +150,7 @@ function runObjectTests(
         receivedObject,
         spec,
         op,
-        objRes.skipped ?? false
+        objRes.skipped ?? false,
       );
       objRes.results.push(...res.results);
       objRes.subResults.push(...res.subResults);
@@ -180,8 +180,8 @@ function testSize(expectedObject: any, receivedObject: any, spec: string, op: st
     typeof receivedObject === "object"
       ? Object.keys(receivedObject).length
       : typeof receivedObject === "string" || Array.isArray(receivedObject)
-      ? receivedObject.length
-      : undefined;
+        ? receivedObject.length
+        : undefined;
 
   const received: Exclude<any, object> = getStringIfNotScalar(receivedObject);
   const expected: Exclude<any, object> = getStringIfNotScalar(expectedObject);
@@ -223,7 +223,7 @@ function testRecursiveTests(
   receivedObject: any,
   spec: string,
   op: string,
-  skip: boolean
+  skip: boolean,
 ): SpecResult {
   const res: SpecResult = { spec, results: [], subResults: [] };
 
