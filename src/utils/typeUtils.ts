@@ -14,14 +14,14 @@ export function getDescriptiveType(obj: any): string {
   return typeof obj;
 }
 
-export function getStringIfNotScalar(data: any) {
+export function getStringIfNotScalar(data: any): Exclude<any, object> {
   if (typeof data !== "object") return data;
   return JSON.stringify(data);
 }
 
 export function getStringValueIfDefined<
   T extends undefined | Exclude<any, undefined>,
-  R = T extends undefined ? undefined : string,
+  R = T extends undefined ? undefined : string
 >(value: T): R {
   if (typeof value === "undefined") return undefined as R;
   if (typeof value === "object") return JSON.stringify(value) as R; // handles dicts, arrays, null, date (all obj)
