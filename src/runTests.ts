@@ -2,7 +2,7 @@ import jp from "jsonpath";
 
 import { getStringIfNotScalar, isDict } from "./utils/typeUtils";
 
-import { Tests, ResponseData, Assertion, SpecResult } from "./models";
+import { Tests, ResponseData, Assertion, SpecResult, TestResult } from "./models";
 import { mergePrefixBasedTests } from "./mergeData";
 
 function hasFailure(res: SpecResult): boolean {
@@ -14,7 +14,7 @@ export function runAllTests(
   responseData: ResponseData,
   stopOnFailure: boolean,
   rootSpec: string | null = null,
-  skip?: boolean,
+  skip?: boolean
 ): SpecResult {
   const res: SpecResult = { spec: rootSpec, results: [], subResults: [] };
   if (!tests) return res;
@@ -86,18 +86,20 @@ function getValueForJSONTests(responseContent: object, key: string): any {
   }
 }
 
+const SKIP_CLAUSE = "$skip", OPTIONS_CLAUSE = "$options";
+
 function runObjectTests(
   opVals: { [key: string]: any },
   receivedObject: any,
   spec: string,
-  skip?: boolean,
+  skip?: boolean
 ): SpecResult {
   let objRes: SpecResult = { spec, results: [], subResults: [] };
-  if (skip || opVals["$skip"]) objRes.skipped = true;
+  if (skip || opVals[SKIP_CLAUSE]) objRes.skipped = true;
 
   for (const op in opVals) {
-    let expected = getStringIfNotScalar(opVals[op]);
-    let received = getStringIfNotScalar(receivedObject);
+    let expected: Exclude<any, object> = getStringIfNotScalar(opVals[op]);
+    let received: Exclude<any, object> = getStringIfNotScalar(receivedObject);
 
     let pass = false;
     let message = "";
@@ -114,28 +116,10 @@ function runObjectTests(
     } else if (op === "$gte") {
       pass = receivedObject >= expected;
     } else if (op === "$size") {
-      let receivedLen: number | undefined = undefined;
-      if (typeof receivedObject === "object") {
-        receivedLen = Object.keys(receivedObject).length;
-      } else if (typeof receivedObject === "string" || Array.isArray(receivedObject)) {
-        receivedLen = receivedObject.length;
-      }
-      if (typeof expected === "number") {
-        pass = receivedLen === expected;
-      } else {
-        try {
-          expected = JSON.parse(expected);
-
-          // the spec remains the same, so we add it to the current layer
-          const res = runObjectTests(expected, receivedLen, spec);
-          objRes.results.push(...res.results);
-          objRes.subResults.push(...res.subResults);
-          continue;
-        } catch (err: any) {
-          pass = false;
-          message = `$size val is not num or valid JSON`;
-        }
-      }
+      const res: SpecResult = testSize(opVals[op], receivedObject, spec, op);
+      objRes.results.push(...res.results);
+      objRes.subResults.push(...res.subResults);
+      continue;
     } else if (op === "$exists") {
       const exists = received !== undefined;
       pass = exists === expected;
@@ -144,7 +128,7 @@ function runObjectTests(
       pass = expected === receivedType;
       received = `${received} (type ${receivedType})`;
     } else if (op === "$regex") {
-      const options = opVals["$options"];
+      const options = opVals[OPTIONS_CLAUSE];
       const regex = new RegExp(expected, options);
       try {
         pass = typeof received === "string" && regex.test(received);
@@ -157,7 +141,7 @@ function runObjectTests(
       pass = typeof received === "string" && received.endsWith(expected);
     } else if (op === "$co") {
       pass = typeof received === "string" && received.includes(expected);
-    } else if (op === "$options") {
+    } else if (op === OPTIONS_CLAUSE) {
       continue; // do nothing. $regex will address it.
     } else if (op === "$tests") {
       const recursiveTests = opVals[op];
@@ -181,7 +165,7 @@ function runObjectTests(
         objRes.subResults.push(...res.subResults);
         continue;
       }
-    } else if (op === "$skip") {
+    } else if (op === SKIP_CLAUSE) {
       continue; // do nothing. If it wasn't already addressed, that means the test is not to be skipped.
     } else {
       objRes.results.push({
@@ -197,6 +181,50 @@ function runObjectTests(
   }
 
   return objRes;
+}
+
+function testSize(expectedObject: any, receivedObject: any, spec: string, op: string): SpecResult {
+  const res: SpecResult = { spec, results: [], subResults: [] };
+
+  const receivedLen: number | undefined =
+    typeof receivedObject === "object"
+      ? Object.keys(receivedObject).length
+      : typeof receivedObject === "string" || Array.isArray(receivedObject)
+      ? receivedObject.length
+      : undefined;
+
+  const received: Exclude<any, object> = getStringIfNotScalar(receivedObject);
+  const expected: Exclude<any, object> = getStringIfNotScalar(expectedObject);
+  if (typeof expectedObject === "number") {
+    const compResult: TestResult = {
+      pass: expected === receivedLen,
+      op: op,
+      expected: expected,
+      received: received,
+    };
+    res.results.push(compResult);
+    return res;
+  }
+
+  if (isDict(expectedObject)) {
+    // the spec remains the same, so we add it to the current layer
+    const compRes: SpecResult = runObjectTests(expectedObject, receivedLen, spec);
+    res.results.push(...compRes.results);
+    res.subResults.push(...compRes.subResults);
+
+    return res;
+  }
+
+  const compResult: TestResult = {
+    pass: false,
+    op: op,
+    expected: expected,
+    received: received,
+    message: "value for $size is not a number or valid JSON",
+  };
+  res.results.push(compResult);
+
+  return res;
 }
 
 function getType(data: any): string {
