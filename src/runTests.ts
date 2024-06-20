@@ -86,7 +86,8 @@ function getValueForJSONTests(responseContent: object, key: string): any {
   }
 }
 
-const SKIP_CLAUSE = "$skip", OPTIONS_CLAUSE = "$options";
+const SKIP_CLAUSE = "$skip",
+  OPTIONS_CLAUSE = "$options";
 
 function runObjectTests(
   opVals: { [key: string]: any },
@@ -144,27 +145,16 @@ function runObjectTests(
     } else if (op === OPTIONS_CLAUSE) {
       continue; // do nothing. $regex will address it.
     } else if (op === "$tests") {
-      const recursiveTests = opVals[op];
-
-      if (!isDict(recursiveTests)) {
-        pass = false;
-        message = "recursive tests must be dicts";
-      } else {
-        mergePrefixBasedTests(recursiveTests);
-        const receivedObj: ResponseData = {
-          executionTime: 0,
-          body: "",
-          rawHeaders: "",
-          headers: {},
-          json: receivedObject,
-        };
-
-        // the spec remains the same, so we add it to the current layer
-        const res = runAllTests(recursiveTests, receivedObj, false, spec, objRes.skipped);
-        objRes.results.push(...res.results);
-        objRes.subResults.push(...res.subResults);
-        continue;
-      }
+      const res: SpecResult = testRecursiveTests(
+        opVals[op],
+        receivedObject,
+        spec,
+        op,
+        objRes.skipped ?? false
+      );
+      objRes.results.push(...res.results);
+      objRes.subResults.push(...res.subResults);
+      continue;
     } else if (op === SKIP_CLAUSE) {
       continue; // do nothing. If it wasn't already addressed, that means the test is not to be skipped.
     } else {
@@ -195,6 +185,7 @@ function testSize(expectedObject: any, receivedObject: any, spec: string, op: st
 
   const received: Exclude<any, object> = getStringIfNotScalar(receivedObject);
   const expected: Exclude<any, object> = getStringIfNotScalar(expectedObject);
+
   if (typeof expectedObject === "number") {
     const compResult: TestResult = {
       pass: expected === receivedLen,
@@ -223,6 +214,42 @@ function testSize(expectedObject: any, receivedObject: any, spec: string, op: st
     message: "value for $size is not a number or valid JSON",
   };
   res.results.push(compResult);
+
+  return res;
+}
+
+function testRecursiveTests(
+  expectedObject: any,
+  receivedObject: any,
+  spec: string,
+  op: string,
+  skip: boolean
+): SpecResult {
+  const res: SpecResult = { spec, results: [], subResults: [] };
+
+  const expected: Exclude<any, object> = getStringIfNotScalar(expectedObject);
+  const received: Exclude<any, object> = getStringIfNotScalar(receivedObject);
+
+  const recursiveTests = expectedObject;
+  if (!isDict(recursiveTests)) {
+    const compResult: TestResult = {
+      pass: false,
+      op: op,
+      expected: expected,
+      received: received,
+      message: "recursive tests must be dicts",
+    };
+    res.results.push(compResult);
+
+    return res;
+  }
+
+  mergePrefixBasedTests(recursiveTests);
+
+  // the spec remains the same, so we add it to the current layer
+  const compRes = runObjectTests(recursiveTests.json, receivedObject, spec, skip);
+  res.results.push(...compRes.results);
+  res.subResults.push(...compRes.subResults);
 
   return res;
 }
