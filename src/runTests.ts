@@ -177,7 +177,7 @@ function testSize(expectedObject: any, receivedObject: any, spec: string, op: st
   const res: SpecResult = { spec, results: [], subResults: [] };
 
   const receivedLen: number | undefined =
-    typeof receivedObject === "object"
+    typeof receivedObject === "object" && receivedObject !== null
       ? Object.keys(receivedObject).length
       : typeof receivedObject === "string" || Array.isArray(receivedObject)
         ? receivedObject.length
@@ -194,6 +194,7 @@ function testSize(expectedObject: any, receivedObject: any, spec: string, op: st
       received: received,
     };
     res.results.push(compResult);
+
     return res;
   }
 
