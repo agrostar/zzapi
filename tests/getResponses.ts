@@ -9,7 +9,6 @@ import {
 } from "../src/index";
 
 import { RawRequest } from "./utils/requestUtils";
-import { replaceFileContents } from "./utils/fileContents";
 import { getStatusCode } from "./utils/errors";
 
 import { compareReqAndResp } from "./runTests";
@@ -60,8 +59,6 @@ export async function runRequestTests(
     let message = `${name}: FAIL`;
 
     const req: RequestSpec = requests[name];
-    req.httpRequest.body = replaceFileContents(req.httpRequest.body, bundlePath);
-
     const undefs = replaceVariablesInRequest(req, rawReq.variables.getAllVariables());
 
     const httpRequest = constructGotRequest(req);
