@@ -122,8 +122,6 @@ function getNumTests(tests: Tests) {
 
 export function compareReqAndResp(req: RequestSpec, res: SpecResult) {
   const numTests = getNumTests(req.tests);
-  if (req.name.includes("positive")) return allPositive(res, numTests);
-  else if (req.name.includes("negative")) return allNegative(res, numTests);
-
-  return ["not a valid test type for automated tests"];
+  if (req.name.includes("negative")) return allNegative(res, numTests);
+  return allPositive(res, numTests);
 }
