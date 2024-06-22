@@ -11,7 +11,7 @@ function convertToString(item: any): string {
 function formatTestResult(res: TestResult, spec: string | null, skip?: boolean): string {
   const status =
     (skip || res.pass ? "✓ " : "✗ ") +
-    ("test " + (spec ?? "") + " ") +
+    ("test " + spec + " ") +
     (res.op === ":" ? "$eq" : res.op) +
     " " +
     convertToString(res.expected);
@@ -52,8 +52,7 @@ function allNegative(res: SpecResult, numTests: number): string[] {
     const rootPassing = res.results.filter((r) => r.pass);
     passingTests.push(...rootPassing.map((r) => formatTestResult(r, spec, false)));
 
-    spec += " > " + res.spec ?? "";
-    for (const s of res.subResults) passingTests.push(...getPassingTests(s, spec));
+    for (const s of res.subResults) passingTests.push(...getPassingTests(s, spec + " > " + s.spec));
 
     return passingTests;
   }
@@ -77,8 +76,7 @@ function allPositive(res: SpecResult, numTests: number): string[] {
     const rootFailing = res.results.filter((r) => !r.pass);
     failingTests.push(...rootFailing.map((r) => formatTestResult(r, spec, false)));
 
-    spec = (spec ? spec + " > " : "") + (res.spec ?? "");
-    for (const s of res.subResults) failingTests.push(...getFailingTests(s, spec));
+    for (const s of res.subResults) failingTests.push(...getFailingTests(s, spec + " > " + s.spec));
 
     return failingTests;
   }

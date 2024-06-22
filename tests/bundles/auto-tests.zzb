@@ -166,7 +166,7 @@ requests:
       - { name: verbatim1, value: $usernameelse }
       - { name: verbatim2, value: \$(username) }
     tests:
-      $.args.replaced1: tom
+      $.args.replaced1: to
       $.args.replaced2: some$username
       $.args.replaced3: sometomelse
       $.args.verbatim1: { $ne: tomelse, $eq: $usernameelse }
@@ -178,7 +178,7 @@ requests:
     headers:
       - { name: foo, value: $(fooVar) }
     tests:
-      $.headers.foo: bar
+      $.headers.foo: ba
 
   variables-in-body-positive:
     method: POST
