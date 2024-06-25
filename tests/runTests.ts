@@ -118,6 +118,7 @@ function getNumTests(tests: Tests) {
   return numTests;
 }
 
+// TODO. also introduce skipped -> ensure nothing negative or failure
 export function compareReqAndResp(req: RequestSpec, res: SpecResult) {
   const numTests = getNumTests(req.tests);
   if (req.name.includes("negative")) return allNegative(res, numTests);
