@@ -5,6 +5,10 @@ import { getStringIfNotScalar, isDict } from "./utils/typeUtils";
 import { Tests, ResponseData, Assertion, SpecResult, TestResult } from "./models";
 import { mergePrefixBasedTests } from "./mergeData";
 
+const SKIP_CLAUSE = "$skip",
+  OPTIONS_CLAUSE = "$options",
+  MULTI_CLAUSE = "multi";
+
 function hasFailure(res: SpecResult): boolean {
   return res.results.some((r) => !r.pass) || res.subResults.some(hasFailure);
 }
@@ -14,7 +18,7 @@ export function runAllTests(
   responseData: ResponseData,
   stopOnFailure: boolean,
   rootSpec: string | null = null,
-  skip?: boolean,
+  skip?: boolean
 ): SpecResult {
   const res: SpecResult = { spec: rootSpec, results: [], subResults: [] };
   if (!tests) return res;
@@ -37,10 +41,14 @@ export function runAllTests(
   }
 
   for (const spec in tests.json) {
-    let expected = tests.json[spec],
-      received;
+    const expected = tests.json[spec];
+    let received;
     try {
-      received = getValueForJSONTests(responseData.json, spec);
+      received = getValueForJSONTests(
+        responseData.json,
+        spec,
+        typeof expected === "object" && expected !== null && expected[MULTI_CLAUSE]
+      );
     } catch (err: any) {
       res.subResults.push({
         spec,
@@ -78,9 +86,9 @@ function runTest(spec: string, expected: Assertion, received: any, skip?: boolea
   return { spec, skipped: skip, results: [{ pass, expected, received, op: ":" }], subResults: [] };
 }
 
-function getValueForJSONTests(responseContent: object, key: string): any {
+function getValueForJSONTests(responseContent: object, key: string, multi?: boolean): any {
   try {
-    return jp.value(responseContent, key);
+    return multi ? jp.query(responseContent, key) : jp.value(responseContent, key);
   } catch (err: any) {
     throw new Error(`Error while evaluating JSONPath ${key}: ${err.description || err.message || err}`);
   }
@@ -92,16 +100,13 @@ function getType(data: any): string {
   return typeof data;
 }
 
-const SKIP_CLAUSE = "$skip",
-  OPTIONS_CLAUSE: string = "$options";
-
 const tests: {
   [name: string]: (
     expectedObj: any,
     receivedObj: any,
     spec: string,
     op: string,
-    options: { [key: string]: any },
+    options: { [key: string]: any }
   ) => SpecResult;
 } = {
   $eq: function (expectedObj, receivedObj, spec, op, options): SpecResult {
@@ -165,8 +170,8 @@ const tests: {
       typeof receivedObj === "object" && receivedObj !== null
         ? Object.keys(receivedObj).length
         : typeof receivedObj === "string" || Array.isArray(receivedObj)
-          ? receivedObj.length
-          : undefined;
+        ? receivedObj.length
+        : undefined;
 
     const received: Exclude<any, object> = getStringIfNotScalar(receivedObj);
     const expected: Exclude<any, object> = getStringIfNotScalar(expectedObj);
@@ -290,6 +295,13 @@ const tests: {
       results: [],
     };
   },
+  [MULTI_CLAUSE]: function (expectedObj, receivedObj, spec, op, options): SpecResult {
+    return {
+      spec,
+      subResults: [],
+      results: [],
+    };
+  },
   $tests: function (expectedObj, receivedObj, spec, op, options): SpecResult {
     const res: SpecResult = { spec, results: [], subResults: [] };
 
@@ -325,7 +337,7 @@ export function runObjectTests(
   opVals: { [key: string]: any },
   receivedObject: any,
   spec: string,
-  skip?: boolean,
+  skip?: boolean
 ): SpecResult {
   const objRes: SpecResult = {
     spec,
