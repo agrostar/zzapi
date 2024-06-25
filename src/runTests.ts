@@ -176,7 +176,7 @@ const tests: {
         pass: expected === receivedLen,
         op: op,
         expected: expected,
-        received: received,
+        received: `(length: ${receivedLen}) -> ${received}`,
       };
       res.results.push(compResult);
 
