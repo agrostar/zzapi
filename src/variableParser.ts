@@ -59,7 +59,7 @@ export function loadVariables(
   bundleContent: string | undefined,
   varFileContents: string[],
 ): Variables {
-  if (!envName) return { vars: {}, undefinedVars: [] };
+  if (!envName) return {};
 
   const allBundleVariables = getBundleVariables(bundleContent);
   const bundleVars: Variables = allBundleVariables[envName] ?? {};
@@ -71,7 +71,7 @@ export function loadVariables(
   });
 
   const basicVars = Object.assign({}, envVars, bundleVars);
-  const { replacedVars: vars, undefinedVars } = replaceEnvironmentVariables(basicVars);
+  const vars = replaceEnvironmentVariables(basicVars);
 
-  return { vars, undefinedVars };
+  return vars;
 }
