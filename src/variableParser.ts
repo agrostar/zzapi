@@ -38,34 +38,27 @@ export function getEnvironments(bundleContent: string | undefined, varFileConten
   return [...uniqueNames];
 }
 
-function replaceEnvironmentVariables(vars: Variables): {
-  replacedVars: Variables;
-  undefinedVars: string[];
-} {
+function replaceEnvironmentVariables(vars: Variables): Variables {
   const PREFIX = "$env.";
 
-  const undefinedVars: string[] = [];
   const getVal = (val: any): any => {
     if (typeof val !== "string" || !val.startsWith(PREFIX)) return val;
 
     const envVarName = val.slice(PREFIX.length);
-    if (envVarName in process.env) return process.env[envVarName];
-
-    undefinedVars.push(val);
-    return val;
+    return envVarName in process.env ? process.env[envVarName] : val;
   };
 
   const replacedVars: Variables = {};
   for (const key in vars) replacedVars[key] = getVal(vars[key]);
 
-  return { replacedVars, undefinedVars };
+  return replacedVars;
 }
 
 export function loadVariables(
   envName: string | undefined,
   bundleContent: string | undefined,
   varFileContents: string[],
-): { vars: Variables; undefinedVars: string[] } {
+): Variables {
   if (!envName) return { vars: {}, undefinedVars: [] };
 
   const allBundleVariables = getBundleVariables(bundleContent);
