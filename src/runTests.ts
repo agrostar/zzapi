@@ -18,7 +18,7 @@ export function runAllTests(
   responseData: ResponseData,
   stopOnFailure: boolean,
   rootSpec: string | null = null,
-  skip?: boolean
+  skip?: boolean,
 ): SpecResult {
   const res: SpecResult = { spec: rootSpec, results: [], subResults: [] };
   if (!tests) return res;
@@ -47,7 +47,7 @@ export function runAllTests(
       received = getValueForJSONTests(
         responseData.json,
         spec,
-        typeof expected === "object" && expected !== null && expected[MULTI_CLAUSE]
+        typeof expected === "object" && expected !== null && expected[MULTI_CLAUSE],
       );
     } catch (err: any) {
       res.subResults.push({
@@ -106,7 +106,7 @@ const tests: {
     receivedObj: any,
     spec: string,
     op: string,
-    options: { [key: string]: any }
+    options: { [key: string]: any },
   ) => SpecResult;
 } = {
   $eq: function (expectedObj, receivedObj, spec, op, options): SpecResult {
@@ -170,8 +170,8 @@ const tests: {
       typeof receivedObj === "object" && receivedObj !== null
         ? Object.keys(receivedObj).length
         : typeof receivedObj === "string" || Array.isArray(receivedObj)
-        ? receivedObj.length
-        : undefined;
+          ? receivedObj.length
+          : undefined;
 
     const received: Exclude<any, object> = getStringIfNotScalar(receivedObj);
     const expected: Exclude<any, object> = getStringIfNotScalar(expectedObj);
@@ -337,7 +337,7 @@ export function runObjectTests(
   opVals: { [key: string]: any },
   receivedObject: any,
   spec: string,
-  skip?: boolean
+  skip?: boolean,
 ): SpecResult {
   const objRes: SpecResult = {
     spec,
