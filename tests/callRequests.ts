@@ -11,8 +11,8 @@ import { runRequestTests } from "./getResponses";
 
 async function runRequestSpecs(
   requests: { [name: string]: RequestSpec },
-  rawRequest: RawRequest,
-): Promise<void> {
+  rawRequest: RawRequest
+): Promise<number> {
   for (const name in requests) {
     const request = requests[name];
 
@@ -23,17 +23,17 @@ async function runRequestSpecs(
     request.httpRequest.headers = Object.assign(autoHeaders, request.httpRequest.headers);
   }
 
-  await runRequestTests(requests, rawRequest);
+  return await runRequestTests(requests, rawRequest);
 }
 
-export async function callRequests(request: RawRequest): Promise<void> {
+export async function callRequests(request: RawRequest): Promise<number> {
   try {
     // load the variables
     const env = request.envName;
     const loadedVariables: Variables = loadVariables(
       env,
       request.bundle.bundleContents,
-      getVarFileContents(path.dirname(request.bundle.bundlePath)),
+      getVarFileContents(path.dirname(request.bundle.bundlePath))
     );
     if (env && Object.keys(loadedVariables).length < 1)
       console.log(`warning: no variables added from env: ${env}`);
@@ -54,5 +54,5 @@ export async function callRequests(request: RawRequest): Promise<void> {
   }
 
   // finally, run the request specs
-  await runRequestSpecs(allRequests, request);
+  return await runRequestSpecs(allRequests, request);
 }

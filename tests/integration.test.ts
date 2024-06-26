@@ -1,5 +1,4 @@
 import { RawRequest } from "./utils/requestUtils";
-import { getStatusCode } from "./utils/errors";
 
 import { callRequests } from "./callRequests";
 
@@ -12,6 +11,5 @@ import { callRequests } from "./callRequests";
 
 test("execute auto-tests.zzb in default env", async () => {
   const rawReq = new RawRequest("./tests/bundles/auto-tests.zzb", "default");
-  await callRequests(rawReq);
-  expect(getStatusCode()).toBe(0);
+  expect(await callRequests(rawReq)).toBe(0);
 });

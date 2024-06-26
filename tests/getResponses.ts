@@ -9,7 +9,6 @@ import {
 } from "../src/index";
 
 import { RawRequest } from "./utils/requestUtils";
-import { getStatusCode } from "./utils/errors";
 
 import { compareReqAndResp } from "./runTests";
 
@@ -51,8 +50,10 @@ const BULLET = "-->";
 
 export async function runRequestTests(
   requests: { [name: string]: RequestSpec },
-  rawReq: RawRequest,
-): Promise<void> {
+  rawReq: RawRequest
+): Promise<number> {
+  let numFailingReqs = 0; // any request that does not perform as expected
+
   for (const name in requests) {
     let fail: boolean = true;
     let message = `${name}: FAIL`;
@@ -71,7 +72,7 @@ export async function runRequestTests(
     if (error) {
       message += `\n${BULLET} error executing request: ${error}`;
       console.log(message + "\n");
-      process.exitCode = getStatusCode() + 1;
+      numFailingReqs += 1;
       continue;
     }
 
@@ -88,14 +89,14 @@ export async function runRequestTests(
     if (parseError) {
       message += `\n${BULLET} unable to parse body: ${parseError}`;
       console.log(message + "\n");
-      process.exitCode = getStatusCode() + 1;
+      numFailingReqs += 1;
       continue;
     }
 
     const results = runAllTests(req.tests, response, req.options.stopOnFailure);
     const errors = compareReqAndResp(req, results);
     if (errors.length > 0) {
-      process.exitCode = getStatusCode() + errors.length;
+      numFailingReqs += errors.length;
 
       message = [message, ...errors].join(`\n${BULLET} `);
     } else {
@@ -110,4 +111,6 @@ export async function runRequestTests(
 
     if (fail) console.log(message + "\n");
   }
+
+  return numFailingReqs;
 }
