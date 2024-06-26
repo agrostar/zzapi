@@ -53,7 +53,6 @@ export async function runRequestTests(
   requests: { [name: string]: RequestSpec },
   rawReq: RawRequest,
 ): Promise<void> {
-  const bundlePath = rawReq.bundle.bundlePath;
   for (const name in requests) {
     let fail: boolean = true;
     let message = `${name}: FAIL`;
