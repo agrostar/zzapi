@@ -36,6 +36,22 @@ requests:
         $.args.foo1: bar1
         $.args.foo2: bar2
 
+  get-with-params-skip:
+    method: GET
+    url: /get
+    params:
+      foo1: bar1
+      foo2: bar2
+    tests: # old way of specifying json tests
+      status: { $eq: 0, $skip: true }
+      $h.Content-type: { $eq: random-test, $skip: true }
+      json:
+        $.args: 
+          $skip: false 
+          $tests: 
+            $.foo1 : bar2 
+            $.foo2: bar1 
+
   get-with-params-no-value-positive:
     method: GET
     url: /get
@@ -53,7 +69,7 @@ requests:
       - { name: foo2, value: multi-1 }
       - { name: foo2, value: multi-2 }
     tests:
-      $.args.foo1: { $eq: bar1, $skip: true }
+      $.args.foo1: bar1
       $.args.foo2: { $eq: ["multi-1", "multi-2"] }
 
   get-with-params-values-as-array-positive:
@@ -251,9 +267,7 @@ requests:
       $.data.lastName: { $exists: true }
       # $.data.middleName: { $exists: true, $type: "null" }
       $.data.middleName: null
-      $.data.otherName:
-        $tests: 
-          $.: { $exists: true, $type: undefined, $skip: true }
+      $.data.otherName: { $exists: false, $type: undefined }
       # stress: ensure corner cases don't crash
       $.data.otherName.value: { $exists: false } # don't recurse down undefined
       $.data.middleName.value: { $exists: false } # don't recurse down null

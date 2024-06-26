@@ -71,24 +71,21 @@ function allNegative(res: SpecResult, numTests: number): string[] {
 
 function allSkipped(res: SpecResult, numTests: number): string[] {
   const errors: string[] = [];
-
   const [_passed, skipped, all] = getResultData(res);
   if (all !== numTests) errors.push(`expected ${numTests} tests, got ${all}\n`);
   if (skipped === all) return errors;
 
-  function getSkippedTests(res: SpecResult, spec: string): string[] {
-    const skippedTests: string[] = [];
-    if (!res.skipped) return skippedTests;
+  function getRanTests(res: SpecResult, spec: string): string[] {
+    const nonSkippedTests: string[] = [];
+    if (res.skipped) return nonSkippedTests;
 
-    const rootSkipped = res.results;
-    skippedTests.push(...rootSkipped.map((r) => formatTestResult(r, spec, true)));
+    nonSkippedTests.push(...res.results.map((r) => formatTestResult(r, spec, res.skipped)));
+    for (const s of res.subResults) nonSkippedTests.push(...getRanTests(s, spec + " > " + s.spec));
 
-    for (const s of res.subResults) skippedTests.push(...getSkippedTests(s, spec + " > " + s.spec));
-
-    return skippedTests;
+    return nonSkippedTests;
   }
 
-  errors.push(...getSkippedTests(res, res.spec ?? ""));
+  errors.push(...getRanTests(res, res.spec ?? ""));
   return errors;
 }
 
