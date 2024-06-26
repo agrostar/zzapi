@@ -21,26 +21,34 @@ function formatTestResult(res: TestResult, spec: string | null, skip?: boolean):
   return status + " | actual " + res.received + (res.message ? `[${res.message}]` : "");
 }
 
-function getResultData(res: SpecResult): [number, number] {
-  if (res.skipped) return [0, 0];
+// pass, skipped, total
+function getResultData(res: SpecResult): [number, number, number] {
+  let passed = 0,
+    skipped = 0,
+    total = 0;
 
   const rootResults = res.results;
-  let passed = rootResults.filter((r) => r.pass).length;
-  let all = rootResults.length;
+  if (res.skipped) skipped = rootResults.length;
+  else passed = rootResults.filter((r) => r.pass).length;
+  total = rootResults.length;
 
   for (const s of res.subResults) {
-    const [subPassed, subAll] = getResultData(s);
+    if (res.skipped && !s.skipped)
+      throw new Error("root result skipped but sub result not marked as skipped");
+
+    const [subPassed, subSkipped, subTotal] = getResultData(s);
     passed += subPassed;
-    all += subAll;
+    skipped += subSkipped;
+    total += subTotal;
   }
 
-  return [passed, all];
+  return [passed, skipped, total];
 }
 
 function allNegative(res: SpecResult, numTests: number): string[] {
   const errors: string[] = [];
 
-  const [passed, all] = getResultData(res);
+  const [passed, _skipped, all] = getResultData(res);
   if (all !== numTests) errors.push(`expected ${numTests} tests, got ${all}\n`);
 
   if (passed === 0) return errors;
@@ -61,10 +69,33 @@ function allNegative(res: SpecResult, numTests: number): string[] {
   return errors;
 }
 
+function allSkipped(res: SpecResult, numTests: number): string[] {
+  const errors: string[] = [];
+
+  const [_passed, skipped, all] = getResultData(res);
+  if (all !== numTests) errors.push(`expected ${numTests} tests, got ${all}\n`);
+  if (skipped === all) return errors;
+
+  function getSkippedTests(res: SpecResult, spec: string): string[] {
+    const skippedTests: string[] = [];
+    if (!res.skipped) return skippedTests;
+
+    const rootSkipped = res.results;
+    skippedTests.push(...rootSkipped.map((r) => formatTestResult(r, spec, true)));
+
+    for (const s of res.subResults) skippedTests.push(...getSkippedTests(s, spec + " > " + s.spec));
+
+    return skippedTests;
+  }
+
+  errors.push(...getSkippedTests(res, res.spec ?? ""));
+  return errors;
+}
+
 function allPositive(res: SpecResult, numTests: number): string[] {
   const errors: string[] = [];
 
-  const [passed, all] = getResultData(res);
+  const [passed, _skipped, all] = getResultData(res);
   if (all !== numTests) errors.push(`expected ${numTests} tests, got ${all}`);
 
   if (passed === all) return errors;
@@ -103,7 +134,6 @@ function getNumTests(tests: Tests) {
         count += 1;
         continue;
       }
-      if (assertion[SKIP_CLAUSE]) continue;
 
       const testKeys = Object.keys(assertion);
       if (testKeys.includes(TEST_CLAUSE)) count += getNumTests(assertion[TEST_CLAUSE]);
@@ -118,9 +148,9 @@ function getNumTests(tests: Tests) {
   return numTests;
 }
 
-// TODO. also introduce skipped -> ensure nothing negative or failure
 export function compareReqAndResp(req: RequestSpec, res: SpecResult) {
   const numTests = getNumTests(req.tests);
   if (req.name.includes("negative")) return allNegative(res, numTests);
+  if (req.name.includes("skip")) return allSkipped(res, numTests);
   return allPositive(res, numTests);
 }
