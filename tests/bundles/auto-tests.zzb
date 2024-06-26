@@ -46,11 +46,11 @@ requests:
       status: { $eq: 0, $skip: true }
       $h.Content-type: { $eq: random-test, $skip: true }
       json:
-        $.args: 
-          $skip: true 
-          $tests: 
-            $.foo1 : bar2 
-            $.foo2: bar1 
+        $.args:
+          $skip: true
+          $tests:
+            $.foo1: bar2
+            $.foo2: bar1
 
   get-with-params-no-value-positive:
     method: GET
