@@ -47,7 +47,7 @@ requests:
       $h.Content-type: { $eq: random-test, $skip: true }
       json:
         $.args: 
-          $skip: false 
+          $skip: true 
           $tests: 
             $.foo1 : bar2 
             $.foo2: bar1 
