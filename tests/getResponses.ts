@@ -50,7 +50,7 @@ const BULLET = "-->";
 
 export async function runRequestTests(
   requests: { [name: string]: RequestSpec },
-  rawReq: RawRequest
+  rawReq: RawRequest,
 ): Promise<number> {
   let numFailingReqs = 0; // any request that does not perform as expected
 

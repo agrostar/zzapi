@@ -11,7 +11,7 @@ import { runRequestTests } from "./getResponses";
 
 async function runRequestSpecs(
   requests: { [name: string]: RequestSpec },
-  rawRequest: RawRequest
+  rawRequest: RawRequest,
 ): Promise<number> {
   for (const name in requests) {
     const request = requests[name];
@@ -33,7 +33,7 @@ export async function callRequests(request: RawRequest): Promise<number> {
     const loadedVariables: Variables = loadVariables(
       env,
       request.bundle.bundleContents,
-      getVarFileContents(path.dirname(request.bundle.bundlePath))
+      getVarFileContents(path.dirname(request.bundle.bundlePath)),
     );
     if (env && Object.keys(loadedVariables).length < 1)
       console.log(`warning: no variables added from env: ${env}`);
