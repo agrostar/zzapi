@@ -11,4 +11,4 @@ jobs:
         with:
           node-version: "20"
       - name: prettier check
-        run: npx prettier -c ./src --config ./src/.prettierrc
+        run: npx prettier -c ./src ./tests --config ./.prettierrc
