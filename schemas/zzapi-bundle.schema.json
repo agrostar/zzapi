@@ -112,7 +112,6 @@
               "enum": ["number", "string", "boolean", "object", "array", "null", "undefined"]
             },
             "$regex": { "type": "string" },
-            "$options": { "type": "string" },
             "$exists": { "type": "boolean" },
             "$size": {
               "anyOf": [
@@ -132,7 +131,9 @@
               ]
             },
             "$tests": { "$ref": "#/$defs/tests" },
-            "$skip": { "type": "boolean" }
+            "options": { "type": "string" },
+            "skip": { "type": "boolean" },
+            "multi": { "type": "boolean" }
           }
         }
       ]

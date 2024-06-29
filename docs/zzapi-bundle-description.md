@@ -166,13 +166,14 @@ Note that an assertion value can be a non-scalar, especially when matching a non
 
 Operators supported in the RHS are:
 * `$eq`, `$ne`, `$lt`, `$gt`, `$lte`, `$gte`: against the value
-* `$regex`: against the value, with `$options` like ignore-case
+* `$regex`: against the value, with `options` like ignore-case
 * `$sw`, `$ew`, `$co`: to check if the target starts with, ends with or contains a string
 * `$size`: for length of arrays and objects, or the length of the string if it is not an array. The value can be an object for `$ne`, `$lt` etc. comparisons.
 * `$exists`: true|false, to check existance of a field
 * `$type`: string|number|object|array|null: to check the type of the field
 * `$tests`: perform assertions (recursively) on the value, as if it were the `$.` root
-* `$skip`: skip the assertions under this test. Useful in case some tests are failing, but we want the output to keep reminding us of this fact.
+* `skip`: skip the assertions under this test. Useful in case some tests are failing, but we want the output to keep reminding us of this fact.
+* `multi`: use `jasonpath.query` (all matches) instead of `jasonpath.value` (first match) to evaluate the JSONPath expresson. This is useful if you need to evaluate multiple nested elements of an object array all at once.
 
 ### jsonpath tests
 
