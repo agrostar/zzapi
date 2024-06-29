@@ -137,9 +137,10 @@ export function replaceVariablesInRequest(request: RequestSpec, variables: Varia
 
   type keyOfHttp = Exclude<keyof typeof request.httpRequest, "method">;
   const httpPropertiesToReplace: string[] = ["baseUrl", "url", "params", "headers", "body"];
-  httpPropertiesToReplace.forEach((key) => {
-    const replacedData = replaceVariables(request.httpRequest[key as keyOfHttp], variables);
-    request.httpRequest[key as keyOfHttp] = replacedData.data;
+  httpPropertiesToReplace.forEach((prop) => {
+    const httpKey = prop as keyOfHttp;
+    const replacedData = replaceVariables(request.httpRequest[httpKey], variables);
+    request.httpRequest[httpKey] = replacedData.data;
     undefs.push(...replacedData.undefinedVars);
   });
 

@@ -1,5 +1,8 @@
 # Change Log
 
+## [todo]
+- Introduced automated tests
+
 ## 1.5.1
 - Fixed regression (status check failures were not detected)
 

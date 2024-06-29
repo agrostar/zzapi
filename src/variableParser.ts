@@ -38,6 +38,22 @@ export function getEnvironments(bundleContent: string | undefined, varFileConten
   return [...uniqueNames];
 }
 
+function replaceEnvironmentVariables(vars: Variables): Variables {
+  const PREFIX = "$env.";
+
+  const getVal = (val: any): any => {
+    if (typeof val !== "string" || !val.startsWith(PREFIX)) return val;
+
+    const envVarName = val.slice(PREFIX.length);
+    return envVarName in process.env ? process.env[envVarName] : val;
+  };
+
+  const replacedVars: Variables = {};
+  for (const key in vars) replacedVars[key] = getVal(vars[key]);
+
+  return replacedVars;
+}
+
 export function loadVariables(
   envName: string | undefined,
   bundleContent: string | undefined,
@@ -46,15 +62,16 @@ export function loadVariables(
   if (!envName) return {};
 
   const allBundleVariables = getBundleVariables(bundleContent);
-  const bundleVars = allBundleVariables.hasOwnProperty(envName) ? allBundleVariables[envName] : {};
+  const bundleVars: Variables = allBundleVariables[envName] ?? {};
 
-  let envVars = {};
+  const envVars: Variables = {};
   varFileContents.forEach((fileContents) => {
     const parsedData = YAML.parse(fileContents);
-    if (parsedData && isDict(parsedData[envName])) {
-      Object.assign(envVars, parsedData[envName]);
-    }
+    if (parsedData && isDict(parsedData[envName])) Object.assign(envVars, parsedData[envName]);
   });
 
-  return Object.assign({}, envVars, bundleVars);
+  const basicVars = Object.assign({}, envVars, bundleVars);
+  const vars = replaceEnvironmentVariables(basicVars);
+
+  return vars;
 }
