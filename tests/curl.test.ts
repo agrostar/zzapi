@@ -6,27 +6,33 @@ import { getCurlRequest, getRequestSpec } from "../src/index";
 
 const execPromise = util.promisify(exec);
 
-test("execute simple-get cURL", async () => {
-  const content = fs.readFileSync("./tests/bundles/auto-tests.zzb", "utf-8");
-  const requestName = "simple-get-positive";
+async function runCurlRequest(
+  bundlePath: string,
+  requestName: string,
+): Promise<{ stdout: string; stderr: string }> {
+  const content = fs.readFileSync(bundlePath, "utf-8");
   const request = getRequestSpec(content, requestName);
 
   const curlReq = getCurlRequest(request);
 
-  const { stdout, stderr } = await execPromise(curlReq);
+  return await execPromise(curlReq);
+}
+
+test("execute simple-get cURL", async () => {
+  const { stdout, stderr } = await runCurlRequest(
+    "./tests/bundles/auto-tests.zzb",
+    "simple-get-positive",
+  );
 
   const response = JSON.parse(stdout);
   expect(response.url).toBe("https://postman-echo.com/get");
 });
 
 test("execute post-header-merge cURL", async () => {
-  const content = fs.readFileSync("./tests/bundles/auto-tests.zzb", "utf-8");
-  const requestName = "post-header-merge-positive";
-  const request = getRequestSpec(content, requestName);
-
-  const curlReq = getCurlRequest(request);
-
-  const { stdout, stderr } = await execPromise(curlReq);
+  const { stdout, stderr } = await runCurlRequest(
+    "./tests/bundles/auto-tests.zzb",
+    "post-header-merge-positive",
+  );
 
   const response = JSON.parse(stdout);
   expect(response.url).toBe("https://postman-echo.com/post");
