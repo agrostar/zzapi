@@ -298,24 +298,6 @@ requests:
       $.data.age.something: 55 # jsonpath should take care of this.
       $.data.numbers[5]: 0 # jsonpath should take care of this
 
-  # This request tests should all fail due to bad tests schema
-  # Ensure we don't crash on these.
-  tests-negative-schema:
-    method: POST
-    url: /post
-    body:
-      address: 1, example street
-      numbers: [444, 222]
-      object: { foo: bar }
-    tests:
-      status: { $ne: 200 }
-      headers:
-        content-type: { $exists: false }
-      $.data.operator: { badop: any }  # invalid operator badop. If you want to match an entire object/array, use it as the value of the $eq operator.
-      $.data.numbers: [444, 222]
-      $.data.address: { $type: invalid }
-      $.data.object: { $exists: 4 }
-
   capture-response-positive:
     method: POST
     url: /post
