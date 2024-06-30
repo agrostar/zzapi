@@ -113,9 +113,9 @@ function allPositive(res: SpecResult, numTests: number): string[] {
   return errors;
 }
 
-const SKIP_CLAUSE = "$skip";
+const SKIP_CLAUSE = "skip";
 const TEST_CLAUSE = "$tests";
-const NON_TEST_KEYS = ["$options", "multi", TEST_CLAUSE, SKIP_CLAUSE];
+const NON_TEST_KEYS = ["options", "multi", TEST_CLAUSE, SKIP_CLAUSE];
 
 function getNumTests(tests: Tests) {
   let numTests = 0;
