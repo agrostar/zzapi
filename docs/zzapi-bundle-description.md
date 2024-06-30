@@ -173,6 +173,7 @@ Operators supported in the RHS are:
 * `$type`: string|number|object|array|null: to check the type of the field
 * `$tests`: perform assertions (recursively) on the value, as if it were the `$.` root
 * `$skip`: skip the assertions under this test. Useful in case some tests are failing, but we want the output to keep reminding us of this fact.
+* `$multi`: use `jasonpath.query` (all matches) instead of `jasonpath.value` (first match) to evaluate the JSONPath expresson. This is useful if you need to evaluate multiple nested elements of an object array all at once.
 
 ### jsonpath tests
 

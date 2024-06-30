@@ -1,7 +1,7 @@
 import { getStringValueIfDefined } from "./utils/typeUtils";
 
-import { getParamsForUrl, getURL } from "./executeRequest";
 import { RequestSpec } from "./models";
+import { getParamsForUrl, getURL } from "./executeRequest";
 
 function replaceSingleQuotes<T>(value: T): T {
   if (typeof value !== "string") return value;
