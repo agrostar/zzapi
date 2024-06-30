@@ -5,9 +5,9 @@ import { getStringIfNotScalar, isDict } from "./utils/typeUtils";
 import { Tests, ResponseData, Assertion, SpecResult, TestResult } from "./models";
 import { mergePrefixBasedTests } from "./mergeData";
 
-const SKIP_CLAUSE = "skip",
-  OPTIONS_CLAUSE = "options",
-  MULTI_CLAUSE = "multi";
+const SKIP_CLAUSE = "$skip",
+  OPTIONS_CLAUSE = "$options",
+  MULTI_CLAUSE = "$multi";
 
 function hasFailure(res: SpecResult): boolean {
   return res.results.some((r) => !r.pass) || res.subResults.some(hasFailure);

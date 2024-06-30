@@ -131,9 +131,9 @@
               ]
             },
             "$tests": { "$ref": "#/$defs/tests" },
-            "options": { "type": "string" },
-            "skip": { "type": "boolean" },
-            "multi": { "type": "boolean" }
+            "$options": { "type": "string" },
+            "$skip": { "type": "boolean" },
+            "$multi": { "type": "boolean" }
           }
         }
       ]

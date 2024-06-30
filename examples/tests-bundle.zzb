@@ -33,7 +33,7 @@ requests:
     params:
       foo1: bar1
       foo2: bar2
-    tests: # old way of specifying json tests
+    tests:
       json:
         $.args.foo1: bar1
         $.args.foo2: bar2
@@ -44,7 +44,7 @@ requests:
     params:
       foo1: bar1
       foo2:
-    tests: # new way of specifying json
+    tests:
       $.url: "https://postman-echo.com/get?foo1=bar1&foo2"
 
   get-with-params-as-array:
@@ -68,7 +68,7 @@ requests:
         - multi-2
     tests:
       $.args.foo1: bar
-      $.args.foo2: { $eq: ["multi-1", "multi-2"], skip: true }
+      $.args.foo2: { $eq: ["multi-1", "multi-2"], $skip: true }
 
   post-header-merge:
     url: /post
@@ -144,7 +144,7 @@ requests:
     method: GET
     url: /encoding/utf8
     tests:
-      body: { $regex: unicode demo, options: i }
+      body: { $regex: unicode demo, $options: i }
       headers:
         content-type: text/html; charset=utf-8
 
@@ -246,7 +246,7 @@ requests:
       $.data.phoneNumbers.0.available: { $eq: [7, 22], $type: array }
       $.data.phoneNumbers.1.available: { $eq: "[18,22]", $type: array }
       $.data.phoneNumbers.0:
-        skip: true
+        $skip: true
         $tests:
           $.type: mobile
           $.number: { $ne: 0123-4567-8910 }
