@@ -14,7 +14,7 @@ export function getDescriptiveType(obj: any): string {
   return typeof obj;
 }
 
-export function getStringIfNotScalar(data: any) {
+export function getStringIfNotScalar(data: any): Exclude<any, object> {
   if (typeof data !== "object") return data;
   return JSON.stringify(data);
 }
