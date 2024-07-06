@@ -1,7 +1,7 @@
 import { getStrictStringValue, isArrayOrDict } from "./utils/typeUtils";
 
-import { Variables } from "./variables";
 import { RequestSpec } from "./models";
+import { Variables } from "./variables";
 
 function replaceVariablesInArray(
   data: any[],

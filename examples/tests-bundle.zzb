@@ -33,7 +33,7 @@ requests:
     params:
       foo1: bar1
       foo2: bar2
-    tests: # old way of specifying json tests
+    tests:
       json:
         $.args.foo1: bar1
         $.args.foo2: bar2
@@ -44,7 +44,7 @@ requests:
     params:
       foo1: bar1
       foo2:
-    tests: # new way of specifying json
+    tests:
       $.url: "https://postman-echo.com/get?foo1=bar1&foo2"
 
   get-with-params-as-array:
