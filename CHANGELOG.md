@@ -1,7 +1,12 @@
 # Change Log
 
-## [todo]
-- Introduced automated tests
+## 2.0.0
+- New major version (module's interface is not compatible with 1.x)
+- Automated tests
+- Ability to use environment variables as variable values
+- `$multi` option to test multiple JSONPath matches
+- `$size` check failure prints the actual size instead of the actual value
+- Bug fix: Escape single quotes in cURL output
 
 ## 1.5.1
 - Fixed regression (status check failures were not detected)
