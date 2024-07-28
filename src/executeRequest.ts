@@ -49,7 +49,7 @@ export async function executeGotRequest(httpRequest: GotRequest): Promise<{
       } else if (e.name === "CancelError") {
         error = "Cancelled";
       } else {
-        error = e.message;
+        error = e.message || e.code;
       }
     }
   }

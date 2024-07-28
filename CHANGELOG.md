@@ -1,5 +1,8 @@
 # Change Log
 
+# 2.0.1
+- Bug fix (Mac only): proper error message when connection refused
+
 ## 2.0.0
 - New major version (module's interface is not compatible with 1.x)
 - Automated tests
@@ -33,4 +36,3 @@
 
 ## [1.1.0]
 - First fully usable version
-
