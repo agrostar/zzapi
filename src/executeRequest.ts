@@ -5,11 +5,15 @@ import { getStringValueIfDefined } from "./utils/typeUtils";
 import { GotRequest, Param, RequestSpec } from "./models";
 
 export function constructGotRequest(allData: RequestSpec): GotRequest {
-  const completeUrl: string = getURL(
+  var completeUrl: string = getURL(
     allData.httpRequest.baseUrl,
     allData.httpRequest.url,
     getParamsForUrl(allData.httpRequest.params, allData.options.rawParams),
   );
+
+  if(allData.httpRequest.pathParams){
+    completeUrl = substitutePathParams(completeUrl,allData.httpRequest.pathParams);
+  }
 
   const options: OptionsOfTextResponseBody = {
     method: allData.httpRequest.method.toLowerCase() as Method,
@@ -82,4 +86,34 @@ export function getURL(baseUrl: string | undefined, url: string, paramsForUrl: s
   if (!baseUrl || !url.startsWith("/")) return url + paramsForUrl;
   // otherwise, incorporate base url
   return baseUrl + url + paramsForUrl;
+}
+
+function substitutePathParams(url: string,params: Param[]): string {
+
+  const {baseUrl,path,query} = splitURL(url)
+  return baseUrl + path.replace(/:(\w+)/g, (_, key) => {
+      const param = params.find(p => p.name === key);
+      if (param) {
+          return encodeURIComponent(param.value); 
+      }
+      throw new Error(`Missing value for parameter: ${key}`);
+  }) + query;
+}
+
+function splitURL(url: string): { baseUrl: string; path: string; query: string } {
+  try {
+      // defaults to http if protocol not given
+      if (!/^\w+:\/\//.test(url)) {
+        url = "http://" + url;   
+      }
+      const parsedUrl = new URL(url);
+
+      return {
+          baseUrl: `${parsedUrl.protocol}//${parsedUrl.host}`,
+          path: parsedUrl.pathname, 
+          query: parsedUrl.search 
+      };
+  } catch (error) {
+      throw new Error("Invalid URL");
+  }
 }

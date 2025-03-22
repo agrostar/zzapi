@@ -243,6 +243,16 @@
                 { "$ref": "#/$defs/headerObject" }
               ]
             },
+            "pathParams": {
+              "description": "path parameters",
+              "anyOf": [
+                {
+                  "type": "array",
+                  "items": { "$ref": "#/$defs/paramArray" }
+                },
+                { "$ref": "#/$defs/paramObject" }
+              ]
+            },
             "params": {
               "description": "Query string parameters",
               "anyOf": [

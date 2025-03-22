@@ -73,6 +73,7 @@ export interface Common {
   baseUrl?: string;
   headers: RawHeaders;
   params: RawParams;
+  pathParams: RawParams;
   options?: RawOptions;
   tests?: RawTests;
 }
@@ -84,6 +85,7 @@ export interface RawRequest {
   method: Method;
   headers: RawHeaders;
   params: RawParams;
+  pathParams : RawParams;
   body?: string;
   options?: RawOptions;
   tests?: RawTests;
@@ -98,6 +100,7 @@ export interface RequestSpec {
     baseUrl?: string;
     url: string;
     method: Method;
+    pathParams : Param[];
     params: Param[];
     headers: { [key: string]: string };
     body?: any;
