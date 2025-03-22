@@ -51,9 +51,16 @@
         }
       }
     },
+    "pathParamObject": {
+      "type": "object",
+      "description": "A set of path parameters described as key/value pairs",
+      "properties": {
+        "": { "$ref": "#/$defs/scalar" }
+      }
+    },
     "headerObject": {
       "type": "object",
-      "description": "A set ofheaders described as key/value pairs",
+      "description": "A set of headers described as key/value pairs",
       "properties": {
         "": { "$ref": "#/$defs/scalar" }
       }
@@ -243,11 +250,17 @@
                 { "$ref": "#/$defs/headerObject" }
               ]
             },
+            "pathParams": {
+              "description": "path parameters",
+              "anyOf": [
+                { "$ref": "#/$defs/pathParamObject" }
+              ]
+            },
             "params": {
               "description": "Query string parameters",
               "anyOf": [
                 {
-                  "type": "array",
+                  "type": "array",  
                   "items": { "$ref": "#/$defs/paramArray" }
                 },
                 { "$ref": "#/$defs/paramObject" }

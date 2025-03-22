@@ -206,6 +206,7 @@ export function getMergedData(commonData: Common, requestData: RawRequest): Requ
 
   const method = requestData.method;
   const params = getMergedParams(commonData.params, requestData.params);
+  const pathParams = getMergedParams(commonData.pathParams,requestData.pathParams)
   const headers = getMergedHeaders(commonData.headers, requestData.headers);
   const body = requestData.body;
   const options = getMergedOptions(commonData.options, requestData.options);
@@ -226,6 +227,7 @@ export function getMergedData(commonData: Common, requestData: RawRequest): Requ
       url: requestData.url,
       method,
       params,
+      pathParams,
       headers,
       body,
     },
