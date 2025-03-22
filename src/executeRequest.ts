@@ -9,11 +9,9 @@ export function constructGotRequest(allData: RequestSpec): GotRequest {
     allData.httpRequest.baseUrl,
     allData.httpRequest.url,
     getParamsForUrl(allData.httpRequest.params, allData.options.rawParams),
+    allData.httpRequest.pathParams
   );
-
-  if(allData.httpRequest.pathParams){
-    completeUrl = substitutePathParams(completeUrl,allData.httpRequest.pathParams);
-  }
+  
 
   const options: OptionsOfTextResponseBody = {
     method: allData.httpRequest.method.toLowerCase() as Method,
@@ -81,11 +79,20 @@ export function getParamsForUrl(params: Param[] | undefined, rawParams: boolean)
   return `?${paramString}`;
 }
 
-export function getURL(baseUrl: string | undefined, url: string, paramsForUrl: string): string {
+export function getURL(baseUrl: string | undefined, url: string, paramsForUrl: string, pathParams?: Param[]): string {
   // base url not defined, or url does not start with /, then ignore base url
-  if (!baseUrl || !url.startsWith("/")) return url + paramsForUrl;
-  // otherwise, incorporate base url
-  return baseUrl + url + paramsForUrl;
+  var completeUrl = ""
+  if (!baseUrl || !url.startsWith("/")){
+    completeUrl = url + paramsForUrl;
+  }else{
+    // otherwise, incorporate base url
+    completeUrl =  baseUrl + url + paramsForUrl;
+  }
+
+  if(/\/:\w+/.test(completeUrl) && pathParams){
+    completeUrl = substitutePathParams(completeUrl,pathParams);
+  }
+  return completeUrl;
 }
 
 function substitutePathParams(url: string,params: Param[]): string {
@@ -94,7 +101,7 @@ function substitutePathParams(url: string,params: Param[]): string {
   return baseUrl + path.replace(/:(\w+)/g, (_, key) => {
       const param = params.find(p => p.name === key);
       if (param) {
-          return encodeURIComponent(param.value); 
+          return param.value; 
       }
       throw new Error(`Missing value for parameter: ${key}`);
   }) + query;
