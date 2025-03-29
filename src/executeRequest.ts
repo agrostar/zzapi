@@ -3,6 +3,11 @@ import got, { Method, OptionsOfTextResponseBody } from "got";
 import { getStringValueIfDefined } from "./utils/typeUtils";
 
 import { GotRequest, Param, RequestSpec } from "./models";
+import {fileFromPathSync} from 'formdata-node/file-from-path'
+import {FormDataEncoder} from "form-data-encoder";
+import { FormData } from "formdata-node";
+import { Readable } from "stream";
+import * as path from 'path';
 
 export function constructGotRequest(allData: RequestSpec): GotRequest {
   const completeUrl: string = getURL(
@@ -10,10 +15,11 @@ export function constructGotRequest(allData: RequestSpec): GotRequest {
     allData.httpRequest.url,
     getParamsForUrl(allData.httpRequest.params, allData.options.rawParams),
   );
+  handleMultiPart(allData.httpRequest.body,allData,false); //converts any string starting with 'file://' to File object
 
   const options: OptionsOfTextResponseBody = {
     method: allData.httpRequest.method.toLowerCase() as Method,
-    body: getStringValueIfDefined(allData.httpRequest.body),
+    body: getBody(allData),
     headers: allData.httpRequest.headers,
     followRedirect: allData.options.follow,
     https: { rejectUnauthorized: allData.options.verifySSL },
@@ -21,6 +27,72 @@ export function constructGotRequest(allData: RequestSpec): GotRequest {
   };
 
   return got(completeUrl, options);
+}
+
+function replaceFileContents(field: string,request : RequestSpec,isCurl: boolean) {
+  /*
+  finds all file:// instances with atleast 1 succeeding word character
+  matches the file-name referred to by this instance
+  */
+  const fileRegex = /file:\/\/([^\s]+)/g;
+  if(fileRegex.test(field)){
+    const filePath =  field.replace(fileRegex, (match, givenFilePath) => {
+      if (match !== field) return match; // we only perform a replacement if file:// is the ENTIRE body
+      if (isCurl === true) return `@${givenFilePath}`;
+
+      return givenFilePath;
+    });
+    request.httpRequest.headers['content-type'] = 'multipart';
+    if(isCurl == true) return filePath;
+    const fileName = path.basename(filePath);
+    return fileFromPathSync(filePath,fileName);
+  }else{
+    return field;
+  }
+
+}
+
+export function getBody(request: RequestSpec){
+  const body = request.httpRequest.body;
+  if(request.httpRequest.headers['content-type'] == 'multipart'){
+    const multipart = new FormData();
+    for (const key in body) {
+      if (Object.prototype.hasOwnProperty.call(body, key)) {
+        if(Array.isArray(body[key])){
+          for (const element of body[key]) {
+            multipart.append(key,element);
+          }
+        }else{
+          multipart.append(key,body[key]);
+        }
+      }
+    }
+    const fde = new FormDataEncoder(multipart);
+    request.httpRequest.headers['content-type'] = fde.contentType;
+    return Readable.from(fde);
+  }else{
+    return getStringValueIfDefined(request.httpRequest.body);
+  }
+}
+
+export function handleMultiPart(body: any,request : RequestSpec,isCurl: boolean){
+  if(typeof body == "object"){
+    for (const key in body) {
+      if (Object.prototype.hasOwnProperty.call(body, key)) {
+        if(typeof body[key] == 'string'){
+          body[key] = replaceFileContents(body[key],request,isCurl);
+        }
+        else{
+          body[key] = handleMultiPart(body[key],request,isCurl)
+        }
+      }
+    }
+  }else if(Array.isArray(body)){
+    for (let i = 0; i < body.length; i++) {
+      body[i] = replaceFileContents(body[i],request,false);
+    }
+  }
+  return body;
 }
 
 export async function executeGotRequest(httpRequest: GotRequest): Promise<{
