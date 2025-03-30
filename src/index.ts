@@ -21,3 +21,4 @@ export { runAllTests } from "./runTests";
 export { captureVariables } from "./captureVars";
 
 export { default as convertCollection, convertEnvironment } from "./convertPostman";
+export { default as convertCurl } from "./convertCurl";
