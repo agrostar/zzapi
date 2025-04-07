@@ -1,5 +1,7 @@
 import * as YAML from "yaml";
 
+const REGEX = { dataBody: /(?:-d|--data|--data-raw)\s+(['"]?)([\s\S]*?)\1(?=\s+-|$)/ };
+
 function determineMethod(curlCommand: string): string {
   const methodMatch = curlCommand.match(/(?:-X|--request)\s+['"]?(\w+(-\w+)?)['"]?/);
   if (methodMatch) {
@@ -13,7 +15,7 @@ function determineMethod(curlCommand: string): string {
   }
 
   // Check for POST conditions
-  if (/(--data|--data-raw|-d|-F)/.test(curlCommand)) {
+  if (curlCommand.match(REGEX.dataBody)) {
     return "POST"; // Default to POST if request body exists
   }
 
@@ -41,9 +43,8 @@ function extractUrlAndParams(curlCommand: string): {
 
 function parseBody(curlCommand: string, contentType: string | null) {
   // TODO: parse form-urlencoded and multi-form body
-  const dataMatch = curlCommand.match(/(?:-d|--data|--data-raw)\s+['"](.+)['"]/);
-
-  const rawData = dataMatch?.[1];
+  const dataMatch = curlCommand.match(REGEX.dataBody);
+  const rawData = dataMatch?.[2];
   if (!rawData) return;
 
   if (contentType?.includes("application/json")) {
