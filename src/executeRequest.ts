@@ -4,7 +4,7 @@ import { getStringValueIfDefined, hasFile, isFilePath } from "./utils/typeUtils"
 
 import { GotRequest, Param, RequestSpec } from "./models";
 import { fileFromPathSync } from "formdata-node/file-from-path";
-import { fileURLToPath } from "url";
+
 import { FormDataEncoder } from "form-data-encoder";
 import { FormData } from "formdata-node";
 import { Readable } from "stream";
@@ -34,7 +34,8 @@ function replaceFilePath(filePath: string) {
   finds all file:// instances with atleast 1 succeeding word character
   matches the file-name referred to by this instance
   */
-  filePath = fileURLToPath(filePath);
+
+  filePath = path.resolve(filePath.slice(7));
   const fileName = path.basename(filePath);
   return fileFromPathSync(filePath, fileName);
 }
