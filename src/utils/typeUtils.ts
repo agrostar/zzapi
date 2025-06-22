@@ -50,11 +50,11 @@ export function hasFile(body: any): boolean {
     if (isString(body[key]) && isFilePath(body[key])) {
       return true;
     } else if (Array.isArray(body[key])) {
-      body[key].forEach((element: any) => {
+      for (const element of body[key]) {
         if (isString(element) && isFilePath(element)) {
           return true;
         }
-      });
+      }
     }
   }
   return false;
