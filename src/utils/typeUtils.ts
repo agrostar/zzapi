@@ -44,3 +44,18 @@ export function isFilePath(value: any): boolean {
   const fileRegex = /file:\/\/([^\s]+)/g;
   return fileRegex.test(value);
 }
+
+export function hasFile(body: any): boolean {
+  for (const key in body) {
+    if (isString(body[key]) && isFilePath(body[key])) {
+      return true;
+    } else if (Array.isArray(body[key])) {
+      body[key].forEach((element: any) => {
+        if (isString(element) && isFilePath(element)) {
+          return true;
+        }
+      });
+    }
+  }
+  return false;
+}

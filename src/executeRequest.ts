@@ -1,6 +1,6 @@
 import got, { Method, OptionsOfTextResponseBody } from "got";
 
-import { getStringValueIfDefined, isString, isFilePath } from "./utils/typeUtils";
+import { getStringValueIfDefined, hasFile, isFilePath } from "./utils/typeUtils";
 
 import { GotRequest, Param, RequestSpec } from "./models";
 import { fileFromPathSync } from "formdata-node/file-from-path";
@@ -36,23 +36,7 @@ function replaceFilePath(filePath: string) {
   */
   filePath = fileURLToPath(filePath);
   const fileName = path.basename(filePath);
-  console.log(filePath, fileName);
   return fileFromPathSync(filePath, fileName);
-}
-
-function hasFile(body: any): boolean {
-  for (const key in body) {
-    if (isString(body[key]) && isFilePath(body[key])) {
-      return true;
-    } else if (Array.isArray(body[key])) {
-      body[key].forEach((element: any) => {
-        if (isString(element) && isFilePath(element)) {
-          return true;
-        }
-      });
-    }
-  }
-  return false;
 }
 
 function constructFormData(request: RequestSpec, body: any) {
@@ -82,16 +66,11 @@ function constructFormData(request: RequestSpec, body: any) {
 
 export function getBody(request: RequestSpec) {
   const body = request.httpRequest.body;
-  console.log("body:", body);
   if (request.httpRequest.headers["content-type"] == "multipart/form-data" || hasFile(body)) {
-    const a = constructFormData(request, body);
-    console.log(a);
-    return a;
+    return constructFormData(request, body);
   }
 
-  const b = getStringValueIfDefined(body);
-  console.log(b);
-  return b;
+  return getStringValueIfDefined(body);
 }
 
 export async function executeGotRequest(httpRequest: GotRequest): Promise<{
