@@ -1,21 +1,21 @@
 import got, { Method, OptionsOfTextResponseBody } from "got";
 
-import { getStringValueIfDefined } from "./utils/typeUtils";
+import { getStringValueIfDefined, isString, isFilePath } from "./utils/typeUtils";
 
 import { GotRequest, Param, RequestSpec } from "./models";
-import {fileFromPathSync} from 'formdata-node/file-from-path'
-import {FormDataEncoder} from "form-data-encoder";
+import { fileFromPathSync } from "formdata-node/file-from-path";
+import { fileURLToPath } from "url";
+import { FormDataEncoder } from "form-data-encoder";
 import { FormData } from "formdata-node";
 import { Readable } from "stream";
-import * as path from 'path';
+import * as path from "path";
 
 export function constructGotRequest(allData: RequestSpec): GotRequest {
   const completeUrl: string = getURL(
     allData.httpRequest.baseUrl,
     allData.httpRequest.url,
-    getParamsForUrl(allData.httpRequest.params, allData.options.rawParams),
+    getParamsForUrl(allData.httpRequest.params, allData.options.rawParams)
   );
-  handleMultiPart(allData.httpRequest.body,allData,false); //converts any string starting with 'file://' to File object
 
   const options: OptionsOfTextResponseBody = {
     method: allData.httpRequest.method.toLowerCase() as Method,
@@ -29,70 +29,69 @@ export function constructGotRequest(allData: RequestSpec): GotRequest {
   return got(completeUrl, options);
 }
 
-function replaceFileContents(field: string,request : RequestSpec,isCurl: boolean) {
+function replaceFilePath(filePath: string) {
   /*
   finds all file:// instances with atleast 1 succeeding word character
   matches the file-name referred to by this instance
   */
-  const fileRegex = /file:\/\/([^\s]+)/g;
-  if(fileRegex.test(field)){
-    const filePath =  field.replace(fileRegex, (match, givenFilePath) => {
-      if (match !== field) return match; // we only perform a replacement if file:// is the ENTIRE body
-      if (isCurl === true) return `@${givenFilePath}`;
-
-      return givenFilePath;
-    });
-    request.httpRequest.headers['content-type'] = 'multipart';
-    if(isCurl == true) return filePath;
-    const fileName = path.basename(filePath);
-    return fileFromPathSync(filePath,fileName);
-  }else{
-    return field;
-  }
-
+  filePath = fileURLToPath(filePath);
+  const fileName = path.basename(filePath);
+  console.log(filePath, fileName);
+  return fileFromPathSync(filePath, fileName);
 }
 
-export function getBody(request: RequestSpec){
+function hasFile(body: any): boolean {
+  for (const key in body) {
+    if (isString(body[key]) && isFilePath(body[key])) {
+      return true;
+    } else if (Array.isArray(body[key])) {
+      body[key].forEach((element: any) => {
+        if (isString(element) && isFilePath(element)) {
+          return true;
+        }
+      });
+    }
+  }
+  return false;
+}
+
+function constructFormData(request: RequestSpec, body: any) {
+  const multipart = new FormData();
+  for (const key in body) {
+    if (Array.isArray(body[key])) {
+      for (const element of body[key]) {
+        if (isFilePath(element)) {
+          multipart.append(key, replaceFilePath(element));
+        } else {
+          multipart.append(key, element);
+        }
+      }
+    } else {
+      if (isFilePath(body[key])) {
+        multipart.append(key, replaceFilePath(body[key]));
+      } else {
+        multipart.append(key, body[key]);
+      }
+    }
+  }
+  const fde = new FormDataEncoder(multipart);
+
+  request.httpRequest.headers["content-type"] = fde.contentType; //FormDataEncoder builds the actual content-type header.
+  return Readable.from(fde);
+}
+
+export function getBody(request: RequestSpec) {
   const body = request.httpRequest.body;
-  if(request.httpRequest.headers['content-type'] == 'multipart'){
-    const multipart = new FormData();
-    for (const key in body) {
-      if (Object.prototype.hasOwnProperty.call(body, key)) {
-        if(Array.isArray(body[key])){
-          for (const element of body[key]) {
-            multipart.append(key,element);
-          }
-        }else{
-          multipart.append(key,body[key]);
-        }
-      }
-    }
-    const fde = new FormDataEncoder(multipart);
-    request.httpRequest.headers['content-type'] = fde.contentType;
-    return Readable.from(fde);
-  }else{
-    return getStringValueIfDefined(request.httpRequest.body);
+  console.log("body:", body);
+  if (request.httpRequest.headers["content-type"] == "multipart/form-data" || hasFile(body)) {
+    const a = constructFormData(request, body);
+    console.log(a);
+    return a;
   }
-}
 
-export function handleMultiPart(body: any,request : RequestSpec,isCurl: boolean){
-  if(typeof body == "object"){
-    for (const key in body) {
-      if (Object.prototype.hasOwnProperty.call(body, key)) {
-        if(typeof body[key] == 'string'){
-          body[key] = replaceFileContents(body[key],request,isCurl);
-        }
-        else{
-          body[key] = handleMultiPart(body[key],request,isCurl)
-        }
-      }
-    }
-  }else if(Array.isArray(body)){
-    for (let i = 0; i < body.length; i++) {
-      body[i] = replaceFileContents(body[i],request,false);
-    }
-  }
-  return body;
+  const b = getStringValueIfDefined(body);
+  console.log(b);
+  return b;
 }
 
 export async function executeGotRequest(httpRequest: GotRequest): Promise<{
