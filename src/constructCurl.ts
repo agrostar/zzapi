@@ -8,7 +8,7 @@ function replaceSingleQuotes<T>(value: T): T {
   return value.replace(/'/g, "%27") as T & string;
 }
 
-function appendKeyValue(key: string, value: string): string {
+function formatCurlFormField(key: string, value: string): string {
   if (isFilePath(value)) {
     return ` --form ${key}=@"${fileURLToPath(value)}"`;
   }
@@ -21,10 +21,10 @@ function getFormDataCurlRequest(request: RequestSpec): string {
   for (const key in body) {
     if (Array.isArray(body[key])) {
       body[key].forEach((element: string) => {
-        result += appendKeyValue(key, element);
+        result += formatCurlFormField(key, element);
       });
     } else {
-      result += appendKeyValue(key, body[key]);
+      result += formatCurlFormField(key, body[key]);
     }
   }
   return result;

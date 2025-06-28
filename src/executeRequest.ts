@@ -29,13 +29,8 @@ export function constructGotRequest(allData: RequestSpec): GotRequest {
   return got(completeUrl, options);
 }
 
-function replaceFilePath(filePath: string) {
-  /*
-  finds all file:// instances with atleast 1 succeeding word character
-  matches the file-name referred to by this instance
-  */
-
-  filePath = path.resolve(filePath.slice(7));
+function getFileFromPath(filePath: string) {
+  filePath = path.resolve(filePath.slice(7)); // removes file:// prefix
   const fileName = path.basename(filePath);
   return fileFromPathSync(filePath, fileName);
 }
@@ -46,14 +41,14 @@ function constructFormData(request: RequestSpec, body: any) {
     if (Array.isArray(body[key])) {
       for (const element of body[key]) {
         if (isFilePath(element)) {
-          multipart.append(key, replaceFilePath(element));
+          multipart.append(key, getFileFromPath(element));
         } else {
           multipart.append(key, element);
         }
       }
     } else {
       if (isFilePath(body[key])) {
-        multipart.append(key, replaceFilePath(body[key]));
+        multipart.append(key, getFileFromPath(body[key]));
       } else {
         multipart.append(key, body[key]);
       }
