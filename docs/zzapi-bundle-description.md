@@ -71,7 +71,10 @@ requests:
 * `method`: required, one of GET, POST, PUT, PATCH etc
 * `headers`: a set of headers, this will be in in addition to the common set, or overridden if the name is the same
 * `params`: a set of parameter values, or overridden if the name is the same
-* `body`: the raw request body. (Use the value `file://<filename>` to read from a file), or an object, which will be converted to a JSON string after variable replacements. If the value of any field is a file (specified using `file://<filename>`), the request will be sent as multipart/form-data, treating each key as a form field.
+* `body`: the raw request body. (Use the value `file://<filename>` to read from a file), or an object, which will be converted to a JSON string after variable replacements.
+* `formValues`: An object representing form fields to send in the request body. If no content-type is given and:
+  1. if none of the fields contain a file (specified as `file://<filename>`), the request will be sent as `application/x-www-form-urlencoded`.
+  2. if at least one field contains a file, the request will be sent as `multipart/form-data`.
 * `response*`: a set of sample responses, useful for documentation (doesn't affect the request)
   * `headers`: the headers expected in the response
   * `body`: the raw response body, or a JSON object. Use `<filename` to read from a file.
