@@ -35,31 +35,31 @@ function getFileFromPath(filePath: string) {
   return fileFromPathSync(filePath, fileName);
 }
 
-function constructFormUrlEncoded(request: RequestSpec){
-  const formValues = request.httpRequest.formValues
-  const result = new URLSearchParams()
-  if(formValues){
-    request.httpRequest.headers["content-type"] = "application/x-www-form-urlencoded"
+function constructFormUrlEncoded(request: RequestSpec) {
+  const formValues = request.httpRequest.formValues;
+  if (!formValues) return "";
+  const result = new URLSearchParams();
+  if (formValues) {
+    request.httpRequest.headers["content-type"] = "application/x-www-form-urlencoded";
   }
 
-  for (const {name,value} of formValues) {
-    result.append(name,value)
+  for (const { name, value } of formValues) {
+    result.append(name, value);
   }
 
-  return result.toString()
+  return result.toString();
 }
 
 function constructFormData(request: RequestSpec) {
-  const formValues = request.httpRequest.formValues
-
+  const formValues = request.httpRequest.formValues;
+  if (!formValues) return;
   const multipart = new FormData();
 
-
   for (const fv of formValues) {
-    if(isFilePath(fv.value)){
-      multipart.append(fv.name,getFileFromPath(fv.value))
-    }else{
-      multipart.append(fv.name,fv.value)
+    if (isFilePath(fv.value)) {
+      multipart.append(fv.name, getFileFromPath(fv.value));
+    } else {
+      multipart.append(fv.name, fv.value);
     }
   }
   const fde = new FormDataEncoder(multipart);
@@ -70,15 +70,14 @@ function constructFormData(request: RequestSpec) {
 
 export function getBody(request: RequestSpec) {
   const body = request.httpRequest.body;
-  const formValues = request.httpRequest.formValues
+  const formValues = request.httpRequest.formValues;
 
   if (request.httpRequest.headers["content-type"] == "multipart/form-data" || hasFile(formValues)) {
     return constructFormData(request);
-
   }
 
-  if(formValues){
-    return constructFormUrlEncoded(request)
+  if (formValues) {
+    return constructFormUrlEncoded(request);
   }
 
   return getStringValueIfDefined(body);

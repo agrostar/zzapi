@@ -15,8 +15,9 @@ function formatCurlFormField(key: string, value: string): string {
   return ` --form '${key}="${value}"'`;
 }
 
-function getFormDataUrlEncoded(request: RequestSpec) {
+function getFormDataUrlEncoded(request: RequestSpec): string {
   const formValues = request.httpRequest.formValues;
+  if (!formValues) return "";
   let result = "";
 
   formValues.forEach((formValue: any) => {
@@ -35,6 +36,7 @@ function getFormDataUrlEncoded(request: RequestSpec) {
 
 function getFormDataCurlRequest(request: RequestSpec): string {
   const formValues = request.httpRequest.formValues;
+  if (!formValues) return "";
   let result = "";
   for (const { name, value } of formValues) {
     result += formatCurlFormField(name, value);
@@ -70,7 +72,7 @@ export function getCurlRequest(request: RequestSpec): string {
         getParamsForUrl(request.httpRequest.params, request.options.rawParams)
       )
     )}'`;
-    return curl
+    return curl;
   }
 
   // method

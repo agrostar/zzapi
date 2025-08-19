@@ -51,7 +51,7 @@ function getMergedParams(commonParams: RawParams, requestParams: RawParams): Par
 
 function getMergedHeaders(
   commonHeaders: RawHeaders,
-  requestHeaders: RawHeaders,
+  requestHeaders: RawHeaders
 ): { [name: string]: string } {
   if (Array.isArray(commonHeaders)) {
     commonHeaders = getArrayHeadersAsObject(commonHeaders);
@@ -80,7 +80,7 @@ function getMergedOptions(cOptions: RawOptions = {}, rOptions: RawOptions = {}):
 
 function getMergedSetVars(
   setvars: RawSetVars = {},
-  captures: Captures = {},
+  captures: Captures = {}
 ): { mergedVars: SetVar[]; hasJsonVars: boolean } {
   const mergedVars: SetVar[] = [];
   let hasJsonVars = false;
@@ -155,7 +155,7 @@ export function mergePrefixBasedTests(tests: RawTests) {
 
 function getMergedTests(
   cTests: RawTests = {},
-  rTests: RawTests = {},
+  rTests: RawTests = {}
 ): { mergedTests: Tests; hasJsonTests: boolean } {
   // Convert $. and h. at root level into headers and json keys
   mergePrefixBasedTests(cTests);
@@ -208,16 +208,16 @@ export function getMergedData(commonData: Common, requestData: RawRequest): Requ
   const params = getMergedParams(commonData.params, requestData.params);
   const headers = getMergedHeaders(commonData.headers, requestData.headers);
   const body = requestData.body;
-  const formValues = getMergedParams([],requestData.formValues)
+  const formValues = getMergedParams([], requestData.formValues);
   const options = getMergedOptions(commonData.options, requestData.options);
 
   const { mergedTests: tests, hasJsonTests: hasJsonTests } = getMergedTests(
     commonData?.tests,
-    requestData.tests,
+    requestData.tests
   );
   const { mergedVars: setvars, hasJsonVars: hasJsonVars } = getMergedSetVars(
     requestData.setvars,
-    requestData.capture,
+    requestData.capture
   );
 
   const mergedData: RequestSpec = {
@@ -229,7 +229,7 @@ export function getMergedData(commonData: Common, requestData: RawRequest): Requ
       params,
       headers,
       body,
-      formValues: formValues.length > 0 ? formValues : undefined
+      formValues: formValues.length > 0 ? formValues : undefined,
     },
     options,
     tests,

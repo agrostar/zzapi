@@ -85,7 +85,7 @@ export interface RawRequest {
   headers: RawHeaders;
   params: RawParams;
   body?: string;
-  formValues?: RawHeaders;
+  formValues?: RawParams;
   options?: RawOptions;
   tests?: RawTests;
   capture?: Captures;
@@ -102,7 +102,7 @@ export interface RequestSpec {
     params: Param[];
     headers: { [key: string]: string };
     body?: any;
-    formValues?: any
+    formValues?: Param[];
   };
   expectJson: boolean;
   options: Options;
