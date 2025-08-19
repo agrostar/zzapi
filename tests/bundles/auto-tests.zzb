@@ -411,8 +411,8 @@ requests:
     url: /post
     formValues:
       name: 
-      - file:///Users/vanshkoul/Desktop/services/zz/zzapi/tests/bundles/test-text-files/file1.txt
-      - file:///Users/vanshkoul/Desktop/services/zz/zzapi/tests/bundles/test-text-files/file2.txt
+      - file://./tests/bundles/test-text-files/file1.txt
+      - file://./tests/bundles/test-text-files/file2.txt
 
     tests:
       $.headers['content-type']: {$regex: multipart/form-data, $options : i}
