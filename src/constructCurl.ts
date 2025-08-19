@@ -1,7 +1,7 @@
 import { getStringValueIfDefined, hasFile, isFilePath } from "./utils/typeUtils";
-import { fileURLToPath } from "url";
 import { RequestSpec } from "./models";
 import { getParamsForUrl, getURL } from "./executeRequest";
+import path from "path";
 
 function replaceSingleQuotes<T>(value: T): T {
   if (typeof value !== "string") return value;
@@ -10,7 +10,7 @@ function replaceSingleQuotes<T>(value: T): T {
 
 function formatCurlFormField(key: string, value: string): string {
   if (isFilePath(value)) {
-    return ` --form ${key}=@"${fileURLToPath(value)}"`;
+    return ` --form ${key}=@"${path.resolve(value.slice(7))}"`;
   }
   return ` --form '${key}="${value}"'`;
 }
