@@ -45,16 +45,13 @@ export function isFilePath(value: any): boolean {
   return fileRegex.test(value);
 }
 
-export function hasFile(body: any): boolean {
-  for (const key in body) {
-    if (isString(body[key]) && isFilePath(body[key])) {
+export function hasFile(formValues: any): boolean {
+  if (!formValues) {
+    return false;
+  }
+  for (const formValue of formValues) {
+    if (isFilePath(formValue.value)) {
       return true;
-    } else if (Array.isArray(body[key])) {
-      for (const element of body[key]) {
-        if (isString(element) && isFilePath(element)) {
-          return true;
-        }
-      }
     }
   }
   return false;

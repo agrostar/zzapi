@@ -35,23 +35,31 @@ function getFileFromPath(filePath: string) {
   return fileFromPathSync(filePath, fileName);
 }
 
-function constructFormData(request: RequestSpec, body: any) {
+function constructFormUrlEncoded(request: RequestSpec){
+  const formValues = request.httpRequest.formValues
+  const result = new URLSearchParams()
+  if(formValues){
+    request.httpRequest.headers["content-type"] = "application/x-www-form-urlencoded"
+  }
+
+  for (const {name,value} of formValues) {
+    result.append(name,value)
+  }
+
+  return result.toString()
+}
+
+function constructFormData(request: RequestSpec) {
+  const formValues = request.httpRequest.formValues
+
   const multipart = new FormData();
-  for (const key in body) {
-    if (Array.isArray(body[key])) {
-      for (const element of body[key]) {
-        if (isFilePath(element)) {
-          multipart.append(key, getFileFromPath(element));
-        } else {
-          multipart.append(key, element);
-        }
-      }
-    } else {
-      if (isFilePath(body[key])) {
-        multipart.append(key, getFileFromPath(body[key]));
-      } else {
-        multipart.append(key, body[key]);
-      }
+
+
+  for (const fv of formValues) {
+    if(isFilePath(fv.value)){
+      multipart.append(fv.name,getFileFromPath(fv.value))
+    }else{
+      multipart.append(fv.name,fv.value)
     }
   }
   const fde = new FormDataEncoder(multipart);
@@ -62,8 +70,15 @@ function constructFormData(request: RequestSpec, body: any) {
 
 export function getBody(request: RequestSpec) {
   const body = request.httpRequest.body;
-  if (request.httpRequest.headers["content-type"] == "multipart/form-data" || hasFile(body)) {
-    return constructFormData(request, body);
+  const formValues = request.httpRequest.formValues
+
+  if (request.httpRequest.headers["content-type"] == "multipart/form-data" || hasFile(formValues)) {
+    return constructFormData(request);
+
+  }
+
+  if(formValues){
+    return constructFormUrlEncoded(request)
   }
 
   return getStringValueIfDefined(body);

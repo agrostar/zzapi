@@ -217,6 +217,18 @@ export function validateRawRequest(obj: any): string | undefined {
     }
   }
 
+  if(obj.hasOwnProperty("formValues") && obj.hasOwnProperty("body")){
+    return `both body and formValues can't be present in the same request.`
+  }
+
+  if(obj.hasOwnProperty("method") && obj["method"] == "GET" && obj.hasOwnProperty("formValues")){
+    return `formValues can't be used with method GET`
+  }
+
+  if(obj.hasOwnProperty("method") && obj["method"] == "GET" && obj.hasOwnProperty("body")){
+    return `body can't be used with method GET`
+  } 
+
   return undefined;
 }
 

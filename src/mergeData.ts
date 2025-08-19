@@ -208,6 +208,7 @@ export function getMergedData(commonData: Common, requestData: RawRequest): Requ
   const params = getMergedParams(commonData.params, requestData.params);
   const headers = getMergedHeaders(commonData.headers, requestData.headers);
   const body = requestData.body;
+  const formValues = getMergedParams([],requestData.formValues)
   const options = getMergedOptions(commonData.options, requestData.options);
 
   const { mergedTests: tests, hasJsonTests: hasJsonTests } = getMergedTests(
@@ -228,6 +229,7 @@ export function getMergedData(commonData: Common, requestData: RawRequest): Requ
       params,
       headers,
       body,
+      formValues: formValues.length > 0 ? formValues : undefined
     },
     options,
     tests,

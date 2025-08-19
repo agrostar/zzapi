@@ -357,10 +357,21 @@ requests:
       $.data.name: Tom
       $.data.address: { $eq: { city: Bangalore, pincode: 560002 } }
 
+  url-encoded-form-data:
+    method: POST
+    url: /post
+    formValues: 
+      firstName: John
+      lastName: Doe
+    tests:
+      $.headers['content-type']: {$regex: application/x-www-form-urlencoded, $options : i}
+      $.form.firstName: John
+      $.form.lastName: Doe
+      
   formdata-with-one-file:
     method: POST
     url: /post
-    body:
+    formValues:
       file: file://./tests/bundles/test-text-files/file1.txt
     tests:
       $.headers['content-type']: {$regex: multipart/form-data, $options : i}
@@ -370,7 +381,7 @@ requests:
   formdata-with-multiple-files:
     method: POST
     url: /post
-    body:
+    formValues:
       first: file://./tests/bundles/test-text-files/file2.txt
       second: file://./tests/bundles/test-text-files/file3.txt
       name: John
@@ -386,7 +397,7 @@ requests:
     url: /post
     headers:
       content-type: multipart/form-data
-    body:
+    formValues:
       foo: bar
       count: 3
     tests:
@@ -398,10 +409,10 @@ requests:
   formdata-multiple-files-under-same-key:
     method: POST
     url: /post
-    body:
+    formValues:
       name: 
-      - file://./tests/bundles/test-text-files/file3.txt
-      - file://./tests/bundles/test-text-files/file1.txt
+      - file:///Users/vanshkoul/Desktop/services/zz/zzapi/tests/bundles/test-text-files/file1.txt
+      - file:///Users/vanshkoul/Desktop/services/zz/zzapi/tests/bundles/test-text-files/file2.txt
 
     tests:
       $.headers['content-type']: {$regex: multipart/form-data, $options : i}

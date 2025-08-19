@@ -1,4 +1,4 @@
-import { CancelableRequest, Response, Method, OptionsOfTextResponseBody } from "got";
+import { CancelableRequest, Response, Method } from "got";
 
 export interface Header {
   name: string;
@@ -85,6 +85,7 @@ export interface RawRequest {
   headers: RawHeaders;
   params: RawParams;
   body?: string;
+  formValues?: RawHeaders;
   options?: RawOptions;
   tests?: RawTests;
   capture?: Captures;
@@ -101,6 +102,7 @@ export interface RequestSpec {
     params: Param[];
     headers: { [key: string]: string };
     body?: any;
+    formValues?: any
   };
   expectJson: boolean;
   options: Options;

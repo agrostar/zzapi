@@ -15,17 +15,29 @@ function formatCurlFormField(key: string, value: string): string {
   return ` --form '${key}="${value}"'`;
 }
 
-function getFormDataCurlRequest(request: RequestSpec): string {
-  const body = request.httpRequest.body;
+function getFormDataUrlEncoded(request: RequestSpec) {
+  const formValues = request.httpRequest.formValues;
   let result = "";
-  for (const key in body) {
-    if (Array.isArray(body[key])) {
-      body[key].forEach((element: string) => {
-        result += formatCurlFormField(key, element);
-      });
-    } else {
-      result += formatCurlFormField(key, body[key]);
-    }
+
+  formValues.forEach((formValue: any) => {
+    result += `${formValue.name}=${formValue.value}&`;
+  });
+
+  if (result.endsWith("&")) {
+    result = result.slice(0, -1);
+  }
+
+  if (result) {
+    return ` --data "${result}"`;
+  }
+  return "";
+}
+
+function getFormDataCurlRequest(request: RequestSpec): string {
+  const formValues = request.httpRequest.formValues;
+  let result = "";
+  for (const { name, value } of formValues) {
+    result += formatCurlFormField(name, value);
   }
   return result;
 }
@@ -35,7 +47,7 @@ export function getCurlRequest(request: RequestSpec): string {
 
   if (
     request.httpRequest.headers["content-type"] == "multipart/form-data" ||
-    hasFile(request.httpRequest.body)
+    hasFile(request.httpRequest.formValues)
   ) {
     curl += getFormDataCurlRequest(request);
     curl += ` '${replaceSingleQuotes(
@@ -46,6 +58,19 @@ export function getCurlRequest(request: RequestSpec): string {
       )
     )}'`;
     return curl;
+  } else if (
+    request.httpRequest.headers["content-type"] == "application/x-www-form-urlencoded" ||
+    request.httpRequest.formValues
+  ) {
+    curl += getFormDataUrlEncoded(request);
+    curl += ` '${replaceSingleQuotes(
+      getURL(
+        request.httpRequest.baseUrl,
+        request.httpRequest.url,
+        getParamsForUrl(request.httpRequest.params, request.options.rawParams)
+      )
+    )}'`;
+    return curl
   }
 
   // method
