@@ -12,7 +12,7 @@ function formatCurlFormField(key: string, value: string): string {
   if (isFilePath(value)) {
     return ` --form ${key}=@"${path.resolve(value.slice(7))}"`;
   }
-  return ` --form '${key}="${value}"'`;
+  return ` --form '${key}="${encodeURIComponent(value)}"'`;
 }
 
 function getFormDataUrlEncoded(request: RequestSpec): string {
@@ -21,17 +21,10 @@ function getFormDataUrlEncoded(request: RequestSpec): string {
   let result = "";
 
   formValues.forEach((formValue: any) => {
-    result += `${formValue.name}=${formValue.value}&`;
+    result += ` --data "${formValue.name}=${encodeURIComponent(formValue.value)}"`;
   });
 
-  if (result.endsWith("&")) {
-    result = result.slice(0, -1);
-  }
-
-  if (result) {
-    return ` --data "${result}"`;
-  }
-  return "";
+  return result;
 }
 
 function getFormDataCurlRequest(request: RequestSpec): string {
