@@ -49,8 +49,8 @@ export function getCurlRequest(request: RequestSpec): string {
       getURL(
         request.httpRequest.baseUrl,
         request.httpRequest.url,
-        getParamsForUrl(request.httpRequest.params, request.options.rawParams)
-      )
+        getParamsForUrl(request.httpRequest.params, request.options.rawParams),
+      ),
     )}'`;
     return curl;
   } else if (
@@ -62,8 +62,8 @@ export function getCurlRequest(request: RequestSpec): string {
       getURL(
         request.httpRequest.baseUrl,
         request.httpRequest.url,
-        getParamsForUrl(request.httpRequest.params, request.options.rawParams)
-      )
+        getParamsForUrl(request.httpRequest.params, request.options.rawParams),
+      ),
     )}'`;
     return curl;
   }
@@ -97,8 +97,8 @@ export function getCurlRequest(request: RequestSpec): string {
     getURL(
       request.httpRequest.baseUrl,
       request.httpRequest.url,
-      getParamsForUrl(request.httpRequest.params, request.options.rawParams)
-    )
+      getParamsForUrl(request.httpRequest.params, request.options.rawParams),
+    ),
   )}'`;
 
   return curl;

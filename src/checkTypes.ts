@@ -5,7 +5,7 @@ function checkKey(
   item: string,
   key: string,
   expectedTypes: string[],
-  optional: boolean
+  optional: boolean,
 ): string | undefined {
   if (!optional && !obj.hasOwnProperty(key)) {
     return `${key} key must be present in each ${item} item`;
