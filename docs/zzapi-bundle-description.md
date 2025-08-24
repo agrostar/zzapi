@@ -65,7 +65,7 @@ requests:
   * `tests`: a set of tests applied to all the requests in this bundle
   * `options`: options applicable to all requests, unless overridden
 
-### request
+## request
 
 * `url`: required, URL of the request (baseUrl from common settings will be prefixed if the URL starts with a /)
 * `method`: required, one of GET, POST, PUT, PATCH etc

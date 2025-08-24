@@ -1,6 +1,9 @@
 # Change Log
 
-# 2.0.1
+## 2.1.0
+- Added support for form values (url-encoded and multipart-formdata)
+
+## 2.0.1
 - Bug fix (Mac only): proper error message when connection refused
 
 ## 2.0.0
