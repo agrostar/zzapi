@@ -21,7 +21,7 @@ export function getStringIfNotScalar(data: any): Exclude<any, object> {
 
 export function getStringValueIfDefined<
   T extends undefined | Exclude<any, undefined>,
-  R = T extends undefined ? undefined : string,
+  R = T extends undefined ? undefined : string
 >(value: T): R {
   if (typeof value === "undefined") return undefined as R;
   if (typeof value === "object") return JSON.stringify(value) as R; // handles dicts, arrays, null, date (all obj)
@@ -31,4 +31,28 @@ export function getStringValueIfDefined<
 export function getStrictStringValue(value: any): string {
   if (typeof value === "undefined") return "undefined";
   return getStringValueIfDefined(value);
+}
+
+export function isString(value: any): boolean {
+  return typeof value === "string" || value instanceof String;
+}
+
+export function isFilePath(value: any): boolean {
+  if (!isString(value)) {
+    return false;
+  }
+  const fileRegex = /file:\/\/([^\s]+)/g;
+  return fileRegex.test(value);
+}
+
+export function hasFile(formValues: any): boolean {
+  if (!formValues) {
+    return false;
+  }
+  for (const formValue of formValues) {
+    if (isFilePath(formValue.value)) {
+      return true;
+    }
+  }
+  return false;
 }

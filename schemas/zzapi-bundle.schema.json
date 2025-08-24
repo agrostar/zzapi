@@ -257,6 +257,16 @@
               "description": "The request body",
               "type": ["string", "object", "array"] 
             },
+            "formValues":{
+              "description": "Put form values here.",
+              "anyOf":[
+                {
+                  "type": "array",
+                  "items": { "$ref": "#/$defs/headerArray" }
+                },
+                { "$ref": "#/$defs/headerObject" }
+              ]
+            },
             "options": { "$ref": "#/$defs/options" },
             "tests": { "$ref": "#/$defs/tests" },
             "capture": {

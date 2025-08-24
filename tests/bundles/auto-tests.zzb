@@ -356,3 +356,64 @@ requests:
     tests:
       $.data.name: Tom
       $.data.address: { $eq: { city: Bangalore, pincode: 560002 } }
+
+  url-encoded-form-data:
+    method: POST
+    url: /post
+    formValues: 
+      firstName: John
+      lastName: Doe
+    tests:
+      $.headers['content-type']: {$regex: application/x-www-form-urlencoded, $options : i}
+      $.form.firstName: John
+      $.form.lastName: Doe
+      
+  formdata-with-one-file:
+    method: POST
+    url: /post
+    formValues:
+      file: file://./tests/bundles/test-text-files/file1.txt
+    tests:
+      $.headers['content-type']: {$regex: multipart/form-data, $options : i}
+      $.files : {$size:  1}
+      $.files['file1.txt']: {$exists : true}
+
+  formdata-with-multiple-files:
+    method: POST
+    url: /post
+    formValues:
+      first: file://./tests/bundles/test-text-files/file2.txt
+      second: file://./tests/bundles/test-text-files/file3.txt
+      name: John
+    tests:
+      $.headers['content-type']: {$regex: multipart/form-data, $options : i}
+      $.files : {$size:  2}
+      $.files['file2.txt']: {$exists : true}
+      $.files['file3.txt']: {$exists : true}
+      $.form.name: John
+
+  formdata-without-files:
+    method: POST
+    url: /post
+    headers:
+      content-type: multipart/form-data
+    formValues:
+      foo: bar
+      count: 3
+    tests:
+      $.headers['content-type']: {$regex: multipart/form-data, $options : i}
+      $.form : {$size:  2}
+      $.form.foo : bar
+      $.form.count: "3"
+
+  formdata-multiple-files-under-same-key:
+    method: POST
+    url: /post
+    formValues:
+      name: 
+      - file://./tests/bundles/test-text-files/file1.txt
+      - file://./tests/bundles/test-text-files/file2.txt
+
+    tests:
+      $.headers['content-type']: {$regex: multipart/form-data, $options : i}
+      $.files : { $size : 2}

@@ -5,7 +5,7 @@ function checkKey(
   item: string,
   key: string,
   expectedTypes: string[],
-  optional: boolean,
+  optional: boolean
 ): string | undefined {
   if (!optional && !obj.hasOwnProperty(key)) {
     return `${key} key must be present in each ${item} item`;
@@ -215,6 +215,18 @@ export function validateRawRequest(obj: any): string | undefined {
       if (!VALID_METHODS[methodToPass])
         return `method key must have value among ${Object.keys(VALID_METHODS)}: found ${methodToPass}`;
     }
+  }
+
+  if (obj.hasOwnProperty("formValues") && obj.hasOwnProperty("body")) {
+    return `both body and formValues can't be present in the same request.`;
+  }
+
+  if (obj.hasOwnProperty("method") && obj["method"] == "GET" && obj.hasOwnProperty("formValues")) {
+    return `formValues can't be used with method GET`;
+  }
+
+  if (obj.hasOwnProperty("method") && obj["method"] == "GET" && obj.hasOwnProperty("body")) {
+    return `body can't be used with method GET`;
   }
 
   return undefined;
