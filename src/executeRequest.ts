@@ -10,16 +10,16 @@ import { FormData } from "formdata-node";
 import { Readable } from "stream";
 import * as path from "path";
 
-export function constructGotRequest(allData: RequestSpec): GotRequest {
+export function constructGotRequest(allData: RequestSpec, workingDir?: string): GotRequest {
   const completeUrl: string = getURL(
     allData.httpRequest.baseUrl,
     allData.httpRequest.url,
-    getParamsForUrl(allData.httpRequest.params, allData.options.rawParams),
+    getParamsForUrl(allData.httpRequest.params, allData.options.rawParams)
   );
 
   const options: OptionsOfTextResponseBody = {
     method: allData.httpRequest.method.toLowerCase() as Method,
-    body: getBody(allData),
+    body: getBody(allData, workingDir),
     headers: allData.httpRequest.headers,
     followRedirect: allData.options.follow,
     https: { rejectUnauthorized: allData.options.verifySSL },
@@ -29,8 +29,13 @@ export function constructGotRequest(allData: RequestSpec): GotRequest {
   return got(completeUrl, options);
 }
 
-function getFileFromPath(filePath: string) {
-  filePath = path.resolve(filePath.slice(7)); // removes file:// prefix
+function getFileFromPath(filePath: string, workingDir?: string) {
+  if (workingDir) {
+    filePath = path.resolve(workingDir, filePath.slice(7)); // removes <file://> prefix
+  } else {
+    filePath = path.resolve(filePath.slice(7)); // takes current working directory
+  }
+
   const fileName = path.basename(filePath);
   return fileFromPathSync(filePath, fileName);
 }
@@ -50,14 +55,14 @@ function constructFormUrlEncoded(request: RequestSpec) {
   return result.toString();
 }
 
-function constructFormData(request: RequestSpec) {
+function constructFormData(request: RequestSpec, workingDir?: string) {
   const formValues = request.httpRequest.formValues;
   if (!formValues) return;
   const multipart = new FormData();
 
   for (const fv of formValues) {
     if (isFilePath(fv.value)) {
-      multipart.append(fv.name, getFileFromPath(fv.value));
+      multipart.append(fv.name, getFileFromPath(fv.value, workingDir));
     } else {
       multipart.append(fv.name, fv.value);
     }
@@ -68,12 +73,12 @@ function constructFormData(request: RequestSpec) {
   return Readable.from(fde);
 }
 
-export function getBody(request: RequestSpec) {
+export function getBody(request: RequestSpec, workingDir?: string) {
   const body = request.httpRequest.body;
   const formValues = request.httpRequest.formValues;
 
   if (request.httpRequest.headers["content-type"] == "multipart/form-data" || hasFile(formValues)) {
-    return constructFormData(request);
+    return constructFormData(request, workingDir);
   }
 
   if (formValues) {

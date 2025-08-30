@@ -8,9 +8,9 @@ function replaceSingleQuotes<T>(value: T): T {
   return value.replace(/'/g, "%27") as T & string;
 }
 
-function formatCurlFormField(key: string, value: string): string {
+function formatCurlFormField(key: string, value: string, workingDir?: string): string {
   if (isFilePath(value)) {
-    return ` --form ${key}=@"${path.resolve(value.slice(7))}"`;
+    return ` --form ${key}=@"${path.resolve(workingDir || "", value.slice(7))}"`; // if workingDir not given, it takes current working directory.
   }
   return ` --form '${key}="${encodeURIComponent(value)}"'`;
 }
@@ -27,30 +27,30 @@ function getFormDataUrlEncoded(request: RequestSpec): string {
   return result;
 }
 
-function getFormDataCurlRequest(request: RequestSpec): string {
+function getFormDataCurlRequest(request: RequestSpec, workingDir?: string): string {
   const formValues = request.httpRequest.formValues;
   if (!formValues) return "";
   let result = "";
   for (const { name, value } of formValues) {
-    result += formatCurlFormField(name, value);
+    result += formatCurlFormField(name, value, workingDir);
   }
   return result;
 }
 
-export function getCurlRequest(request: RequestSpec): string {
+export function getCurlRequest(request: RequestSpec, workingDir?: string): string {
   let curl: string = "curl";
 
   if (
     request.httpRequest.headers["content-type"] == "multipart/form-data" ||
     hasFile(request.httpRequest.formValues)
   ) {
-    curl += getFormDataCurlRequest(request);
+    curl += getFormDataCurlRequest(request, workingDir);
     curl += ` '${replaceSingleQuotes(
       getURL(
         request.httpRequest.baseUrl,
         request.httpRequest.url,
-        getParamsForUrl(request.httpRequest.params, request.options.rawParams),
-      ),
+        getParamsForUrl(request.httpRequest.params, request.options.rawParams)
+      )
     )}'`;
     return curl;
   } else if (
@@ -62,8 +62,8 @@ export function getCurlRequest(request: RequestSpec): string {
       getURL(
         request.httpRequest.baseUrl,
         request.httpRequest.url,
-        getParamsForUrl(request.httpRequest.params, request.options.rawParams),
-      ),
+        getParamsForUrl(request.httpRequest.params, request.options.rawParams)
+      )
     )}'`;
     return curl;
   }
@@ -97,8 +97,8 @@ export function getCurlRequest(request: RequestSpec): string {
     getURL(
       request.httpRequest.baseUrl,
       request.httpRequest.url,
-      getParamsForUrl(request.httpRequest.params, request.options.rawParams),
-    ),
+      getParamsForUrl(request.httpRequest.params, request.options.rawParams)
+    )
   )}'`;
 
   return curl;
