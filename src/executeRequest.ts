@@ -14,7 +14,7 @@ export function constructGotRequest(allData: RequestSpec, workingDir?: string): 
   const completeUrl: string = getURL(
     allData.httpRequest.baseUrl,
     allData.httpRequest.url,
-    getParamsForUrl(allData.httpRequest.params, allData.options.rawParams)
+    getParamsForUrl(allData.httpRequest.params, allData.options.rawParams),
   );
 
   const options: OptionsOfTextResponseBody = {
