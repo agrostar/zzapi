@@ -1,5 +1,8 @@
 # Change Log
 
+## 2.1.1
+- Take in an optional working dir in some APIs, needed for multipart with files
+
 ## 2.1.0
 - Added support for form values (url-encoded and multipart-formdata)
 
