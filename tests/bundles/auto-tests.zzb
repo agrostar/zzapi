@@ -382,8 +382,15 @@ requests:
     method: POST
     url: /post
     formValues:
+      # The following files should be relative to the current directory,
+      # but are like this so that the jest tests can find them (they run 
+      # from the root directory)
       first: file://./tests/bundles/test-text-files/file2.txt
       second: file://./tests/bundles/test-text-files/file3.txt
+      # Comment the above and uncomment the following for manual tests
+      # within VS Code
+      # first: file://./test-text-files/file2.txt
+      # second: file://./test-text-files/file3.txt
       name: John
     tests:
       $.headers['content-type']: {$regex: multipart/form-data, $options : i}
@@ -410,7 +417,10 @@ requests:
     method: POST
     url: /post
     formValues:
-      name: 
+      name:
+      # The following files should be relative to the current directory,
+      # but are like this so that the jest tests can find them (they run 
+      # from the root directory) Remove "tests/bundles/" to run in VS Code
       - file://./tests/bundles/test-text-files/file1.txt
       - file://./tests/bundles/test-text-files/file2.txt
 
